@@ -1,10 +1,8 @@
 package ca.mcgill.ecse211.finalproject;
 
-import static ca.mcgill.ecse211.finalproject.Resources.SHOOTER_MOTOR_SPEED;
-import static ca.mcgill.ecse211.finalproject.Resources.shooterMotor;
+//import static ca.mcgill.ecse211.finalproject.Resources.shooterMotor;
 import static ca.mcgill.ecse211.finalproject.Resources.usLocalizer;
 import static ca.mcgill.ecse211.finalproject.Resources.usPoller;
-
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 
@@ -25,10 +23,10 @@ public class Main {
 		// ***Part one of the demo: static shooting*** //
 		int shots = 0;
 		while (shots < 5) {
-			shooterMotor.rotate(-190); // cock the launcher
+		//	shooterMotor.rotate(-190); // cock the launcher
 			Sound.twoBeeps(); // beep for dramatic effect
-			shooterMotor.rotate(240); // shoot
-			shooterMotor.rotate(-50); // reset angle
+		//	shooterMotor.rotate(240); // shoot
+		//	shooterMotor.rotate(-50); // reset angle
 			Button.waitForAnyPress(); // wait for reload
 			shots++;
 		}
@@ -61,14 +59,14 @@ public class Main {
 
 		// ==== Phase 3: launch the ball ==== //
 		shots = 0;
-		while (shots < 5) {
-			shooterMotor.rotate(-190); // cock the launcher
-			Sound.twoBeeps(); // beep for dramatic effect
-			shooterMotor.rotate(240); // shoot
-			shooterMotor.rotate(-50); // reset angle
-			Button.waitForAnyPress(); // wait for reload
-			shots++;
-		}
+//		while (shots < 5) {
+//			shooterMotor.rotate(-190); // cock the launcher
+//			Sound.twoBeeps(); // beep for dramatic effect
+//			shooterMotor.rotate(240); // shoot
+//			shooterMotor.rotate(-50); // reset angle
+//			Button.waitForAnyPress(); // wait for reload
+//			shots++;
+//		}
 
 		System.exit(0);
 	}

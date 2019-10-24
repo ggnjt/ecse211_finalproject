@@ -118,7 +118,7 @@ public class Resources {
 	/**
 	 * motor for the ball launcher
 	 */
-	public static final EV3LargeRegulatedMotor shooterMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
+	//public static final EV3LargeRegulatedMotor shooterMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 
 	/**
 	 * The LCD.
