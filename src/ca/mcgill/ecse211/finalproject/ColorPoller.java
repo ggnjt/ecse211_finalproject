@@ -43,9 +43,9 @@ public class ColorPoller implements Runnable {
 			
 			
 			readingEnd = System.currentTimeMillis();
-			if (readingEnd - readingStart < SENSORTIMERLIMIT) {
+			if (readingEnd - readingStart < 100) {
 				try {
-					Thread.sleep(SENSORTIMERLIMIT - (readingEnd - readingStart));
+					Thread.sleep(100 - (readingEnd - readingStart));
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
