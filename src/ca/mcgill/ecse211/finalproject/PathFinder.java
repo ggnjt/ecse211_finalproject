@@ -1,9 +1,10 @@
 package ca.mcgill.ecse211.finalproject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Stack;
-
 
 public class PathFinder {
 
@@ -12,63 +13,81 @@ public class PathFinder {
 	}
 
 	static private Square[][] map;
-	
+
 	/**
 	 * current position and orientation of the robot on the grid
 	 */
 	private static int currentX;
 	private static int currentY;
-	private Orientation orientation;
+	private static Orientation orientation;
 
 	/**
 	 * A* stuff
 	 */
-	private static PriorityQueue<Square> open = new PriorityQueue<Square>();
+	private static PriorityQueue<Square> open = new PriorityQueue<Square>(20);
 	private static boolean[][] closed;
 	private static int targetX;
 	private static int targetY;
 
-
-
+	/**
+	 * constructor which initialized the map and the path finder this should be
+	 * called after localization
+	 * 
+	 * @param arenaSizeX arena x size -1
+	 * @param arenaSizeY arena y size -1
+	 * @param tunnelLLX  lower left corner X coordinate of OUR tunnel
+	 * @param tunnelLLY  lower left corner Y coordinate of OUR tunnel
+	 * @param tunnelURX  upper right corner X coordinate of OUR tunnel
+	 * @param tunnelURY  upper right corner Y coordinate of OUR tunnel
+	 * @param baseLLX    lower left corner X coordinate of OUR base
+	 * @param baseLLY    lower left corner Y coordinate of OUR base
+	 * @param baseURX    upper right corner X coordinate of OUR base
+	 * @param baseURY    upper right corner Y coordinate of OUR base
+	 * @param islandLLX  lower left corner X coordinate of the central island
+	 * @param islandLLY  lower left corner Y coordinate of the central island
+	 * @param islandURX  upper right corner X coordinate of the central island
+	 * @param islandURY  upper right corner Y coordinate of the central island
+	 */
 	public PathFinder(int arenaSizeX, int arenaSizeY, int tunnelLLX, int tunnelLLY, int tunnelURX, int tunnelURY,
 			int baseLLX, int baseLLY, int baseURX, int baseURY, int islandLLX, int islandLLY, int islandURX,
 			int islandURY) {
 
-		PathFinder.map = new Square[arenaSizeX][arenaSizeX];
-
-		for (int i = baseLLX; i < baseURX; i++) {
-			for (int j = baseLLY; j < baseURY; j++) {
+		PathFinder.map = new Square[arenaSizeX][arenaSizeY];
+		PathFinder.closed = new boolean [arenaSizeX][arenaSizeY];
+		for (int i = 0; i < arenaSizeX; i++) {
+			for (int j = 0; j < arenaSizeY; j++) {
 				Square sq = new Square(i, j);
 				map[i][j] = sq;
-				sq.setStatus(-1);
+				sq.setStatus(0);
+			}
+		}
+		
+		for (int i = baseLLX; i < baseURX; i++) {
+			for (int j = baseLLY; j < baseURY; j++) {
+				map[i][j].setStatus(1);
 			}
 		}
 		for (int i = tunnelLLX; i < tunnelURX; i++) {
 			for (int j = tunnelLLY; j < tunnelURY; j++) {
-				Square sq = new Square(i, j);
-				map[i][j] = sq;
-				sq.setStatus(-2);
+				map[i][j].setStatus(2);
 			}
 		}
 		for (int i = islandLLX; i < islandURX; i++) {
 			for (int j = islandLLY; j < islandURY; j++) {
-				Square sq = new Square(i, j);
-				map[i][j] = sq;
-				sq.setStatus(1);
+				map[i][j].setStatus(3);
 			}
 		}
 
-		this.currentX = 0;
-		this.currentY = 0;
-		this.orientation = Orientation.NORTH;
+		PathFinder.currentX = 0;
+		PathFinder.currentY = 8;
+		PathFinder.orientation = Orientation.NORTH;
 	}
-	
-	
+
 	/**
 	 * resets the map so that a new round of path finding can be run
 	 */
 	public void resetMap() {
-		for (Square [] row: map) {
+		for (Square[] row : map) {
 			for (Square sq : row) {
 				sq.hCost = 0;
 				sq.finalCost = 0;
@@ -77,14 +96,13 @@ public class PathFinder {
 		}
 		open = new PriorityQueue<Square>();
 	}
-	
-	
+
 	/**
 	 * Add the square right in front of the robot as an obstacle
 	 */
 	public void addObstacle() {
-		//TODO
-		switch (this.orientation) {
+		// TODO
+		switch (PathFinder.orientation) {
 		case NORTH:
 		case SOUTH:
 		case EAST:
@@ -92,75 +110,118 @@ public class PathFinder {
 		}
 	}
 	
+	/**
+	 * set the target square as an obstacle
+	 * @param x x coordinate of square
+	 * @param y y coordinate of square
+	 */
+	public void setObstacle(int x, int y) {
+		PathFinder.map[x][y].setStatus(-2);
+	}
+
 	public void checkAndUpdateCost(Square current, Square target, double cost) {
-		if(target == null || closed[target.X][target.Y]) {
+		if (target.status <= 0 || closed[target.X][target.Y]) {
 			return;
 		}
-        double t_final_cost = target.hCost+cost;
-        boolean inOpen = open.contains(target);
-        if(!inOpen || t_final_cost<target.finalCost){
-            target.finalCost = t_final_cost;
-            target.parent = current;
-            if(!inOpen)open.add(target);
-        }
+		double t_final_cost = target.hCost + cost;
+		boolean inOpen = open.contains(target);
+		if (!inOpen || t_final_cost < target.finalCost) {
+			target.finalCost = t_final_cost;
+			target.parent = current;
+			if (!inOpen)
+				open.add(target);
+		}
 	}
-	
+
 	/**
-	 * after running this method, the target square should have a path marked with parent
+	 * prints the map
 	 */
-	public ArrayList<int[]> findPath () {
+	public void printMap() {
+		char[][] image = new char[map.length][map[0].length];
+		for (Square[] row : map) {
+			for (Square sq : row) {
+				if (sq.status == 0) {
+					image[sq.X][sq.Y] = '~';
+				} else if (sq.status == 1) {
+					image[sq.X][sq.Y] = 'B';
+				} else if (sq.status == 2) {
+					image[sq.X][sq.Y] = 'U';
+				} else if (sq.status == -2) {
+					image[sq.X][sq.Y] = 'X';
+				} else if (sq.status == 3) {
+					image[sq.X][sq.Y] = 'O';
+				}
+			}
+		}
+		image[currentX][currentY] = 'C';
+		image[targetX][targetY] = 'T';
+		for (char[] row : image) {
+			System.out.println(Arrays.toString(row));
+		}
+	}
+
+	/**
+	 * this returns a list of int[] of size 2, which represents the list of moves
+	 * the robot should make....
+	 * 
+	 * @return
+	 */
+	public ArrayList<int[]> findPath() {
 		open.add(map[currentX][currentY]);
 		Square current;
-		
-		while(true){ 
-            current = open.poll();
-            if(current==null) {
-            	System.out.println("Something went horribly wrong");
-            	break;
-            }
-            current.hCost = current.getDistanceTo(map[targetX][targetY]);
-            closed[current.X][current.Y]=true; 
 
-            if(current.equals(map[targetX][targetY])){
-            	ArrayList<int[]> result = new ArrayList<int[]>();
-                Stack<Square> ghettoStack = new Stack<Square>();
-                ghettoStack.push(current);
-                while (current.parent != null) {
-                	ghettoStack.push(current.parent);
-                	current = current.parent;
-                }
-                current = ghettoStack.pop();
-                while (!ghettoStack.isEmpty()) {
-                	int [] entry = {ghettoStack.peek().X - current.X ,ghettoStack.peek().Y - current.Y};
-                	result.add(entry);
-                	current = ghettoStack.pop();
-                }
-                int [] entry = {targetX - current.X ,targetY - current.Y};
-            	result.add(entry);
-            	return result;
-            } 
-            
-            Square t;  
-            if(current.X-1>=0){
-                t = map[current.X-1][current.Y];
-                checkAndUpdateCost(current, t, current.finalCost + 1); 
-            } 
+		while (true) {
+			current = open.poll();
+			if (current == null) {
+				System.out.println("Something went horribly wrong");
+				break;
+			}
+			closed[current.X][current.Y] = true;
 
-            if(current.Y-1>=0){
-                t = map[current.X][current.Y-1];
-                checkAndUpdateCost(current, t, current.finalCost + 1); 
-            }
+			if (current.equals(map[targetX][targetY])) {
+				ArrayList<int[]> result = new ArrayList<int[]>();
+				Stack<Square> ghettoStack = new Stack<Square>();
+				ghettoStack.push(current);
+				while (current.parent != null) {
+					ghettoStack.push(current.parent);
+					current = current.parent;
+				}
+				current = ghettoStack.pop();
+				while (!ghettoStack.isEmpty()) {
+					int[] entry = { ghettoStack.peek().X - current.X, ghettoStack.peek().Y - current.Y };
+					result.add(entry);
+					current = ghettoStack.pop();
+				}
+				int[] entry = { targetX - current.X, targetY - current.Y };
+				result.add(entry);
+				return result;
+			}
 
-            if(current.Y+1<map[0].length){
-                t = map[current.X][current.Y+1];
-                checkAndUpdateCost(current, t, current.finalCost + 1); 
-            }
+			Square t;
+			if (current.X - 1 >= 0) {
+				t = map[current.X - 1][current.Y];
+				t.hCost = current.getDistanceTo(map[targetX][targetY]);
+				checkAndUpdateCost(current, t, current.finalCost + 1);
+			}
 
-            if(current.X+1<map.length){
-                t = map[current.X+1][current.Y];
-                checkAndUpdateCost(current, t, current.finalCost + 1); 
-            }
-        }
+			if (current.Y - 1 >= 0) {
+				t = map[current.X][current.Y - 1];
+				t.hCost = current.getDistanceTo(map[targetX][targetY]);
+				checkAndUpdateCost(current, t, current.finalCost + 1);
+			}
+
+			if (current.Y + 1 < map[0].length) {
+				t = map[current.X][current.Y + 1];
+				t.hCost = current.getDistanceTo(map[targetX][targetY]);
+				checkAndUpdateCost(current, t, current.finalCost + 1);
+			}
+
+			if (current.X + 1 < map.length) {
+				t = map[current.X + 1][current.Y];
+				t.hCost = current.getDistanceTo(map[targetX][targetY]);
+				checkAndUpdateCost(current, t, current.finalCost + 1);
+			}
+		}
 		System.out.println("something went horribly wrong");
 		return null;
 	}
@@ -230,7 +291,7 @@ public class PathFinder {
 	 * 
 	 * @author yp
 	 */
-	private class Square {
+	private class Square implements Comparable <Square>{
 		double hCost = 0;
 		double finalCost = 0;
 		int X;
@@ -257,22 +318,55 @@ public class PathFinder {
 		}
 
 		@Override
-        public String toString(){
-            return "["+this.X+", "+this.Y+"]";
-        }
-		
+		public String toString() {
+			return "[" + this.X + ", " + this.Y + "]";
+		}
+
 		boolean equals(Square anotherone) {
 			return this.X == anotherone.X && this.Y == anotherone.Y;
 		}
 
 		/**
-		 * 0 => river or enemy base/tunnel 1 => central island -1 => base -2 => tunnel
-		 * -3 => obstacle
+		 * 0 => river or enemy base/tunnel 
+		 * 3 => central island 
+		 * 2 => tunnel
+		 * 1 => base 
+		 * -2 => obstacle
 		 */
 		void setStatus(int status) {
 			this.status = status;
 		}
 
+		@Override
+		public int compareTo(Square c) {
+			return this.finalCost<c.finalCost?-1:
+                this.finalCost>c.finalCost?1:0;
+		}
+
 	}
+
+	public static PathFinder test(int arenaSizeX, int arenaSizeY, int tunnelLLX, int tunnelLLY, int tunnelURX, int tunnelURY,
+			int baseLLX, int baseLLY, int baseURX, int baseURY, int islandLLX, int islandLLY, int islandURX,
+			int islandURY, int targetX, int targetY) {
+		PathFinder pf = new PathFinder(arenaSizeX, arenaSizeY, tunnelLLX, tunnelLLY, tunnelURX, tunnelURY, baseLLX,
+				baseLLY, baseURX, baseURY, islandLLX, islandLLY, islandURX, islandURY);
+		PathFinder.targetX = targetX;
+		PathFinder.targetY = targetY;
+		return pf;
+	}
+	
+	public static void main(String[] args) {
+		PathFinder pf = test (15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
+		pf.setObstacle(7, 6);
+		pf.setObstacle(7, 7);
+		pf.setObstacle(7, 8);
+		pf.printMap();
+		
+		ArrayList<int[]> lel = pf.findPath();
+		for (int[] lol : lel) {
+			System.out.println(Arrays.toString(lol));
+		}
+	}
+	
 
 }
