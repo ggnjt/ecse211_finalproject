@@ -1,8 +1,6 @@
 package ca.mcgill.ecse211.finalproject;
 
 import lejos.hardware.Button;
-import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
-import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 /**
  * The main driver class for the odometry lab.
  */

@@ -257,12 +257,12 @@ public class Navigation {
   public static void processNextMove (int [] move) {
 	  if (previousMove[0] == 0 && previousMove [1]== 0 ) {
 		  boolean verti = move [0] == 0;
-		  if (verti) {
-			  turnTo(move[1] == 1? 90:-90);
-		  }
-		  else {
-			  turnTo(move[0] == 1? 0:180);
-		  }
+//		  if (verti) {
+//			  turnTo(move[1] == 1? 90:-90);
+//		  }
+//		  else {
+//			  turnTo(move[0] == 1? 0:180);
+//		  }
 		  moveForwardByTile(1);
 	  }
 	  else if (Arrays.equals(move, previousMove)){
