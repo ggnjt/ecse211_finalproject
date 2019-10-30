@@ -197,7 +197,7 @@ public class PathFinder {
 		Square current;
 
 		while (true) {
-			System.out.println(open.toString());
+			//System.out.println(open.toString());
 			current = open.poll();
 			if (current == null) {
 				System.out.println("Something went horribly wrong");
@@ -371,7 +371,7 @@ public class PathFinder {
 		
 		
 
-//		PathFinder.resetMap();
+		//PathFinder.resetMap();
 //		pf.printMap();
 //
 //		lel = pf.findPath();

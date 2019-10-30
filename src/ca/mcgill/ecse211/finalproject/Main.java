@@ -16,10 +16,6 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		leftMotor.setSpeed(150);
-		rightMotor.setSpeed(150);
-		leftMotor.forward();
-		rightMotor.forward();
 //		Thread colorPoller = new Thread(Resources.colorPoller);
 //		colorPoller.start();
 //		

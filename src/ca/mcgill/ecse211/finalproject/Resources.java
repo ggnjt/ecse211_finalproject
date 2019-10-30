@@ -123,7 +123,7 @@ public class Resources {
 	/**
 	 * The LCD.
 	 */
-	public static final TextLCD LCD = LocalEV3.get().getTextLCD();
+	public static final TextLCD LCDScreen = LocalEV3.get().getTextLCD();
 
 	/**
 	 * The odometer.
@@ -133,32 +133,32 @@ public class Resources {
 	/**
 	 * left color sensor
 	 */
-	//public static final EV3ColorSensor leftColorSensor = new EV3ColorSensor(SensorPort.S4);
+	public static final EV3ColorSensor leftColorSensor = new EV3ColorSensor(SensorPort.S4);
 	
 	/**
 	 * right color sensor
 	 */
-	//public static final EV3ColorSensor rightColorSensor = new EV3ColorSensor(SensorPort.S1);
+	public static final EV3ColorSensor rightColorSensor = new EV3ColorSensor(SensorPort.S1);
 
 	/**
 	 * The ultrasonic sensor.
 	 */
-	//public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S2);
+	public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S2);
 
 	/**
 	 * The ultrasonic poller.
 	 */
-	//public static final UltrasonicPoller usPoller = new UltrasonicPoller();
+	public static final UltrasonicPoller usPoller = new UltrasonicPoller();
 	
 	/**
 	 * Color poller
 	 */
-	//public static final ColorPoller colorPoller = new ColorPoller();
+	public static final ColorPoller colorPoller = new ColorPoller();
 
 	/**
 	 * US localizer
 	 */
-	//public static final UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer();
+	public static final UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer();
 
 
 	/**
