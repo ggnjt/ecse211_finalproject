@@ -5,9 +5,6 @@ import lejos.hardware.Button;
  * The main driver class for the odometry lab.
  */
 public class Main {
-	public static final int TARGETX = 6;
-	public static final int TARGETY = 3;
-
 	/**
 	 * The main entry point.
 	 * 
