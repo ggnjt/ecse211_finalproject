@@ -6,29 +6,11 @@ import java.util.PriorityQueue;
 import java.util.Stack;
 
 public class PathFinder {
-
-  /**
-   * orientation of the robot
-   * 
-   * @author yp
-   *
-   */
-  public enum Orientation {
-    NORTH, SOUTH, EAST, WEST
-  }
-
   /**
    * a 2-D array used to represent the map
    */
   static private Square[][] map;
-
-  /**
-   * current position and orientation of the robot on the grid
-   */
-  private static int currentX;
-  private static int currentY;
-  private static Orientation orientation;
-
+  
   /**
    * A* stuff
    */
@@ -90,11 +72,6 @@ public class PathFinder {
         map[i][j].setStatus(3);
       }
     }
-
-    // TODO: subject to change
-    PathFinder.currentX = 0;
-    PathFinder.currentY = 8;
-    PathFinder.orientation = Orientation.NORTH;
   }
 
   /**
@@ -117,7 +94,7 @@ public class PathFinder {
    */
   public void addObstacle() {
     // TODO
-    switch (PathFinder.orientation) {
+    switch (Navigation.orientation) {
       case NORTH:
       case SOUTH:
       case EAST:
@@ -176,7 +153,7 @@ public class PathFinder {
         }
       }
     }
-    image[currentX][currentY] = 'C';
+    image[Navigation.xTile][Navigation.yTile] = 'C';
     image[targetX][targetY] = 'T';
     for (char[] row : image) {
       System.out.println(Arrays.toString(row));
@@ -191,7 +168,7 @@ public class PathFinder {
    */
   public ArrayList<int[]> findPath() {
 
-    open.add(map[currentX][currentY]);
+    open.add(map[Navigation.xTile][Navigation.yTile]);
     Square current;
 
     while (true) {
@@ -254,7 +231,6 @@ public class PathFinder {
 
   // ***** code copied over from lab 5 **** //
   private static int[] findLaunchPointToTarget(int targetX, int targetY) {
-
     int[] result = new int[2];
     double shortest_dist = 100;
     int[][] notableSquares = {{-3, 3}, {0, 4}, {3, 3}, {-4, 0}, {4, 0}, {-3, -3}, {0, -4}, {3, -3}};
@@ -360,9 +336,6 @@ public class PathFinder {
     for (int[] lol : lel) {
       System.out.println(Arrays.toString(lol));
     }
-
-
-
     // PathFinder.resetMap();
     // pf.printMap();
     //
