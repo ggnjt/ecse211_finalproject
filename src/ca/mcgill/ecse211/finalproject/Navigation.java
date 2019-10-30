@@ -30,13 +30,13 @@ public class Navigation {
   /**
    * current position and orientation of the robot on the grid
    */
-  public static Orientation orientation = Orientation.NORTH; //initial orientation
+  public static Orientation orientation = Orientation.NORTH; // initial orientation
 
   // integers to hold which square the robot is currently in (initialized with the initial position)
   public static int xTile = 0;
   public static int yTile = 8;
-  
-  private static int [] previousMove = {0,0};
+
+  private static int[] previousMove = {0, 0};
 
   /**
    * Lets other methods know if the robot is currently navigating to a waypoint.
@@ -69,6 +69,13 @@ public class Navigation {
     isNavigating = false;
     leftMotor.setAcceleration(ACCELERATION);
     rightMotor.setAcceleration(ACCELERATION);
+  }
+
+  /**
+   * start navigating
+   */
+  public static void startNavigating() {
+    isNavigating = true;
   }
 
   /**
@@ -144,7 +151,7 @@ public class Navigation {
    * 
    * @return true if the robot is currently navigating to a waypoint.
    */
-  public boolean isNavigating() {
+  public static boolean getNavigating() {
     return isNavigating;
   }
 
@@ -253,35 +260,45 @@ public class Navigation {
       moveForwardByTile(0.5); // Minor correction for corner cases
     }
   }
-  
-  public static void processNextMove (int [] move) {
-	  if (previousMove[0] == 0 && previousMove [1]== 0 ) {
-		  boolean verti = move [0] == 0;
-//		  if (verti) {
-//			  turnTo(move[1] == 1? 90:-90);
-//		  }
-//		  else {
-//			  turnTo(move[0] == 1? 0:180);
-//		  }
-		  moveForwardByTile(1);
-	  }
-	  else if (Arrays.equals(move, previousMove)){
-		  moveForwardByTile(1);
-	  }
-	  else {
-		  if (previousMove[0] == move[1] && previousMove [1] == -move[0]) {
-			  turnLeft();
-			  moveForwardByTile(1);
-		  }
-		  else if (previousMove[0] == -move[1] && previousMove [1] == move[0]) {
-			  turnRight();
-			  moveForwardByTile(1);
-		  }
-		  else {
-			  System.out.println("something went terribly wrong");
-		  }
-	  }
-	  previousMove = move;
-	  
+
+  public static void stopTheRobot() {
+    isNavigating = false;
+    Resources.leftMotor.stop(true);
+    Resources.rightMotor.stop(false);
+  }
+
+  public static void processNextMove(int[] move) {
+    // check if there is an obstacle
+    if (UltrasonicObstacleDetector.obstacleDetected) {
+      Resources.pf.resetMap();
+      Resources.pf.setObstacle(xTile, yTile);
+    }
+    if (previousMove[0] == 0 && previousMove[1] == 0) {
+      boolean verti = move[0] == 0;
+      // if (verti) {
+      // turnTo(move[1] == 1? 90:-90);
+      // }
+      // else {
+      // turnTo(move[0] == 1? 0:180);
+      // }
+      moveForwardByTile(1);
+    } else if (Arrays.equals(move, previousMove)) {
+      moveForwardByTile(1);
+    } else {
+      if (previousMove[0] == move[1] && previousMove[1] == -move[0]) {
+        turnLeft();
+        moveForwardByTile(1);
+      } else if (previousMove[0] == -move[1] && previousMove[1] == move[0]) {
+        turnRight();
+        moveForwardByTile(1);
+      } else {
+        System.out.println("something went terribly wrong");
+      }
+    }
+    previousMove = move;
+
+    // ToDo figure out if place here or no
+    xTile += move[0];
+    yTile += move[1];
   }
 }

@@ -143,13 +143,18 @@ public class Resources {
 	/**
 	 * The ultrasonic sensor.
 	 */
-//	public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S2);
+	public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S4);
 
 	/**
 	 * The ultrasonic poller.
 	 */
-//	public static final UltrasonicPoller usPoller = new UltrasonicPoller();
+	public static final UltrasonicPoller usPoller = new UltrasonicPoller();
 	
+	/**
+	 * Path Finder
+	 */
+	public static final PathFinder pf = PathFinder.test(15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
+    
 	/**
 	 * Color poller
 	 */
