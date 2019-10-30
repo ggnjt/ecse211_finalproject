@@ -1,11 +1,8 @@
 package ca.mcgill.ecse211.finalproject;
 
-//import static ca.mcgill.ecse211.finalproject.Resources.shooterMotor;
-import static ca.mcgill.ecse211.finalproject.Resources.usLocalizer;
-import static ca.mcgill.ecse211.finalproject.Resources.usPoller;
 import lejos.hardware.Button;
-import lejos.hardware.Sound;
-
+import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
+import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 /**
  * The main driver class for the odometry lab.
  */
@@ -19,46 +16,70 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		leftMotor.setSpeed(150);
+		rightMotor.setSpeed(150);
+		leftMotor.forward();
+		rightMotor.forward();
+//		Thread colorPoller = new Thread(Resources.colorPoller);
+//		colorPoller.start();
+//		
+//		Thread pollerThread = new Thread(usPoller);
+//		Thread localizerThread = new Thread(usLocalizer);
+//		Thread localizerDisplayThread = new Thread(new UltrasonicLocalizerDisplay());
+//		pollerThread.start();
+//		localizerThread.start();
+//		localizerDisplayThread.start();
+		
 
-		// ***Part one of the demo: static shooting*** //
-		int shots = 0;
-		while (shots < 5) {
-		//	shooterMotor.rotate(-190); // cock the launcher
-			Sound.twoBeeps(); // beep for dramatic effect
-		//	shooterMotor.rotate(240); // shoot
-		//	shooterMotor.rotate(-50); // reset angle
-			Button.waitForAnyPress(); // wait for reload
-			shots++;
-		}
-
-		// ***Part two of the demo: move to a square and launch the ball*** //
-
-		// ==== Phase 1: localize using US sensor and rammer ==== //
-		Thread pollerThread = new Thread(usPoller);
-		Thread localizerThread = new Thread(usLocalizer);
-		Thread localizerDisplayThread = new Thread(new UltrasonicLocalizerDisplay());
-		pollerThread.start();
-		localizerThread.start();
-		localizerDisplayThread.start();
+//		leftMotor.setSpeed(100);
+//		rightMotor.setSpeed(100);
+//		
+//		leftMotor.backward();
+//		rightMotor.backward();
+//		Sound.beep();
+//
+//		
+//		PathFinder pf = PathFinder.test(15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
+//		pf.setObstacle(7, 6);
+//		pf.setObstacle(7, 7);
+//		pf.setObstacle(7, 8);
+//		pf.printMap();
+//
+//		ArrayList<int[]> lel = pf.findPath();
+//		
+//		for (int[] lol : lel) {
+//			System.out.println(Arrays.toString(lol));
+//		}
+//		
+//		pf.setObstacle(9, 5);
+//		pf.setObstacle(9, 6);
+//		pf.setObstacle(9, 7);
+//		PathFinder.resetMap();
+//		pf.printMap();
+//
+//		lel = pf.findPath();
+//		for (int[] lol : lel) {
+//			System.out.println(Arrays.toString(lol));
+//		}
+		
+		
 		Button.waitForAnyPress();
 
 		// ==== Phase 2: Navigate to position and take aim ==== //
 		// killing all previous threads
-		UltrasonicPoller.kill = true;
-		UltrasonicLocalizerDisplay.kill = true;
-		try {
-			pollerThread.join(5000);
-			localizerThread.join(5000);
-			localizerDisplayThread.join(5000);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
+		//UltrasonicPoller.kill = true;
+		//UltrasonicLocalizerDisplay.kill = true;
+//		try {
+//			pollerThread.join(5000);
+//			localizerThread.join(5000);
+//			localizerDisplayThread.join(5000);
+//		} catch (InterruptedException e1) {
+//			e1.printStackTrace();
+//		}
 
 		// Navigate
-		Navigation.getReadyToShoot(TARGETX, TARGETY);
 
 		// ==== Phase 3: launch the ball ==== //
-		shots = 0;
 //		while (shots < 5) {
 //			shooterMotor.rotate(-190); // cock the launcher
 //			Sound.twoBeeps(); // beep for dramatic effect

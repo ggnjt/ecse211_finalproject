@@ -2,16 +2,24 @@ package ca.mcgill.ecse211.finalproject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Stack;
 
 public class PathFinder {
 
+	/**
+	 * orientation of the robot
+	 * 
+	 * @author yp
+	 *
+	 */
 	public enum Orientation {
 		NORTH, SOUTH, EAST, WEST
 	}
 
+	/**
+	 * a 2-D array used to represent the map
+	 */
 	static private Square[][] map;
 
 	/**
@@ -24,14 +32,15 @@ public class PathFinder {
 	/**
 	 * A* stuff
 	 */
-	private static PriorityQueue<Square> open = new PriorityQueue<Square>(20);
-	private static boolean[][] closed;
-	private static int targetX;
-	private static int targetY;
-
+	private static PriorityQueue<Square> open = new PriorityQueue<Square>(20); //priority queue used to determine the best path
+	private static boolean[][] closed; //array to record which squares have been visited
+	private static int targetX; //target X coordinate
+	private static int targetY; //target Y coordinate
+	
 	/**
-	 * constructor which initialized the map and the path finder this should be
-	 * called after localization
+	 * constructor which initialized the map and the path finder. the enemy tunnel
+	 * and base are not considered and regarded as the same as the river this should
+	 * be called after localization
 	 * 
 	 * @param arenaSizeX arena x size -1
 	 * @param arenaSizeY arena y size -1
@@ -53,7 +62,9 @@ public class PathFinder {
 			int islandURY) {
 
 		PathFinder.map = new Square[arenaSizeX][arenaSizeY];
-		PathFinder.closed = new boolean [arenaSizeX][arenaSizeY];
+		PathFinder.closed = new boolean[arenaSizeX][arenaSizeY];
+
+		// set river
 		for (int i = 0; i < arenaSizeX; i++) {
 			for (int j = 0; j < arenaSizeY; j++) {
 				Square sq = new Square(i, j);
@@ -61,23 +72,27 @@ public class PathFinder {
 				sq.setStatus(0);
 			}
 		}
-		
+
+		// set base
 		for (int i = baseLLX; i < baseURX; i++) {
 			for (int j = baseLLY; j < baseURY; j++) {
 				map[i][j].setStatus(1);
 			}
 		}
+		// set tunnel
 		for (int i = tunnelLLX; i < tunnelURX; i++) {
 			for (int j = tunnelLLY; j < tunnelURY; j++) {
 				map[i][j].setStatus(2);
 			}
 		}
+		// set island
 		for (int i = islandLLX; i < islandURX; i++) {
 			for (int j = islandLLY; j < islandURY; j++) {
 				map[i][j].setStatus(3);
 			}
 		}
 
+		// TODO: subject to change
 		PathFinder.currentX = 0;
 		PathFinder.currentY = 8;
 		PathFinder.orientation = Orientation.NORTH;
@@ -86,7 +101,7 @@ public class PathFinder {
 	/**
 	 * resets the map so that a new round of path finding can be run
 	 */
-	public void resetMap() {
+	public static void resetMap() {
 		for (Square[] row : map) {
 			for (Square sq : row) {
 				sq.hCost = 0;
@@ -95,6 +110,7 @@ public class PathFinder {
 			}
 		}
 		open = new PriorityQueue<Square>();
+		PathFinder.closed = new boolean[map.length][map[0].length];
 	}
 
 	/**
@@ -109,9 +125,10 @@ public class PathFinder {
 		case WEST:
 		}
 	}
-	
+
 	/**
 	 * set the target square as an obstacle
+	 * 
 	 * @param x x coordinate of square
 	 * @param y y coordinate of square
 	 */
@@ -119,6 +136,14 @@ public class PathFinder {
 		PathFinder.map[x][y].setStatus(-2);
 	}
 
+	/**
+	 * this checks the heuristic cost of an adjacent square, updates the final cost
+	 * and adds it into the priority queue
+	 * 
+	 * @param current current square probing from
+	 * @param target  square being probed
+	 * @param cost    cost increment of the target
+	 */
 	public void checkAndUpdateCost(Square current, Square target, double cost) {
 		if (target.status <= 0 || closed[target.X][target.Y]) {
 			return;
@@ -162,15 +187,17 @@ public class PathFinder {
 
 	/**
 	 * this returns a list of int[] of size 2, which represents the list of moves
-	 * the robot should make....
+	 * the robot should make to get to the target
 	 * 
 	 * @return
 	 */
 	public ArrayList<int[]> findPath() {
+		
 		open.add(map[currentX][currentY]);
 		Square current;
 
 		while (true) {
+			System.out.println(open.toString());
 			current = open.poll();
 			if (current == null) {
 				System.out.println("Something went horribly wrong");
@@ -179,7 +206,11 @@ public class PathFinder {
 			closed[current.X][current.Y] = true;
 
 			if (current.equals(map[targetX][targetY])) {
+				// at this point, you are at a target and the route can be traced back by using
+				// the parent Sqaures
 				ArrayList<int[]> result = new ArrayList<int[]>();
+				// we use a Stack to help reverse the linked list and calculate the movement
+				// (instead of iusing squares)
 				Stack<Square> ghettoStack = new Stack<Square>();
 				ghettoStack.push(current);
 				while (current.parent != null) {
@@ -192,8 +223,6 @@ public class PathFinder {
 					result.add(entry);
 					current = ghettoStack.pop();
 				}
-				int[] entry = { targetX - current.X, targetY - current.Y };
-				result.add(entry);
 				return result;
 			}
 
@@ -222,46 +251,10 @@ public class PathFinder {
 				checkAndUpdateCost(current, t, current.finalCost + 1);
 			}
 		}
-		System.out.println("something went horribly wrong");
 		return null;
 	}
 
 	// ***** code copied over from lab 5 **** //
-	private static int[][] getListOfMovesToTarget(int[] target) {
-		int[][] result;
-		boolean xBigger;
-		if (target[0] == 0 || target[1] == 0) {
-			result = new int[1][2];
-			result[0] = target;
-		} else {
-			int stepSize;
-			xBigger = target[0] > target[1];
-			result = new int[(xBigger ? target[1] : target[0])][2];
-			if (xBigger) { // per y step, x will move by stepSize
-				stepSize = target[0] / target[1];
-				int i = 0, j = 0;
-				while (j < target[1] - 1) {
-					result[j] = new int[] { stepSize, 1 };
-					i += stepSize;
-					j++;
-				}
-				result[j] = new int[] { target[0] - i, 1 };
-				return result;
-			} else { // per x step, y will move by stepSize
-				stepSize = target[1] / target[0];
-				int i = 0, j = 0;
-				while (j < target[0] - 1) {
-					result[j] = new int[] { 1, stepSize };
-					i += stepSize;
-					j++;
-				}
-				result[j] = new int[] { 1, target[1] - i };
-				return result;
-			}
-		}
-		return result;
-	}
-
 	private static int[] findLaunchPointToTarget(int targetX, int targetY) {
 
 		int[] result = new int[2];
@@ -287,11 +280,12 @@ public class PathFinder {
 	}
 
 	/**
-	 * class for squares on the map used for A* algorithm
+	 * class used to represent the squares used in the map for A* path finding
 	 * 
 	 * @author yp
+	 *
 	 */
-	private class Square implements Comparable <Square>{
+	private class Square implements Comparable<Square> {
 		double hCost = 0;
 		double finalCost = 0;
 		int X;
@@ -306,8 +300,7 @@ public class PathFinder {
 		}
 
 		/**
-		 * returns the distance needed to travel by cardinal directions from one
-		 * waypoint to another
+		 * returns the Eulidean distance from one square to another
 		 * 
 		 * @param anotherone another way point
 		 * @return
@@ -317,21 +310,13 @@ public class PathFinder {
 					+ (this.Y - anotherone.Y) * (this.Y - anotherone.Y));
 		}
 
-		@Override
-		public String toString() {
-			return "[" + this.X + ", " + this.Y + "]";
-		}
-
-		boolean equals(Square anotherone) {
-			return this.X == anotherone.X && this.Y == anotherone.Y;
-		}
-
 		/**
+		 * sets the values for the status of the square, each number represents a type of terrain
 		 * 0 => river or enemy base/tunnel 
 		 * 3 => central island 
-		 * 2 => tunnel
+		 * 2 => tunnel 
 		 * 1 => base 
-		 * -2 => obstacle
+		 * -2=> obstacle
 		 */
 		void setStatus(int status) {
 			this.status = status;
@@ -339,15 +324,21 @@ public class PathFinder {
 
 		@Override
 		public int compareTo(Square c) {
-			return this.finalCost<c.finalCost?-1:
-                this.finalCost>c.finalCost?1:0;
+			return this.finalCost < c.finalCost ? -1 : this.finalCost > c.finalCost ? 1 : 0;
+		}
+		
+		/**
+		 * prints the square to help debug
+		 */
+		public String toString(){
+			return ("["+X+","+Y+"]");
 		}
 
 	}
 
-	public static PathFinder test(int arenaSizeX, int arenaSizeY, int tunnelLLX, int tunnelLLY, int tunnelURX, int tunnelURY,
-			int baseLLX, int baseLLY, int baseURX, int baseURY, int islandLLX, int islandLLY, int islandURX,
-			int islandURY, int targetX, int targetY) {
+	public static PathFinder test(int arenaSizeX, int arenaSizeY, int tunnelLLX, int tunnelLLY, int tunnelURX,
+			int tunnelURY, int baseLLX, int baseLLY, int baseURX, int baseURY, int islandLLX, int islandLLY,
+			int islandURX, int islandURY, int targetX, int targetY) {
 		PathFinder pf = new PathFinder(arenaSizeX, arenaSizeY, tunnelLLX, tunnelLLY, tunnelURX, tunnelURY, baseLLX,
 				baseLLY, baseURX, baseURY, islandLLX, islandLLY, islandURX, islandURY);
 		PathFinder.targetX = targetX;
@@ -356,17 +347,40 @@ public class PathFinder {
 	}
 	
 	public static void main(String[] args) {
-		PathFinder pf = test (15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
+		
+		PathFinder pf = PathFinder.test(15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
 		pf.setObstacle(7, 6);
 		pf.setObstacle(7, 7);
 		pf.setObstacle(7, 8);
+		pf.setObstacle(9, 5);
+		pf.setObstacle(9, 6);
+		pf.setObstacle(9, 7);
+		pf.setObstacle(11, 5);
+		pf.setObstacle(11, 6);
+		pf.setObstacle(11, 7);
+		pf.setObstacle(12, 5);
+		pf.setObstacle(13, 5);
+		pf.setObstacle(13, 6);
 		pf.printMap();
-		
+
 		ArrayList<int[]> lel = pf.findPath();
+		
 		for (int[] lol : lel) {
 			System.out.println(Arrays.toString(lol));
 		}
+		
+		
+
+//		PathFinder.resetMap();
+//		pf.printMap();
+//
+//		lel = pf.findPath();
+//		for (int[] lol : lel) {
+//			System.out.println(Arrays.toString(lol));
+//		}
+		
 	}
+	
 	
 
 }
