@@ -58,7 +58,7 @@ public class Resources {
 	/**
 	 * The robot width in centimeters.
 	 */
-	public static final double TRACK = 18.1;
+	public static final double TRACK = 12.3;
 
 	/**
 	 * The speed at which the robot moves forward in degrees per second.
@@ -108,12 +108,12 @@ public class Resources {
 	/**
 	 * The left motor.
 	 */
-	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
+	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 
 	/**
 	 * The right motor.
 	 */
-	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 
 	/**
 	 * motor for the ball launcher
