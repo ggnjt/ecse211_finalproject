@@ -7,7 +7,7 @@ public class Test {
     // detect obstacles
     Thread obstacleDetector = new Thread(new UltrasonicObstacleDetector());
     obstacleDetector.start();
-    TestPathFinding(Resources.pf);
+    TestPathFinding(Resources.pathFinder);
   }
 
 

@@ -151,9 +151,18 @@ public class Resources {
    * right color sensor
    */
   public static final EV3ColorSensor rightColorSensor = new EV3ColorSensor(SensorPort.S1);
+  
+  
+  /**
+   * Test path finder
+   * TODO: the way the pf is initialized is subject to change
+   */
+  public static final PathFinder  pathFinder = PathFinder.test(15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
 
   /**
    * The dimensions sizes in squares
    */
   public static final int ARENA_X = 7;
   public static final int ARENA_Y = 7;
+  
+}

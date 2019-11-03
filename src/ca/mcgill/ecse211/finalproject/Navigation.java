@@ -2,7 +2,6 @@ package ca.mcgill.ecse211.finalproject;
 
 import static ca.mcgill.ecse211.finalproject.Resources.ACCELERATION;
 import static ca.mcgill.ecse211.finalproject.Resources.FORWARD_SPEED;
-import static ca.mcgill.ecse211.finalproject.Resources.LCDScreen;
 import static ca.mcgill.ecse211.finalproject.Resources.ROTATE_SPEED;
 import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
 import static ca.mcgill.ecse211.finalproject.Resources.TRACK;
@@ -16,6 +15,11 @@ import java.util.Arrays;
 
 import lejos.hardware.Sound;
 
+/**
+ * Class where all of the navigation of the robot is handled
+ * @author yp
+ *
+ */
 public class Navigation {
   /**
    * orientation of the robot
@@ -86,7 +90,7 @@ public class Navigation {
    * @param x the X coordinate of the waypoint
    * @param y the Y coordinate of the waypoint
    */
-  public static void travelTo(double x, double y) {
+  public static void travelTo(double x, double y) { //We could scrape this in the final version of the code because it is not used
 
     position = odometer.getXYT();
     vectorX = x - position[0];
@@ -100,7 +104,7 @@ public class Navigation {
       // Update the heading, and ensure it stays between 0 and 360 degrees
       heading = Math.toDegrees(Math.atan2(vectorX, vectorY));
       heading = (heading + 360) % 360;
-      LCDScreen.drawString("Heading: " + Double.toString(heading), 0, 3);
+      Resources.LCD.drawString("Heading: " + Double.toString(heading), 0, 3);
       // If the robot isn't too close to the waypoint, allow it to correct its heading
       // by rotating
       if (distance(vectorX, vectorY) > (2 * WPOINT_RAD)) {
@@ -195,9 +199,26 @@ public class Navigation {
     leftMotor.rotate(convertDistance(TILE_SIZE * i), true);
     rightMotor.rotate(convertDistance(TILE_SIZE * i), false);
   }
+  
+  /**
+   * move forward until the robot encounters an obstacle or finishes the movement of one tile length
+   * @return true if the robot finishes without encountering an obstacle
+   */
+  public static boolean moveForwardOneTileNonBloking() {
+	  while (true) {
+		  switch (orientation){
+		  case NORTH:
+		  case SOUTH:
+		  case WEST:
+		  case EAST:
+		  }
+	  }
+  }
+  
+  
 
   /**
-   * turns the robot 90 degrees left
+   * turns the robot 90 degrees left and sleep the color sensor threads
    */
   public static void turnLeft() {
     leftMotor.rotate(convertAngle(-90.0), true);
@@ -205,7 +226,7 @@ public class Navigation {
   }
 
   /**
-   * turns the robot 90 degrees right
+   * turns the robot 90 degrees right and sleep the color sensor threads
    */
   public static void turnRight() {
     leftMotor.rotate(convertAngle(90.0), true);
@@ -261,17 +282,27 @@ public class Navigation {
     }
   }
 
+  
+  /**
+   * stops the robot in place
+   */
   public static void stopTheRobot() {
     isNavigating = false;
     Resources.leftMotor.stop(true);
     Resources.rightMotor.stop(false);
   }
 
+  
+  /**
+   * process a move which takes the form of a size 2 array. 
+   * The robot will either turn right, turn left or go straight, then move by one tile
+   * @param move a size 2 array representing the move. This can only take the following forms: {1,0}{-1,0}{0,1}{0,-1}
+   */
   public static void processNextMove(int[] move) {
     // check if there is an obstacle
     if (UltrasonicObstacleDetector.obstacleDetected) {
-      Resources.pf.resetMap();
-      Resources.pf.setObstacle(xTile, yTile);
+      PathFinder.resetMap();
+      Resources.pathFinder.setObstacle(xTile, yTile);
     }
     if (previousMove[0] == 0 && previousMove[1] == 0) {
       boolean verti = move[0] == 0;
@@ -297,7 +328,7 @@ public class Navigation {
     }
     previousMove = move;
 
-    // ToDo figure out if place here or no
+    // TODO: figure out if place here or no
     xTile += move[0];
     yTile += move[1];
   }

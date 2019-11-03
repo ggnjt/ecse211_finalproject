@@ -13,9 +13,6 @@ public class PathFinder {
 	 * @author yp
 	 *
 	 */
-	public enum Orientation {
-		NORTH, SOUTH, EAST, WEST
-	}
 
 	/**
 	 * a 2-D array used to represent the map
@@ -27,7 +24,6 @@ public class PathFinder {
 	 */
 	private static int currentX;
 	private static int currentY;
-	private static Orientation orientation;
 
 	/**
 	 * A* stuff
@@ -95,7 +91,6 @@ public class PathFinder {
 		// TODO: subject to change
 		PathFinder.currentX = 0;
 		PathFinder.currentY = 8;
-		PathFinder.orientation = Orientation.NORTH;
 	}
 
 	/**
@@ -118,12 +113,7 @@ public class PathFinder {
 	 */
 	public void addObstacle() {
 		// TODO
-		switch (PathFinder.orientation) {
-		case NORTH:
-		case SOUTH:
-		case EAST:
-		case WEST:
-		}
+		
 	}
 
 	/**
