@@ -205,14 +205,27 @@ public class Navigation {
    * @return true if the robot finishes without encountering an obstacle
    */
   public static boolean moveForwardOneTileNonBloking() {
-	  while (true) {
-		  switch (orientation){
-		  case NORTH:
-		  case SOUTH:
-		  case WEST:
-		  case EAST:
+	  final Thread moveOneTile = new Thread () {
+		  public void run () {
+			  while (true) {
+				  switch (orientation){
+				  case NORTH:
+					  break;
+				  case SOUTH:
+					  break;
+				  case WEST:
+					  break;
+				  case EAST:
+					  break;
+				  }
+				  if (ColorPoller.isCorrecting) {
+					  moveOneTile.wait();
+				  }
+			  }
 		  }
-	  }
+	  };
+	  moveOneTile.start();
+	  return true;
   }
   
   
@@ -305,6 +318,7 @@ public class Navigation {
       Resources.pathFinder.setObstacle(xTile, yTile);
     }
     if (previousMove[0] == 0 && previousMove[1] == 0) {
+    //TODO: initialization
       boolean verti = move[0] == 0;
       // if (verti) {
       // turnTo(move[1] == 1? 90:-90);
@@ -322,8 +336,13 @@ public class Navigation {
       } else if (previousMove[0] == -move[1] && previousMove[1] == move[0]) {
         turnRight();
         moveForwardByTile(1);
+      } else if (previousMove[0] == -move[0] && previousMove[1] == -move[1]){
+        turnRight();
+        turnRight();
+        moveForwardByTile(1);
       } else {
-        System.out.println("something went terribly wrong");
+    	  System.out.println("something went terribly wrong"); 
+    	  //This should never happen if the pathfinder works correctly
       }
     }
     previousMove = move;

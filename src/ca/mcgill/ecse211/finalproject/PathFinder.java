@@ -325,6 +325,8 @@ public class PathFinder {
 
 	}
 
+	
+	// ========== Tester/debugger methods ==========//
 	public static PathFinder test(int arenaSizeX, int arenaSizeY, int tunnelLLX, int tunnelLLY, int tunnelURX,
 			int tunnelURY, int baseLLX, int baseLLY, int baseURX, int baseURY, int islandLLX, int islandLLY,
 			int islandURX, int islandURY, int targetX, int targetY) {
