@@ -162,7 +162,7 @@ public class Resources {
   /**
    * The dimensions sizes in squares
    */
-  public static final int ARENA_X = 7;
-  public static final int ARENA_Y = 7;
+  public static final int ARENA_X = 14;
+  public static final int ARENA_Y = 8;
   
 }

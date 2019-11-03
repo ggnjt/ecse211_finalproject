@@ -2,6 +2,11 @@ package ca.mcgill.ecse211.finalproject;
 
 import java.util.ArrayList;
 
+/**
+ * test and debugging class
+ * @author yp
+ *
+ */
 public class Test {
   public static void main(String[] args) {
     // detect obstacles
@@ -17,12 +22,9 @@ public class Test {
     Resources.rightMotor.setAcceleration(1000);
     Resources.leftMotor.setSpeed(150);
     Resources.rightMotor.setSpeed(150);
-    Navigation.startNavigating();
 
     ArrayList<int[]> path = pf.findPath();
     for (int[] item : path) {
-      if(!Navigation.getNavigating())
-        break;
       Navigation.processNextMove(item);
     }
   }

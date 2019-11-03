@@ -11,32 +11,85 @@ import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 import lejos.robotics.SampleProvider;
 
 public class ColorPoller implements Runnable {
-	// timer
-	private long leftTimer;
-	private long rightTimer;
-
-	// left sensor
+	// =====left sensor=====//
+	/**
+	 * sample provider for the left color sensor
+	 */
 	private static SampleProvider leftSampleProvider = leftColorSensor.getRedMode();
+	/**
+	 * sample reading from the left color sensor
+	 */
 	private static float[] leftSampleColor = new float[leftColorSensor.sampleSize()];
-	private static float leftSample; // value from sensor
-	private static float leftDer = 0; // change in sensor measurement
-	private static float leftPrev = 0; // used to hold previous value
-	private static int leftCounter = 0; // used to hold previous value
-	// right sensor
+	/**
+	 * value from left sensor
+	 */
+	private static float leftSample;
+	/**
+	 * change in sensor measurement between two iterations of the left color sensor
+	 * sampling
+	 */
+	private static float leftDer = 0;
+	/**
+	 * used to hold previous value of the left sampler
+	 */
+	private static float leftPrev = 0;
+	/**
+	 * a buffer used for the left sensor for line detection
+	 */
+	private static int leftCounter = 0;
+
+	// =====right sensor=====//
+	/**
+	 * sample provider for the right color sensor
+	 */
 	private static SampleProvider rightSampleProvider = rightColorSensor.getRedMode();
+	/**
+	 * sample reading from the right color sensor
+	 */
 	private static float[] rightSampleColor = new float[rightColorSensor.sampleSize()];
-	private static float rightSample; // value from sensor
-	private static float rightDer = 0; // change in sensor measurement
-	private static float rightPrev = 0; // used to hold previous value
-	private static int rightCounter = 0; // used to hold previous value
+	/**
+	 * value from right sensor
+	 */
+	private static float rightSample;
+	/**
+	 * change in sensor measurement between two iterations of the right color sensor
+	 * sampling
+	 */
+	private static float rightDer = 0;
+	/**
+	 * used to hold previous value of the right sampler
+	 */
+	private static float rightPrev = 0;
+	/**
+	 * a buffer used for the right sensor for line detection
+	 */
+	private static int rightCounter = 0;
 
-	private static final float SENSOR_DERIVATIVE_THRESHOLD = 0.03f;
+	/**
+	 * A threshold value used to determine a large enough change in sensor
+	 * measurement
+	 */
+	private static final float SENSOR_DERIVATIVE_THRESHOLD = 0.07f;
+
+	/**
+	 * a global kill switch for the poller thread
+	 */
 	public static boolean kill = false;
+	/**
+	 * whether or not the left sensor is currently detecting a black line
+	 */
 	private static boolean leftLineDetected;
+	/**
+	 * whether or not the right sensor is currently detecting a black line
+	 */
 	private static boolean rightLineDetected;
-
-	private static double[] currXYT;
-
+	/**
+	 * flag indicating whether the robot is in the process of odometry correction
+	 */
+	public static boolean isCorrecting;
+	/**
+	 * run method for the two collor pollers
+	 */
 	public void run() {
 		long readingStart, readingEnd;
 
@@ -61,7 +114,11 @@ public class ColorPoller implements Runnable {
 				rightLineDetected = rightDetectBlackLine();
 			}
 
-			if ((leftLineDetected && rightLineDetected) || !(leftLineDetected && rightLineDetected)) { // Both lines detected, (or no detections), carry on
+			if ((leftLineDetected && rightLineDetected) || !(leftLineDetected && rightLineDetected)) { // Both lines
+																										// detected, (or
+																										// no
+																										// detections),
+																										// carry on
 				leftMotor.setSpeed(FORWARD_SPEED);
 				rightMotor.setSpeed(FORWARD_SPEED);
 				leftLineDetected = false;
@@ -89,14 +146,30 @@ public class ColorPoller implements Runnable {
 		}
 	}
 
+	/**
+	 * get the reading from the left color sensor
+	 * 
+	 * @return reading of red light from left sensor
+	 */
 	public static float getLeftSample() {
 		return leftSample;
 	}
 
+	/**
+	 * get the reading from the right color sensor
+	 * 
+	 * @return reading of red light from right sensor
+	 */
 	public static float getRightSample() {
 		return rightSample;
 	}
 
+	/**
+	 * Whether of not the left sensor is detecting a black line
+	 * 
+	 * @return boolean value indicating that the left sensor has transitioned onto a
+	 *         black line
+	 */
 	public static boolean leftDetectBlackLine() {
 		if (leftCounter > 2) {
 			leftCounter = 0;
@@ -108,6 +181,12 @@ public class ColorPoller implements Runnable {
 			return false;
 	}
 
+	/**
+	 * Whether of not the right sensor is detecting a black line
+	 * 
+	 * @return boolean value indicating that the right sensor has transitioned onto
+	 *         a black line
+	 */
 	public static boolean rightDetectBlackLine() {
 		if (rightCounter > 2) {
 			rightCounter = 0;
@@ -119,9 +198,13 @@ public class ColorPoller implements Runnable {
 			return false;
 	}
 
-	private static void correctXYT() { // Set theta to be on a cardinal direction
+	/**
+	 * corrects the odometer according to the nearest black line using internal
+	 * value readings
+	 */
+	public static void correctXYT() {
 		int updatedTheta;
-		currXYT = odometer.getXYT();
+		double[] currXYT = odometer.getXYT();
 		/*
 		 * Resets the angle (since we are only driving in cardinal directions, there are
 		 * only 4 possibilities

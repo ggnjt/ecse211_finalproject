@@ -19,10 +19,8 @@ public class UltrasonicPoller implements Runnable {
     usData = new float[US_SENSOR.sampleSize()];
   }
 
-  /*
-   * Sensors now return floats using a uniform protocol. Need to convert US result to an integer [0,255] (non-Javadoc)
-   * 
-   * @see java.lang.Thread#run()
+  /**
+   * run method for the US sensor
    */
   public void run() {
     int reading;
