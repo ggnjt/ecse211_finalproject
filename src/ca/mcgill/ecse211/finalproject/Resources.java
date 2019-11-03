@@ -200,7 +200,7 @@ public class Resources {
 	/**
 	 * The robot width in centimeters.
 	 */
-	public static final double TRACK = 18.1;
+	public static final double TRACK = 12.3;
 
 	/**
 	 * The speed at which the robot moves forward in degrees per second.
@@ -250,12 +250,12 @@ public class Resources {
 	/**
 	 * The left motor.
 	 */
-	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 
 	/**
 	 * The right motor.
 	 */
-	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 
 	/**
 	 * motor for the ball launcher
@@ -265,37 +265,48 @@ public class Resources {
 	/**
 	 * The LCD.
 	 */
-	public static final TextLCD LCD = LocalEV3.get().getTextLCD();
+	public static final TextLCD LCDScreen = LocalEV3.get().getTextLCD();
 
 	/**
 	 * The odometer.
 	 */
 	public static Odometer odometer = Odometer.getOdometer();
+	
+	/**
+	 * left color sensor
+	 */
+//	public static final EV3ColorSensor leftColorSensor = new EV3ColorSensor(SensorPort.S4);
+	
+	/**
+	 * right color sensor
+	 */
+//	public static final EV3ColorSensor rightColorSensor = new EV3ColorSensor(SensorPort.S1);
 
 	/**
 	 * The ultrasonic sensor.
 	 */
-	public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S2);
+	public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S4);
 
 	/**
 	 * The ultrasonic poller.
 	 */
 	public static final UltrasonicPoller usPoller = new UltrasonicPoller();
+	
+	/**
+	 * Path Finder
+	 */
+	public static final PathFinder pf = PathFinder.test(15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
+    
+	/**
+	 * Color poller
+	 */
+//	public static final ColorPoller colorPoller = new ColorPoller();
 
 	/**
 	 * US localizer
 	 */
-	public static final UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer();
-	
-	/**
-	 * left color sensor
-	 */
-	public static final EV3ColorSensor leftColorSensor = new EV3ColorSensor(SensorPort.S4);
-	
-	/**
-	 * right color sensor
-	 */
-	public static final EV3ColorSensor rightColorSensor = new EV3ColorSensor(SensorPort.S1);
+//	public static final UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer();
+
 
 	/**
 	 * The dimensions sizes in squares
