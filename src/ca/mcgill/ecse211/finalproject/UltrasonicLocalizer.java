@@ -11,6 +11,13 @@ import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 import static ca.mcgill.ecse211.finalproject.Resources.usPoller;
 
+/**
+ * Thread which is responsible for using the US sensor and the wall rammer to
+ * localize in the beginning of the competition
+ * 
+ * @author yp
+ *
+ */
 public class UltrasonicLocalizer implements Runnable {
 
 	/**

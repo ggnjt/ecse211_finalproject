@@ -10,6 +10,11 @@ import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 
 import lejos.robotics.SampleProvider;
 
+/**
+ * Class which takes care of color sensor polling, signal filtering as well as odometry correction using the color sensors
+ * @author yp
+ *
+ */
 public class ColorPoller implements Runnable {
 	// =====left sensor=====//
 	/**

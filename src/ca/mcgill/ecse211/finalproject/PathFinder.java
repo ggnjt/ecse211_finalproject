@@ -5,6 +5,13 @@ import java.util.Arrays;
 import java.util.PriorityQueue;
 import java.util.Stack;
 
+/**
+ * An implementation of the A* path finding algorithm which only allows cardinal
+ * movements on the map
+ * 
+ * @author yp
+ *
+ */
 public class PathFinder {
 
 	/**
