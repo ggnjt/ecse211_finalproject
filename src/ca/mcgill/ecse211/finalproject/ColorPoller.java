@@ -118,22 +118,8 @@ public class ColorPoller implements Runnable {
 										// a false negative
 				rightLineDetected = rightDetectBlackLine();
 			}
-
-			if ((leftLineDetected && rightLineDetected) || !(leftLineDetected && rightLineDetected)) { // Both lines
-																										// detected, (or
-																										// no
-																										// detections),
-																										// carry on
-				leftMotor.setSpeed(FORWARD_SPEED);
-				rightMotor.setSpeed(FORWARD_SPEED);
-				leftLineDetected = false;
-				rightLineDetected = false;
-			} else if (leftLineDetected && !rightLineDetected) { // Left side detection, stop left motor keep right
-																	// running
-				leftMotor.stop(true);
-			} else if (rightLineDetected && !leftLineDetected) { // Right side detection, stop right motor keep left
-																	// running
-				rightMotor.stop(true);
+			if (leftLineDetected && rightLineDetected) {
+				this.sleep();
 			}
 
 			leftPrev = leftSample;
@@ -263,4 +249,41 @@ public class ColorPoller implements Runnable {
 		currY = TILE_SIZE * (Math.round((currY) / TILE_SIZE));
 		odometer.setY(currY);
 	}
+	
+	public void resetLineDetection() {
+		leftLineDetected = false;
+		rightLineDetected = false;
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void sleep() {
+		try {
+			this.wait();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void sleepFor (long millis) {
+		try {
+			Thread.sleep(millis);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void wake() {
+		this.notify();
+	}
+	
+	public boolean[] getLineDetectionStatus() {
+		boolean [] result = {leftLineDetected, rightLineDetected};
+		return result;
+	}
+	
+	
 }

@@ -152,6 +152,10 @@ public class Resources {
    */
   public static final EV3ColorSensor rightColorSensor = new EV3ColorSensor(SensorPort.S1);
   
+  /**
+   * colorPoller
+   */
+  public static final ColorPoller colorPoller = new ColorPoller();
   
   /**
    * Test path finder

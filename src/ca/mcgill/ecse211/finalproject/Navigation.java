@@ -32,10 +32,15 @@ public class Navigation {
 		NORTH, SOUTH, EAST, WEST
 	}
 
+	public enum TravelingMode {
+		TRAVELING, CORRECTING, OBSTACLE_ENCOUNTERED
+	}
+	
 	/**
 	 * current position and orientation of the robot on the grid
 	 */
 	public static Orientation orientation = Orientation.NORTH; // initial orientation
+	public static TravelingMode navigationMode = TravelingMode.TRAVELING;
 
 	// integers to hold which square the robot is currently in (initialized with the
 	// initial position)
@@ -221,33 +226,84 @@ public class Navigation {
 	 * @return boolean which returns true if the robot finishes without encountering
 	 *         an obstacle
 	 */
-	public static boolean moveForwardOneTileNonBloking() {
+	public static boolean moveForwardOneTile() {
+		navigationMode = TravelingMode.TRAVELING;
 		final Thread moveOneTile = new Thread() {
 			public void run() {
+				whileloop:
 				while (true) {
-					switch (orientation) {
-					case NORTH:
-						break;
-					case SOUTH:
-						break;
-					case WEST:
-						break;
-					case EAST:
-						break;
-					}
-					if (ColorPoller.isCorrecting) {
-						try {
-							this.wait();// not sure about this
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+					switch (navigationMode) {
+					case TRAVELING:
+						leftMotor.forward();
+						rightMotor.forward();
+						if (UltrasonicObstacleDetector.obstacleDetected) {
+							navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
+							break whileloop;
 						}
+						if (ColorPoller.isCorrecting) {
+							navigationMode = TravelingMode.CORRECTING;
+						}
+						double[]currentXYT = odometer.getXYT();
+						switch(orientation) {
+						case NORTH:
+							if (currentXYT[1] >= xTile*Resources.TILE_SIZE+0.5*TILE_SIZE) {
+								break whileloop;
+							}
+							break;
+						case SOUTH:
+							if (currentXYT[1] >= xTile*Resources.TILE_SIZE-0.5*TILE_SIZE) {
+								break whileloop;
+							}
+							break;
+						case EAST:
+							if (currentXYT[0] >= xTile*Resources.TILE_SIZE+0.5*TILE_SIZE) {
+								break whileloop;
+							}
+							break;
+						case WEST:
+							if (currentXYT[0] >= xTile*Resources.TILE_SIZE-0.5*TILE_SIZE) {
+								break whileloop;
+							}
+							break;
+						}
+						break;
+					case CORRECTING:
+						boolean [] lineCorrectionStatus;
+						lineCorrectionStatus = Resources.colorPoller.getLineDetectionStatus();
+						if(lineCorrectionStatus[0] && ! lineCorrectionStatus[1]) {
+							leftMotor.stop();
+						} else if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
+							rightMotor.stop();
+						} else if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
+							leftMotor.forward();
+							rightMotor.forward();
+							Resources.colorPoller.sleepFor(1000);
+							navigationMode = TravelingMode.TRAVELING;
+						}
+					case OBSTACLE_ENCOUNTERED:
+						break whileloop;
 					}
 				}
 			}
 		};
 		moveOneTile.start();
-		return true;
+		if (!moveOneTile.isAlive()) {
+			try {
+				moveOneTile.join(2000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		if (navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
+			return false;
+		}
+		else if (navigationMode == TravelingMode.TRAVELING) {
+			return true;
+		}
+		else {
+			System.out.println("somehting is wrong, the robot finished while correcting...");
+			return false;
+		}
 	}
 
 	/**
