@@ -158,6 +158,11 @@ public class Resources {
   public static final ColorPoller colorPoller = new ColorPoller();
   
   /**
+   * obstacle detection threshold
+   */
+  public static final double ObstacleDetectionThreashold = 12.0;
+  
+  /**
    * Test path finder
    * TODO: the way the pf is initialized is subject to change
    */

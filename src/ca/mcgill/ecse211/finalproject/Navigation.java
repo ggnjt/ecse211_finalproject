@@ -31,8 +31,11 @@ public class Navigation {
 	public enum Orientation {
 		NORTH, SOUTH, EAST, WEST
 	}
+
 	/**
-	 * traveling state of the robot, either traveling, correcting angle or detected an obstacle
+	 * traveling state of the robot, either traveling, correcting angle or detected
+	 * an obstacle
+	 * 
 	 * @author yp
 	 *
 	 */
@@ -276,16 +279,17 @@ public class Navigation {
 			}
 		};
 		moveOneTile.start();
-		
+
 		while (navigationRunning) {
-			//not sure if this is okay...
+			// not sure if this is okay...
 			try {
-				Thread.sleep(500);
+				Thread.sleep(200);
 			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
-		
+
 		try {
 			moveOneTile.join(2000);
 		} catch (InterruptedException e) {
@@ -301,26 +305,26 @@ public class Navigation {
 			return false;
 		}
 	}
-	
+
 	public static void backUp() {
 		double distance = 0;
 		switch (orientation) {
 		case NORTH:
-			distance = odometer.getXYT()[1]-((double)yTile+0.5)*Resources.TILE_SIZE;
+			distance = odometer.getXYT()[1] - ((double) yTile + 0.5) * Resources.TILE_SIZE;
 			break;
 		case EAST:
-			distance = odometer.getXYT()[0]-((double)xTile+0.5)*Resources.TILE_SIZE;
+			distance = odometer.getXYT()[0] - ((double) xTile + 0.5) * Resources.TILE_SIZE;
 			break;
 		case SOUTH:
-			distance = -(odometer.getXYT()[1]-((double)yTile+0.5)*Resources.TILE_SIZE);
+			distance = -(odometer.getXYT()[1] - ((double) yTile + 0.5) * Resources.TILE_SIZE);
 			break;
 		case WEST:
-			distance = -(odometer.getXYT()[0]-((double)xTile+0.5)*Resources.TILE_SIZE);
+			distance = -(odometer.getXYT()[0] - ((double) xTile + 0.5) * Resources.TILE_SIZE);
 			break;
 		}
-		leftMotor.rotate(-convertDistance(distance),true);
-		rightMotor.rotate(-convertDistance(distance),false);
-		
+		leftMotor.rotate(-convertDistance(distance), true);
+		rightMotor.rotate(-convertDistance(distance), false);
+
 	}
 
 	/**
@@ -487,7 +491,9 @@ public class Navigation {
 				PathFinder.resetMap();
 				Resources.pathFinder.setObstacle(xTile, yTile);
 			}
+			else {
+				previousMove = move;
+			}
 		}
-		previousMove = move;
 	}
 }

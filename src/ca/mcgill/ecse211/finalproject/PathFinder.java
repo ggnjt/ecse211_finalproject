@@ -74,7 +74,7 @@ public class PathFinder {
 	 */
 	public PathFinder(int arenaSizeX, int arenaSizeY, int tunnelLLX, int tunnelLLY, int tunnelURX, int tunnelURY,
 			int baseLLX, int baseLLY, int baseURX, int baseURY, int islandLLX, int islandLLY, int islandURX,
-			int islandURY) {
+			int islandURY, int corner) {
 
 		PathFinder.map = new Square[arenaSizeX][arenaSizeY];
 		PathFinder.closed = new boolean[arenaSizeX][arenaSizeY];
@@ -106,10 +106,31 @@ public class PathFinder {
 				map[i][j].setStatus(3);
 			}
 		}
-
-		// TODO: subject to change
-		PathFinder.currentX = 0;
-		PathFinder.currentY = 8;
+		
+		switch (corner) {
+		case 0:
+			currentX = 0;
+			currentY = 0;
+			Navigation.orientation = Navigation.Orientation.NORTH;
+			break;
+		case 1:
+			currentX = Resources.ARENA_X;
+			currentY = 0;
+			Navigation.orientation = Navigation.Orientation.WEST;
+			break;
+		case 2:
+			currentX = Resources.ARENA_X;
+			currentY = Resources.ARENA_Y;
+			Navigation.orientation = Navigation.Orientation.SOUTH;
+			break;
+		case 3:
+			currentX = 0;
+			currentY = Resources.ARENA_Y;
+			Navigation.orientation = Navigation.Orientation.EAST;
+			break;
+		}
+		Navigation.xTile = currentX;
+		Navigation.yTile = currentY;
 	}
 
 	/**
@@ -405,7 +426,7 @@ public class PathFinder {
 			int tunnelURY, int baseLLX, int baseLLY, int baseURX, int baseURY, int islandLLX, int islandLLY,
 			int islandURX, int islandURY, int targetX, int targetY) {
 		PathFinder pf = new PathFinder(arenaSizeX, arenaSizeY, tunnelLLX, tunnelLLY, tunnelURX, tunnelURY, baseLLX,
-				baseLLY, baseURX, baseURY, islandLLX, islandLLY, islandURX, islandURY);
+				baseLLY, baseURX, baseURY, islandLLX, islandLLY, islandURX, islandURY, 0);
 		PathFinder.targetX = targetX;
 		PathFinder.targetY = targetY;
 		return pf;
