@@ -1,12 +1,6 @@
-package ca.mcgill.ecse211.finalproject;
+package ca.mcgill.ecse211.finalproject.phase2;
 
-import static ca.mcgill.ecse211.finalproject.Resources.FORWARD_SPEED;
-import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
-import static ca.mcgill.ecse211.finalproject.Resources.leftColorSensor;
-import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
-import static ca.mcgill.ecse211.finalproject.Resources.odometer;
-import static ca.mcgill.ecse211.finalproject.Resources.rightColorSensor;
-import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
+import static ca.mcgill.ecse211.finalproject.Resources.*;
 
 import lejos.robotics.SampleProvider;
 

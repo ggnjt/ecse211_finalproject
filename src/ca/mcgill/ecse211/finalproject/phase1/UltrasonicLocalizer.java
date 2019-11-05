@@ -1,15 +1,6 @@
-package ca.mcgill.ecse211.finalproject;
+package ca.mcgill.ecse211.finalproject.phase1;
 
-import static ca.mcgill.ecse211.finalproject.Resources.FORWARD_SPEED;
-import static ca.mcgill.ecse211.finalproject.Resources.LOW_SPEED;
-import static ca.mcgill.ecse211.finalproject.Resources.ROTATE_SPEED;
-import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
-import static ca.mcgill.ecse211.finalproject.Resources.TRACK;
-import static ca.mcgill.ecse211.finalproject.Resources.WHEEL_RAD;
-import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
-import static ca.mcgill.ecse211.finalproject.Resources.odometer;
-import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
-import static ca.mcgill.ecse211.finalproject.Resources.usPoller;
+import static ca.mcgill.ecse211.finalproject.Resources.*;
 
 /**
  * Thread which is responsible for using the US sensor and the wall rammer to
@@ -73,8 +64,9 @@ public class UltrasonicLocalizer implements Runnable {
 
 	@Override
 	public void run() {
-		setSpeed(ROTATE_SPEED);
-		// start by rotating the robot counterclock wise
+		navigation.setSpeed(ROTATE_SPEED);
+		
+		// start by rotating the robot counter clockwise
 		rotateCounterClockWiseNonBLocking();
 		boolean cont = true; // boolean used to break our of while loop
 		while (cont) {
@@ -107,7 +99,7 @@ public class UltrasonicLocalizer implements Runnable {
 				finishing();
 				break;
 			case FINISHED:
-				stopTheRobot();
+				navigation.stopTheRobot();
 				cont = false;
 				odometer.setXYT(TILE_SIZE / 2, 21, 0);
 				break;
@@ -149,7 +141,7 @@ public class UltrasonicLocalizer implements Runnable {
 			spaceCounter = 0;
 		if (spaceCounter > 3) {
 			state = SearchingState.YWALL;
-			setSpeed(LOW_SPEED); // slows the robot down to get better readings
+			navigation.setSpeed(LOW_SPEED); // slows the robot down to get better readings
 			spaceCounter = 0;
 		}
 	}
@@ -163,8 +155,8 @@ public class UltrasonicLocalizer implements Runnable {
 		if (spaceCounter < 40) {
 			spaceCounter++;
 		} else {
-			setSpeed(FORWARD_SPEED);
-			stopTheRobot();
+		  navigation.setSpeed(FORWARD_SPEED);
+		  navigation.stopTheRobot();
 			state = SearchingState.RAM_Y;
 			spaceCounter = 0;
 		}
@@ -175,11 +167,11 @@ public class UltrasonicLocalizer implements Runnable {
 	 * seconds, the two protruding rammers will heklp the robot to align itself
 	 */
 	private static void ramYWall() {
-		leftMotor.forward();
-		rightMotor.forward();
+	  leftMotor.forward();
+	  rightMotor.forward();
 		spaceCounter++;
 		if (spaceCounter > 110) {
-			stopTheRobot();
+		  navigation.stopTheRobot();
 			state = SearchingState.BACK_Y;
 			spaceCounter = 0;
 		}
@@ -190,12 +182,12 @@ public class UltrasonicLocalizer implements Runnable {
 	 * face the x-axis wall.
 	 */
 	private static void backOffFromYWall() {
-		setSpeed(FORWARD_SPEED);
-		leftMotor.rotate(Navigation.convertDistance(-7.0), true);
-		rightMotor.rotate(Navigation.convertDistance(-7.0), false);
-		leftMotor.rotate(Navigation.convertAngle(-90.0), true);
-		rightMotor.rotate(Navigation.convertAngle(90.0), false);
-		stopTheRobot();
+		navigation.setSpeed(FORWARD_SPEED);
+		leftMotor.rotate(navigation.convertDistance(-7.0), true);
+		rightMotor.rotate(navigation.convertDistance(-7.0), false);
+		leftMotor.rotate(navigation.convertAngle(-90.0), true);
+		rightMotor.rotate(navigation.convertAngle(90.0), false);
+		navigation.stopTheRobot();
 		state = SearchingState.RAM_X;
 	}
 
@@ -208,7 +200,7 @@ public class UltrasonicLocalizer implements Runnable {
 		rightMotor.forward();
 		spaceCounter++;
 		if (spaceCounter > 110) {
-			stopTheRobot();
+			navigation.stopTheRobot();
 			state = SearchingState.FINISHING;
 			spaceCounter = 0;
 		}
@@ -220,30 +212,14 @@ public class UltrasonicLocalizer implements Runnable {
 	 * exactly 0 degrees
 	 */
 	private static void finishing() {
-		leftMotor.rotate(Navigation.convertDistance(-10.0), true);
-		rightMotor.rotate(Navigation.convertDistance(-10.0), false);
-		leftMotor.rotate(Navigation.convertAngle(180.0), true);
-		rightMotor.rotate(Navigation.convertAngle(-180.0), false);
+		leftMotor.rotate(navigation.convertDistance(-10.0), true);
+		rightMotor.rotate(navigation.convertDistance(-10.0), false);
+		leftMotor.rotate(navigation.convertAngle(180.0), true);
+		rightMotor.rotate(navigation.convertAngle(-180.0), false);
 		// rotate clockwise to avoid running into the wall here
 		state = SearchingState.FINISHED;
 	}
 	// ==================(motion methods)==================//
-
-	/**
-	 * Stop the robot
-	 */
-	private static void stopTheRobot() {
-		leftMotor.stop(true);
-		rightMotor.stop(false);
-	}
-
-	/**
-	 * set Speed
-	 */
-	private static void setSpeed(int speed) {
-		leftMotor.setSpeed(speed);
-		rightMotor.setSpeed(speed);
-	}
 
 	/**
 	 * rotate counter clock wise

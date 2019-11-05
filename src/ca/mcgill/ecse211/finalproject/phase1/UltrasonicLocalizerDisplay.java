@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.finalproject;
+package ca.mcgill.ecse211.finalproject.phase1;
 
 import static ca.mcgill.ecse211.finalproject.Resources.LCD;
 import static ca.mcgill.ecse211.finalproject.Resources.usPoller;

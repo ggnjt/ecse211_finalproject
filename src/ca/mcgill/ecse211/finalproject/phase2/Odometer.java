@@ -1,4 +1,4 @@
-package ca.mcgill.ecse211.finalproject;
+package ca.mcgill.ecse211.finalproject.phase2;
 
 import static ca.mcgill.ecse211.finalproject.Resources.*;
 import java.util.concurrent.locks.Condition;
@@ -32,11 +32,6 @@ public class Odometer extends Thread {
    * The orientation in degrees.
    */
   private volatile double theta; // Head angle
-
-  /**
-   * The (x, y, theta) position as an array
-   */
-  private double[] position;
 
   // Thread control tools
   /**

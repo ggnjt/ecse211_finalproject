@@ -1,5 +1,9 @@
 package ca.mcgill.ecse211.finalproject;
 
+import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizer;
+import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
+import ca.mcgill.ecse211.finalproject.phase2.Odometer;
+import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -9,17 +13,22 @@ import lejos.hardware.sensor.EV3UltrasonicSensor;
 
 /**
  * This class is used to define static resources in one place for easy access and to avoid cluttering the rest of the
- * codebase. All resources can be imported at once like this:
+ * code base. All resources can be imported at once like this:
  * 
- * <p>
  * {@code import static ca.mcgill.ecse211.lab3.Resources.*;}
  */
 public class Resources {
+  // ------------------CONSTANTS--------------------
+  /**
+   * The dimensions sizes in squares
+   */
+  public static final int ARENA_X = 14;
+  public static final int ARENA_Y = 8;
 
   /**
    * The threshold for when the signal is considered to have triggered a rising or falling edge.
    */
-  public static final int SIGNAL_THRESHOLD = 50;
+  public final int SIGNAL_THRESHOLD = 50;
 
   /**
    * The threshold in intensity delta for determining when a line has been detected
@@ -93,7 +102,7 @@ public class Resources {
   public static final int MAX_US_DISTANCE = 100;
 
   /**
-   * The distance from the front of the ultrasonic sensor to the wheelbase.
+   * The distance from the front of the ultrasonic sensor to the wheel base.
    */
   public static final int US_SENSOR_RADIUS = 5;
 
@@ -102,6 +111,13 @@ public class Resources {
    */
   public static final int SHOOTER_MOTOR_SPEED = 300;
 
+  /**
+   * obstacle detection threshold
+   */
+  public static final double ObstacleDetectionThreashold = 12.0;
+
+
+  // ------------------EV3 Components--------------------
   /**
    * The left motor.
    */
@@ -123,14 +139,23 @@ public class Resources {
   public static final TextLCD LCD = LocalEV3.get().getTextLCD();
 
   /**
-   * The odometer.
-   */
-  public static Odometer odometer = Odometer.getOdometer();
-
-  /**
    * The ultrasonic sensor.
    */
   public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S2);
+
+  /**
+   * left color sensor
+   */
+  public static final EV3ColorSensor leftColorSensor = new EV3ColorSensor(SensorPort.S4);
+
+  /**
+   * right color sensor
+   */
+  public static final EV3ColorSensor rightColorSensor = new EV3ColorSensor(SensorPort.S1);
+
+
+
+  // ------------------Software Components--------------------
 
   /**
    * The ultrasonic poller.
@@ -143,35 +168,22 @@ public class Resources {
   public static final UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer();
 
   /**
-   * left color sensor
-   */
-  public static final EV3ColorSensor leftColorSensor = new EV3ColorSensor(SensorPort.S4);
-
-  /**
-   * right color sensor
-   */
-  public static final EV3ColorSensor rightColorSensor = new EV3ColorSensor(SensorPort.S1);
-  
-  /**
    * colorPoller
    */
   public static final ColorPoller colorPoller = new ColorPoller();
-  
-  /**
-   * obstacle detection threshold
-   */
-  public static final double ObstacleDetectionThreashold = 12.0;
-  
-  /**
-   * Test path finder
-   * TODO: the way the pf is initialized is subject to change
-   */
-  public static final PathFinder  pathFinder = PathFinder.test(15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
 
   /**
-   * The dimensions sizes in squares
+   * Navigation
    */
-  public static final int ARENA_X = 14;
-  public static final int ARENA_Y = 8;
-  
+  public static final Navigation navigation = new Navigation();
+
+  /**
+   * The odometer.
+   */
+  public static Odometer odometer = Odometer.getOdometer();
+
+  /**
+   * Test path finder TODO: the way the path finder is initialized is subject to change
+   */
+  public static final PathFinder pathFinder = PathFinder.test(15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
 }
