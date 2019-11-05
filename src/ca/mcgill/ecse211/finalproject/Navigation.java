@@ -3,6 +3,7 @@ package ca.mcgill.ecse211.finalproject;
 import java.util.Arrays;
 import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
+import ca.mcgill.ecse211.finalproject.phase2.UltrasonicObstacleDetector;
 
 /**
  * Class where all of the navigation of the robot is handled
