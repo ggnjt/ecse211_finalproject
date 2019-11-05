@@ -31,19 +31,25 @@ public class Navigation {
 	public enum Orientation {
 		NORTH, SOUTH, EAST, WEST
 	}
-
+	/**
+	 * traveling state of the robot, either traveling, correcting angle or detected an obstacle
+	 * @author yp
+	 *
+	 */
 	public enum TravelingMode {
 		TRAVELING, CORRECTING, OBSTACLE_ENCOUNTERED
 	}
-	
+
+	private static boolean navigationRunning = false;
 	/**
 	 * current position and orientation of the robot on the grid
 	 */
 	public static Orientation orientation = Orientation.NORTH; // initial orientation
+	/**
+	 * current state of the robot
+	 */
 	public static TravelingMode navigationMode = TravelingMode.TRAVELING;
 
-	// integers to hold which square the robot is currently in (initialized with the
-	// initial position)
 	/**
 	 * current x tile coordinate of the robot
 	 */
@@ -57,30 +63,6 @@ public class Navigation {
 	 * a size 2 array representing the previous move made by the robot
 	 */
 	private static int[] previousMove = { 0, 0 };
-
-//  /**
-//   * Lets other methods know if the robot is currently navigating to a waypoint.
-//   */
-//  private static boolean isNavigating;
-//
-//  /**
-//   * An array containing the current X, Y, and theta of the robot, as given by the odometer.
-//   */
-//  private static double[] position;
-//  /**
-//   * Vector in the x direction from the robots current position to the waypoint.
-//   */
-//  private static double vectorX;
-//
-//  /**
-//   * Vector in the y direction from the robots current position to the waypoint.
-//   */
-//  private static double vectorY;
-//
-//  /**
-//   * The angle the robot needs to go to so that it is a straight line to the waypoint.
-//   */
-//  private static double heading;
 
 	/**
 	 * Constructor for the Navigation class.
@@ -228,10 +210,10 @@ public class Navigation {
 	 */
 	public static boolean moveForwardOneTile() {
 		navigationMode = TravelingMode.TRAVELING;
+		navigationRunning = true;
 		final Thread moveOneTile = new Thread() {
 			public void run() {
-				whileloop:
-				while (true) {
+				whileloop: while (true) {
 					switch (navigationMode) {
 					case TRAVELING:
 						leftMotor.forward();
@@ -243,83 +225,150 @@ public class Navigation {
 						if (ColorPoller.isCorrecting) {
 							navigationMode = TravelingMode.CORRECTING;
 						}
-						double[]currentXYT = odometer.getXYT();
-						switch(orientation) {
+						double[] currentXYT = odometer.getXYT();
+						switch (orientation) {
 						case NORTH:
-							if (currentXYT[1] >= xTile*Resources.TILE_SIZE+0.5*TILE_SIZE) {
+							if (currentXYT[1] >= yTile * Resources.TILE_SIZE + 0.5 * TILE_SIZE) {
 								break whileloop;
 							}
 							break;
 						case SOUTH:
-							if (currentXYT[1] >= xTile*Resources.TILE_SIZE-0.5*TILE_SIZE) {
+							if (currentXYT[1] >= yTile * Resources.TILE_SIZE - 0.5 * TILE_SIZE) {
 								break whileloop;
 							}
 							break;
 						case EAST:
-							if (currentXYT[0] >= xTile*Resources.TILE_SIZE+0.5*TILE_SIZE) {
+							if (currentXYT[0] >= xTile * Resources.TILE_SIZE + 0.5 * TILE_SIZE) {
 								break whileloop;
 							}
 							break;
 						case WEST:
-							if (currentXYT[0] >= xTile*Resources.TILE_SIZE-0.5*TILE_SIZE) {
+							if (currentXYT[0] >= xTile * Resources.TILE_SIZE - 0.5 * TILE_SIZE) {
 								break whileloop;
 							}
 							break;
 						}
 						break;
 					case CORRECTING:
-						boolean [] lineCorrectionStatus;
+						boolean[] lineCorrectionStatus;
 						lineCorrectionStatus = Resources.colorPoller.getLineDetectionStatus();
-						if(lineCorrectionStatus[0] && ! lineCorrectionStatus[1]) {
+						if (lineCorrectionStatus[0] && !lineCorrectionStatus[1]) {
 							leftMotor.stop();
 						} else if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
 							rightMotor.stop();
 						} else if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
+							Resources.colorPoller.resetLineDetection();
 							leftMotor.forward();
 							rightMotor.forward();
-							Resources.colorPoller.sleepFor(1000);
 							navigationMode = TravelingMode.TRAVELING;
 						}
 					case OBSTACLE_ENCOUNTERED:
 						break whileloop;
 					}
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
+				stopTheRobot();
+				navigationRunning = false;
 			}
 		};
 		moveOneTile.start();
-		if (!moveOneTile.isAlive()) {
+		
+		while (navigationRunning) {
+			//not sure if this is okay...
 			try {
-				moveOneTile.join(2000);
+				Thread.sleep(500);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
+		
+		try {
+			moveOneTile.join(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		if (navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
 			return false;
-		}
-		else if (navigationMode == TravelingMode.TRAVELING) {
+		} else if (navigationMode == TravelingMode.TRAVELING) {
 			return true;
-		}
-		else {
+		} else {
 			System.out.println("somehting is wrong, the robot finished while correcting...");
 			return false;
 		}
+	}
+	
+	public static void backUp() {
+		double distance = 0;
+		switch (orientation) {
+		case NORTH:
+			distance = odometer.getXYT()[1]-((double)yTile+0.5)*Resources.TILE_SIZE;
+			break;
+		case EAST:
+			distance = odometer.getXYT()[0]-((double)xTile+0.5)*Resources.TILE_SIZE;
+			break;
+		case SOUTH:
+			distance = -(odometer.getXYT()[1]-((double)yTile+0.5)*Resources.TILE_SIZE);
+			break;
+		case WEST:
+			distance = -(odometer.getXYT()[0]-((double)xTile+0.5)*Resources.TILE_SIZE);
+			break;
+		}
+		leftMotor.rotate(-convertDistance(distance),true);
+		rightMotor.rotate(-convertDistance(distance),false);
+		
 	}
 
 	/**
 	 * turns the robot 90 degrees left and sleep the color sensor threads
 	 */
 	public static void turnLeft() {
+		Resources.colorPoller.sleep();
 		leftMotor.rotate(convertAngle(-90.0), true);
 		rightMotor.rotate(convertAngle(90.0), false);
+		switch (orientation) {
+		case NORTH:
+			orientation = Orientation.WEST;
+			break;
+		case EAST:
+			orientation = Orientation.NORTH;
+			break;
+		case SOUTH:
+			orientation = Orientation.EAST;
+			break;
+		case WEST:
+			orientation = Orientation.SOUTH;
+			break;
+		}
+		Resources.colorPoller.wake();
 	}
 
 	/**
 	 * turns the robot 90 degrees right and sleep the color sensor threads
 	 */
 	public static void turnRight() {
+		Resources.colorPoller.sleep();
 		leftMotor.rotate(convertAngle(90.0), true);
 		rightMotor.rotate(convertAngle(-90.0), false);
+		switch (orientation) {
+		case NORTH:
+			orientation = Orientation.EAST;
+			break;
+		case EAST:
+			orientation = Orientation.SOUTH;
+			break;
+		case SOUTH:
+			orientation = Orientation.WEST;
+			break;
+		case WEST:
+			orientation = Orientation.NORTH;
+			break;
+		}
+		Resources.colorPoller.wake();
 	}
 
 	/**
@@ -393,10 +442,7 @@ public class Navigation {
 	 */
 	public static void processNextMove(int[] move) {
 		// check if there is an obstacle
-		if (UltrasonicObstacleDetector.obstacleDetected) {
-			PathFinder.resetMap();
-			Resources.pathFinder.setObstacle(xTile, yTile);
-		}
+		boolean success = true;
 		if (previousMove[0] == 0 && previousMove[1] == 0) {
 			// TODO: initialization
 			boolean verti = move[0] == 0;
@@ -406,29 +452,42 @@ public class Navigation {
 			// else {
 			// turnTo(move[0] == 1? 0:180);
 			// }
-			moveForwardByTile(1);
+			moveForwardOneTile();
 		} else if (Arrays.equals(move, previousMove)) {
-			moveForwardByTile(1);
+			if (!moveForwardOneTile()) {
+				backUp();
+				success = false;
+			}
 		} else {
 			if (previousMove[0] == move[1] && previousMove[1] == -move[0]) {
 				turnLeft();
-				moveForwardByTile(1);
+				if (!moveForwardOneTile()) {
+					backUp();
+					success = false;
+				}
 			} else if (previousMove[0] == -move[1] && previousMove[1] == move[0]) {
 				turnRight();
-				moveForwardByTile(1);
+				if (!moveForwardOneTile()) {
+					backUp();
+					success = false;
+				}
 			} else if (previousMove[0] == -move[0] && previousMove[1] == -move[1]) {
 				turnRight();
 				turnRight();
-				moveForwardByTile(1);
+				if (!moveForwardOneTile()) {
+					backUp();
+					success = false;
+				}
 			} else {
 				System.out.println("something went terribly wrong");
+				success = false;
 				// This should never happen if the pathfinder works correctly
+			}
+			if (!success) {
+				PathFinder.resetMap();
+				Resources.pathFinder.setObstacle(xTile, yTile);
 			}
 		}
 		previousMove = move;
-
-		// TODO: figure out if place here or no
-		xTile += move[0];
-		yTile += move[1];
 	}
 }
