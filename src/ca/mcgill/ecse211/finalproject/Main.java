@@ -1,8 +1,11 @@
 package ca.mcgill.ecse211.finalproject;
 
 // import static ca.mcgill.ecse211.finalproject.Resources.shooterMotor;
-import static ca.mcgill.ecse211.finalproject.Resources.*;
+import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
+import static ca.mcgill.ecse211.finalproject.Resources.navigation;
+import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import lejos.hardware.Button;
+
 
 /**
  * The main driver class for the odometry lab.
@@ -17,10 +20,22 @@ public class Main {
    * @param args
    */
   public static void main(String[] args) {
-    // Thread colorPoller = new Thread(Resources.colorPoller);
-    // colorPoller.start();
-    //
-    // Thread pollerThread = new Thread(usPoller);
+    Thread a = new Thread(odometer);
+    Thread c = new Thread(colorPoller);
+    a.start();
+    c.start();
+
+    navigation.moveForwardByOneTile();
+    // // Thread b = new Thread(usPoller);
+    // b.start();
+    // 
+    // for(int[] move: pathFinder.findPath()) {
+    // navigation.processNextMove(move);
+    // }
+    // // Thread colorPoller = new Thread(Resources.colorPoller);
+    // // colorPoller.start();
+    // //
+    // // Thread pollerThread = new Thread(usPoller);
     // Thread localizerThread = new Thread(usLocalizer);
     // Thread localizerDisplayThread = new Thread(new UltrasonicLocalizerDisplay());
     // pollerThread.start();
@@ -45,7 +60,7 @@ public class Main {
     // ArrayList<int[]> lel = pf.findPath();
     //
     // for (int[] lol : lel) {
-    // System.out.println(Arrays.toString(lol));
+    // 
     // }
     //
     // pf.setObstacle(9, 5);
@@ -56,7 +71,7 @@ public class Main {
     //
     // lel = pf.findPath();
     // for (int[] lol : lel) {
-    // System.out.println(Arrays.toString(lol));
+    // 
     // }
 
 

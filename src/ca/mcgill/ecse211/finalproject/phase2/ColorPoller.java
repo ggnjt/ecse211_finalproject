@@ -1,7 +1,7 @@
 package ca.mcgill.ecse211.finalproject.phase2;
 
 import static ca.mcgill.ecse211.finalproject.Resources.*;
-
+import lejos.hardware.Sound;
 import lejos.robotics.SampleProvider;
 
 /**
@@ -67,7 +67,7 @@ public class ColorPoller implements Runnable {
   /**
    * A threshold value used to determine a large enough change in sensor measurement
    */
-  private static final float SENSOR_DERIVATIVE_THRESHOLD = 0.07f;
+  private static final float SENSOR_DERIVATIVE_THRESHOLD = 0.1f;
 
   /**
    * a global kill switch for the poller thread
@@ -101,7 +101,7 @@ public class ColorPoller implements Runnable {
       rightSample = rightSampleColor[0];
       leftDer = leftSample - leftPrev;
       rightDer = rightSample - rightPrev;
-
+      
       if (!leftLineDetected) { // If we have already detected a line, don't try to detect it again because it
                                // will give
                                // a false negative
@@ -113,7 +113,11 @@ public class ColorPoller implements Runnable {
         rightLineDetected = rightDetectBlackLine();
       }
       if (leftLineDetected && rightLineDetected) {
-        this.sleep();
+        try {
+          Thread.sleep(300);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
       }
 
       leftPrev = leftSample;
@@ -124,7 +128,6 @@ public class ColorPoller implements Runnable {
         try {
           Thread.sleep(100 - (readingEnd - readingStart));
         } catch (InterruptedException e) {
-          // TODO Auto-generated catch block
           e.printStackTrace();
         }
       }
@@ -155,8 +158,9 @@ public class ColorPoller implements Runnable {
    * @return boolean value indicating that the left sensor has transitioned onto a black line
    */
   public static boolean leftDetectBlackLine() {
-    if (leftCounter > 2) {
+    if (leftCounter > 0) {
       leftCounter = 0;
+      Sound.beep();
       return true;
     } else if (leftDer < 0 && Math.abs(leftDer) > SENSOR_DERIVATIVE_THRESHOLD) {
       leftCounter++;
@@ -171,8 +175,9 @@ public class ColorPoller implements Runnable {
    * @return boolean value indicating that the right sensor has transitioned onto a black line
    */
   public static boolean rightDetectBlackLine() {
-    if (rightCounter > 2) {
+    if (rightCounter > 0) {
       rightCounter = 0;
+      Sound.twoBeeps();
       return true;
     } else if (rightDer < 0 && Math.abs(rightDer) > SENSOR_DERIVATIVE_THRESHOLD) {
       rightCounter++;

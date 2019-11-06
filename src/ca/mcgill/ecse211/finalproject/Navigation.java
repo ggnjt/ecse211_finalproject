@@ -1,5 +1,18 @@
 package ca.mcgill.ecse211.finalproject;
 
+import static ca.mcgill.ecse211.finalproject.Resources.ACCELERATION;
+import static ca.mcgill.ecse211.finalproject.Resources.ARENA_X;
+import static ca.mcgill.ecse211.finalproject.Resources.ARENA_Y;
+import static ca.mcgill.ecse211.finalproject.Resources.FORWARD_SPEED;
+import static ca.mcgill.ecse211.finalproject.Resources.ROTATE_SPEED;
+import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
+import static ca.mcgill.ecse211.finalproject.Resources.TRACK;
+import static ca.mcgill.ecse211.finalproject.Resources.WHEEL_RAD;
+import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
+import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
+import static ca.mcgill.ecse211.finalproject.Resources.odometer;
+import static ca.mcgill.ecse211.finalproject.Resources.pathFinder;
+import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 import java.util.Arrays;
 import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
@@ -36,8 +49,8 @@ public class Navigation {
    * set Speed
    */
   public void setSpeed(int speed) {
-    Resources.leftMotor.setSpeed(speed);
-    Resources.rightMotor.setSpeed(speed);
+    leftMotor.setSpeed(speed);
+    rightMotor.setSpeed(speed);
   }
 
 
@@ -59,7 +72,7 @@ public class Navigation {
   /**
    * current x tile coordinate of the robot
    */
-  public int yTile = 8;
+  public int yTile = 0;
 
   /**
    * a size 2 array representing the previous move made by the robot
@@ -70,8 +83,10 @@ public class Navigation {
    * Constructor for the Navigation class.
    */
   public Navigation() {
-    Resources.leftMotor.setAcceleration(Resources.ACCELERATION);
-    Resources.rightMotor.setAcceleration(Resources.ACCELERATION);
+    setSpeed(FORWARD_SPEED);
+    orientation = Orientation.NORTH;
+    leftMotor.setAcceleration(ACCELERATION);
+    rightMotor.setAcceleration(ACCELERATION);
   }
 
 
@@ -81,21 +96,21 @@ public class Navigation {
    * @param theta the absolute angle the robot should turn to in degrees
    */
   public void turnTo(double theta) {
-    double angleDiff = theta - Resources.odometer.getXYT()[2];
+    double angleDiff = theta - odometer.getXYT()[2];
     // Don't correct the angle if it is within a certain threshold
     if (Math.abs(angleDiff) < 3.0 || Math.abs(angleDiff) > 357.0) {
       return;
     }
-    Resources.leftMotor.setSpeed(Resources.ROTATE_SPEED);
-    Resources.rightMotor.setSpeed(Resources.ROTATE_SPEED);
+    leftMotor.setSpeed(ROTATE_SPEED);
+    rightMotor.setSpeed(ROTATE_SPEED);
     // This ensures the robot uses the minimal angle when turning to theta
     if (Math.abs(angleDiff) > 180.0) {
       angleDiff = Math.signum(angleDiff) * 360.0 - angleDiff;
-      Resources.leftMotor.rotate(convertAngle(-angleDiff), true);
-      Resources.rightMotor.rotate(convertAngle(angleDiff), false);
+      leftMotor.rotate(convertAngle(-angleDiff), true);
+      rightMotor.rotate(convertAngle(angleDiff), false);
     } else {
-      Resources.leftMotor.rotate(convertAngle(angleDiff), true);
-      Resources.rightMotor.rotate(convertAngle(-angleDiff), false);
+      leftMotor.rotate(convertAngle(angleDiff), true);
+      rightMotor.rotate(convertAngle(-angleDiff), false);
     }
   }
 
@@ -116,7 +131,7 @@ public class Navigation {
    * @return the wheel rotations necessary to cover the distance
    */
   public int convertDistance(double distance) {
-    return (int) ((180 * distance) / (Math.PI * Resources.WHEEL_RAD));
+    return (int) ((180 * distance) / (Math.PI * WHEEL_RAD));
   }
 
   /**
@@ -126,7 +141,7 @@ public class Navigation {
    * @return the wheel rotations necessary to rotate the robot by the angle
    */
   public int convertAngle(double angle) {
-    return convertDistance((Math.PI * Resources.TRACK * angle) / 360.0);
+    return convertDistance((Math.PI * TRACK * angle) / 360.0);
   }
 
   /**
@@ -136,64 +151,76 @@ public class Navigation {
    */
   public boolean moveForwardByOneTile() {
     navigationMode = TravelingMode.TRAVELING;
-
-    whileloop: while (true) {
+    boolean whileRunning = true;
+    while (whileRunning) {
       switch (navigationMode) {
         case TRAVELING:
-          Resources.leftMotor.forward();
-          Resources.rightMotor.forward();
+          leftMotor.forward();
+          rightMotor.forward();
+
           if (UltrasonicObstacleDetector.obstacleDetected) {
+            
             navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
-            break whileloop;
+            whileRunning = false;
+            break;
           }
 
           if (ColorPoller.isCorrecting) {
             navigationMode = TravelingMode.CORRECTING;
           }
 
-          double[] currentXYT = Resources.odometer.getXYT();
+          double[] currentXYT = odometer.getXYT();
+          
 
           switch (orientation) {
             case NORTH:
-              if (currentXYT[1] >= yTile * Resources.TILE_SIZE + 0.5 * Resources.TILE_SIZE) {
-                break whileloop;
+              
+              
+              if (currentXYT[1] >= yTile * TILE_SIZE + 0.5 * TILE_SIZE) {
+                whileRunning = false;
+                break;
               }
               break;
             case SOUTH:
-              if (currentXYT[1] >= yTile * Resources.TILE_SIZE - 0.5 * Resources.TILE_SIZE) {
-                break whileloop;
+              if (currentXYT[1] >= yTile * TILE_SIZE - 0.5 * TILE_SIZE) {
+                whileRunning = false;
+                break;
               }
               break;
             case EAST:
-              if (currentXYT[0] >= xTile * Resources.TILE_SIZE + 0.5 * Resources.TILE_SIZE) {
-                break whileloop;
+              if (currentXYT[0] >= xTile * TILE_SIZE + 0.5 * TILE_SIZE) {
+                whileRunning = false;
+                break;
               }
               break;
             case WEST:
-              if (currentXYT[0] >= xTile * Resources.TILE_SIZE - 0.5 * Resources.TILE_SIZE) {
-                break whileloop;
+              if (currentXYT[0] >= xTile * TILE_SIZE - 0.5 * TILE_SIZE) {
+                whileRunning = false;
+                break;
               }
               break;
           }
           break;
 
         case CORRECTING:
+          
           boolean[] lineCorrectionStatus;
-          lineCorrectionStatus = Resources.colorPoller.getLineDetectionStatus();
+          lineCorrectionStatus = colorPoller.getLineDetectionStatus();
           if (lineCorrectionStatus[0] && !lineCorrectionStatus[1]) {
-            Resources.leftMotor.stop();
+            leftMotor.stop();
           } else if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
-            Resources.rightMotor.stop();
+            rightMotor.stop();
           } else if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
-            Resources.colorPoller.resetLineDetection();
-            Resources.leftMotor.forward();
-            Resources.rightMotor.forward();
+            colorPoller.resetLineDetection();
+            leftMotor.forward();
+            rightMotor.forward();
             navigationMode = TravelingMode.TRAVELING;
           }
           break;
 
         case OBSTACLE_ENCOUNTERED:
-          break whileloop;
+          whileRunning = false;
+          break;
       }
       try {
         Thread.sleep(100);
@@ -217,20 +244,20 @@ public class Navigation {
     double distance = 0;
     switch (orientation) {
       case NORTH:
-        distance = Resources.odometer.getXYT()[1] - ((double) yTile + 0.5) * Resources.TILE_SIZE;
+        distance = odometer.getXYT()[1] - ((double) yTile + 0.5) * TILE_SIZE;
         break;
       case EAST:
-        distance = Resources.odometer.getXYT()[0] - ((double) xTile + 0.5) * Resources.TILE_SIZE;
+        distance = odometer.getXYT()[0] - ((double) xTile + 0.5) * TILE_SIZE;
         break;
       case SOUTH:
-        distance = -(Resources.odometer.getXYT()[1] - ((double) yTile + 0.5) * Resources.TILE_SIZE);
+        distance = -(odometer.getXYT()[1] - ((double) yTile + 0.5) * TILE_SIZE);
         break;
       case WEST:
-        distance = -(Resources.odometer.getXYT()[0] - ((double) xTile + 0.5) * Resources.TILE_SIZE);
+        distance = -(odometer.getXYT()[0] - ((double) xTile + 0.5) * TILE_SIZE);
         break;
     }
-    Resources.leftMotor.rotate(-convertDistance(distance), true);
-    Resources.rightMotor.rotate(-convertDistance(distance), false);
+    leftMotor.rotate(-convertDistance(distance), true);
+    rightMotor.rotate(-convertDistance(distance), false);
 
   }
 
@@ -238,9 +265,9 @@ public class Navigation {
    * turns the robot 90 degrees left and sleep the color sensor threads
    */
   public void turnLeft() {
-    Resources.colorPoller.sleep();
-    Resources.leftMotor.rotate(convertAngle(-90.0), true);
-    Resources.rightMotor.rotate(convertAngle(90.0), false);
+    colorPoller.sleep();
+    leftMotor.rotate(convertAngle(-90.0), true);
+    rightMotor.rotate(convertAngle(90.0), false);
     switch (orientation) {
       case NORTH:
         orientation = Orientation.WEST;
@@ -255,16 +282,16 @@ public class Navigation {
         orientation = Orientation.SOUTH;
         break;
     }
-    Resources.colorPoller.wake();
+    colorPoller.wake();
   }
 
   /**
    * turns the robot 90 degrees right and sleep the color sensor threads
    */
   public void turnRight() {
-    Resources.colorPoller.sleep();
-    Resources.leftMotor.rotate(convertAngle(90.0), true);
-    Resources.rightMotor.rotate(convertAngle(-90.0), false);
+    colorPoller.sleep();
+    leftMotor.rotate(convertAngle(90.0), true);
+    rightMotor.rotate(convertAngle(-90.0), false);
     switch (orientation) {
       case NORTH:
         orientation = Orientation.EAST;
@@ -279,7 +306,7 @@ public class Navigation {
         orientation = Orientation.NORTH;
         break;
     }
-    Resources.colorPoller.wake();
+    colorPoller.wake();
   }
 
   /**
@@ -297,8 +324,8 @@ public class Navigation {
 
     for (int i = 0; i < notableSquares.length; i++) {
       int[] pair = notableSquares[i];
-      boolean ooX = pair[0] + targetX > Resources.ARENA_X || pair[0] + targetX < 0;
-      boolean ooY = pair[1] + targetY > Resources.ARENA_Y || pair[1] + targetY < 0;
+      boolean ooX = pair[0] + targetX > ARENA_X || pair[0] + targetX < 0;
+      boolean ooY = pair[1] + targetY > ARENA_Y || pair[1] + targetY < 0;
       if (ooX || ooY) {
         continue;
       } else {
@@ -319,8 +346,8 @@ public class Navigation {
    */
   public void stopTheRobot() {
     // isNavigating = false;
-    Resources.leftMotor.stop(true);
-    Resources.rightMotor.stop(false);
+    leftMotor.stop(true);
+    rightMotor.stop(false);
   }
 
   /**
@@ -341,7 +368,9 @@ public class Navigation {
       // else {
       // turnTo(move[0] == 1? 0:180);
       // }
+      
       moveForwardByOneTile();
+      
     } else if (Arrays.equals(move, previousMove)) {
       if (!moveForwardByOneTile()) {
         backUp();
@@ -374,7 +403,7 @@ public class Navigation {
       }
       if (!success) {
         PathFinder.resetMap();
-        Resources.pathFinder.setObstacle(xTile, yTile);
+        pathFinder.setObstacle(xTile, yTile);
       } else {
         previousMove = move;
       }

@@ -121,17 +121,17 @@ public class Resources {
   /**
    * The left motor.
    */
-  public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+  public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 
   /**
    * The right motor.
    */
-  public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+  public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
 
   /**
    * motor for the ball launcher
    */
-  public static final EV3LargeRegulatedMotor shooterMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("B"));
+  public static final EV3LargeRegulatedMotor shooterMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 
   /**
    * The LCD.
@@ -141,17 +141,17 @@ public class Resources {
   /**
    * The ultrasonic sensor.
    */
-  public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S2);
+  public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S4);
 
   /**
    * left color sensor
    */
-  public static final EV3ColorSensor leftColorSensor = new EV3ColorSensor(SensorPort.S4);
+  public static final EV3ColorSensor leftColorSensor = new EV3ColorSensor(SensorPort.S1);
 
   /**
    * right color sensor
    */
-  public static final EV3ColorSensor rightColorSensor = new EV3ColorSensor(SensorPort.S1);
+  public static final EV3ColorSensor rightColorSensor = new EV3ColorSensor(SensorPort.S2);
 
 
 
