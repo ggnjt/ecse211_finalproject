@@ -109,21 +109,16 @@ public class ColorPoller implements Runnable {
 										// will give
 										// a false negative
 				leftLineDetected = leftDetectBlackLine();
-				isCorrecting = leftLineDetected;
+				if (!isCorrecting) {
+					isCorrecting = leftLineDetected;
+				}
 			}
 			if (!rightLineDetected) { // If we have already detected a line, don't try to detect it again because it
 										// will give
 										// a false negative
 				rightLineDetected = rightDetectBlackLine();
-				isCorrecting = rightLineDetected;
-			}
-			if (leftLineDetected && rightLineDetected) {
-				resetLineDetection();
-				isCorrecting = false;
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				if (!isCorrecting) {
+					isCorrecting = rightLineDetected;
 				}
 			}
 
@@ -166,15 +161,13 @@ public class ColorPoller implements Runnable {
 	 *         black line
 	 */
 	public static boolean leftDetectBlackLine() {
-		if (leftCounter > 1) {
-			leftCounter = 0;
+		if (leftDer < 0 && Math.abs(leftDer) > SENSOR_DERIVATIVE_THRESHOLD) {
 			Sound.beep();
 			return true;
-		} else if (leftDer < 0 && Math.abs(leftDer) > SENSOR_DERIVATIVE_THRESHOLD) {
-			leftCounter++;
+		} else {
 			return false;
-		} else
-			return false;
+		}
+
 	}
 
 	/**
@@ -184,15 +177,12 @@ public class ColorPoller implements Runnable {
 	 *         a black line
 	 */
 	public static boolean rightDetectBlackLine() {
-		if (rightCounter > 1) {
-			rightCounter = 0;
+		if (rightDer < 0 && Math.abs(rightDer) > SENSOR_DERIVATIVE_THRESHOLD) {
 			Sound.twoBeeps();
 			return true;
-		} else if (rightDer < 0 && Math.abs(rightDer) > SENSOR_DERIVATIVE_THRESHOLD) {
-			rightCounter++;
+		} else {
 			return false;
-		} else
-			return false;
+		}
 	}
 
 	/**
@@ -257,13 +247,13 @@ public class ColorPoller implements Runnable {
 	}
 
 	public void resetLineDetection() {
-		leftLineDetected = false;
-		rightLineDetected = false;
 		try {
-			Thread.sleep(500);
+			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		leftLineDetected = false;
+		rightLineDetected = false;
 	}
 
 	public void sleep() {
@@ -287,6 +277,7 @@ public class ColorPoller implements Runnable {
 	}
 
 	public boolean[] getLineDetectionStatus() {
+		System.out.println("left=" + leftLineDetected + " right= " + rightLineDetected);
 		boolean[] result = { leftLineDetected, rightLineDetected };
 		return result;
 	}

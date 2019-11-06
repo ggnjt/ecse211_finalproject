@@ -4,6 +4,9 @@ package ca.mcgill.ecse211.finalproject;
 import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
 import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
+
+import java.util.ArrayList;
+
 import lejos.hardware.Button;
 
 
@@ -24,8 +27,19 @@ public class Main {
     Thread c = new Thread(colorPoller);
     a.start();
     c.start();
-
-    navigation.moveForwardByOneTile();
+    
+    ArrayList<int[]> moves = new ArrayList<int[]>();
+    moves.add(new int[] {0,1});
+    moves.add(new int[] {0,1});
+    moves.add(new int[] {1,0});
+    moves.add(new int[] {1,0});
+    moves.add(new int[] {0,-1});
+    moves.add(new int[] {1,0});
+    moves.add(new int[] {0,1});
+   
+    for (int [] move: moves) {
+    	navigation.processNextMove(move);
+    }
     // // Thread b = new Thread(usPoller);
     // b.start();
     // 
