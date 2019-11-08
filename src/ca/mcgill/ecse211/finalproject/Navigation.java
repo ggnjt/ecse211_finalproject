@@ -154,37 +154,40 @@ public class Navigation {
 	 *         an obstacle
 	 */
 	public boolean moveForwardByOneTile() {
-		long readingStart, readingEnd;
 		navigationMode = TravelingMode.TRAVELING;
 		boolean whileRunning = true;
 		double target = 0;
 		switch (orientation) {
 		case NORTH:
-			target = yTile * TILE_SIZE + 0.5 * TILE_SIZE;
+			target = yTile * TILE_SIZE + 1.5 * TILE_SIZE;
 			break;
 		case EAST:
-			target = xTile * TILE_SIZE + 0.5 * TILE_SIZE;
+			target = xTile * TILE_SIZE + 1.5 * TILE_SIZE;
 			break;
 		case SOUTH:
-			target = yTile * TILE_SIZE - 0.5 * TILE_SIZE;
+			target = yTile * TILE_SIZE - 1.5 * TILE_SIZE;
 			break;
 		case WEST:
-			target = xTile * TILE_SIZE - 0.5 * TILE_SIZE;
+			target = xTile * TILE_SIZE - 1.5 * TILE_SIZE;
 			break;
 		}
 		while (whileRunning) {
-			readingStart = System.currentTimeMillis();
 			switch (navigationMode) {
 			case TRAVELING:
-				System.out.println("Travelling!");
+				System.out.println("Traveling!");
+				if (ColorPoller.isCorrecting) {
+					navigationMode = TravelingMode.CORRECTING;
+					setSpeed(40); // TODO put in resources
+					leftMotor.forward();
+					rightMotor.forward();
+					continue;
+				}
 				leftMotor.forward();
 				rightMotor.forward();
 
 				double[] currentXYT = odometer.getXYT();
-				System.out.println("Travelling ((1))");
 				switch (orientation) {
 				case NORTH:
-
 					if (currentXYT[1] >= target) {
 						whileRunning = false;
 						continue;
@@ -204,25 +207,16 @@ public class Navigation {
 					break;
 				case WEST:
 					if (currentXYT[0] <= target) {
-						whileRunning = false;
 						continue;
 					}
 					break;
 				}
-				System.out.println("whileRunning=" + whileRunning);
+				break;
 //				if (UltrasonicObstacleDetector.obstacleDetected) {
 //					navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
 //					whileRunning = false;
 //					break;
 //				}
-				System.out.println("Travelling ((2))");
-				if (ColorPoller.isCorrecting) {
-					navigationMode = TravelingMode.CORRECTING;
-					setSpeed(40); // TODO put in resources
-					leftMotor.forward();
-					rightMotor.forward();
-				}
-				break;
 
 			case CORRECTING:
 				System.out.println("Correcting!");
@@ -234,7 +228,8 @@ public class Navigation {
 //					rightMotor.stop();
 //				} else if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
 				if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
-					colorPoller.resetLineDetection();
+					ColorPoller.correctXYT();
+					ColorPoller.resetLineDetection();
 					navigationMode = TravelingMode.TRAVELING;
 					setSpeed(100); // TODO put in resources
 					leftMotor.forward();
@@ -246,10 +241,9 @@ public class Navigation {
 				whileRunning = false;
 				break;
 			}
-			readingEnd = System.currentTimeMillis();
-			if (readingEnd - readingStart < 60) {
+			synchronized (this) {
 				try {
-					Thread.sleep(60 - (readingEnd - readingStart));
+					this.wait();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -388,6 +382,9 @@ public class Navigation {
 	 *             following forms: {1,0}{-1,0}{0,1}{0,-1}
 	 */
 	public void processNextMove(int[] move) {
+		System.out.println("//===============//");
+		System.out.println("Current x: " + xTile + "\nCurrent y: " + yTile);
+		System.out.println("Previous move: " + Arrays.toString(previousMove) + "\nnext move: " + Arrays.toString(move));
 		// check if there is an obstacle
 		boolean success = true;
 		if (previousMove[0] == 0 && previousMove[1] == 0) {

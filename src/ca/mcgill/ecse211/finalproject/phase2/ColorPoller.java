@@ -56,11 +56,11 @@ public class ColorPoller implements Runnable {
 	 * change in sensor measurement between two iterations of the right color sensor
 	 * sampling
 	 */
-	private static float rightDer = 0;
+	private static volatile float rightDer = 0f;
 	/**
 	 * used to hold previous value of the right sampler
 	 */
-	private static float rightPrev = 0;
+	private static volatile float rightPrev = 0f;
 	/**
 	 * a buffer used for the right sensor for line detection
 	 */
@@ -87,7 +87,7 @@ public class ColorPoller implements Runnable {
 	/**
 	 * flag indicating whether the robot is in the process of odometry correction
 	 */
-	public static boolean isCorrecting;
+	public static boolean isCorrecting = false;
 
 	
 	public static boolean wait = false;
@@ -99,6 +99,7 @@ public class ColorPoller implements Runnable {
 //		int i = 0;
 		while (!kill) {
 			if (wait) {
+				System.out.println("waiting");
 				try {
 					Thread.sleep(60);
 				} catch (InterruptedException e) {
@@ -110,44 +111,48 @@ public class ColorPoller implements Runnable {
 //				i++;
 				
 				readingStart = System.currentTimeMillis();
-
+				System.out.println("Correcting:" + isCorrecting);
 				leftSampleProvider.fetchSample(leftSampleColor, 0);
 				rightSampleProvider.fetchSample(rightSampleColor, 0);
 				leftSample = leftSampleColor[0];
 				rightSample = rightSampleColor[0];
 				leftDer = leftSample - leftPrev;
 				rightDer = rightSample - rightPrev;
-
 				if (!leftLineDetected) { // If we have already detected a line, don't try to detect it again because it
 											// will give
 											// a false negative
 					leftLineDetected = leftDetectBlackLine();
 					if (leftLineDetected) {
 						leftMotor.stop();
+						synchronized(this) {
+							notifyAll();
+						}
 					}
-					if (!isCorrecting) {
-						isCorrecting = leftLineDetected;
+					if (!isCorrecting && leftLineDetected) {
+						isCorrecting = true;
 					}
 				}
+
 				if (!rightLineDetected) { // If we have already detected a line, don't try to detect it again because it
 											// will give
 											// a false negative
 					rightLineDetected = rightDetectBlackLine();
 					if (rightLineDetected) {
 						rightMotor.stop();
+						synchronized(this) {
+							notifyAll();
+						}
 					}
-					if (!isCorrecting) {
-						isCorrecting = rightLineDetected;
+					if (!isCorrecting && rightLineDetected) {
+						isCorrecting = true;
 					}
 				}
-
 				leftPrev = leftSample;
 				rightPrev = rightSample;
-//				System.out.println("left= " + leftDer + " right= " + rightDer);
 				readingEnd = System.currentTimeMillis();
-				if (readingEnd - readingStart < 60) {
+				if (readingEnd - readingStart < 75) {
 					try {
-						Thread.sleep(60 - (readingEnd - readingStart));
+						Thread.sleep(75 - (readingEnd - readingStart));
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -271,16 +276,10 @@ public class ColorPoller implements Runnable {
 		odometer.setY(currY);
 	}
 
-	public void resetLineDetection() {
+	public static void resetLineDetection() {
 		isCorrecting = false;
 		leftLineDetected = false;
 		rightLineDetected = false;
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
 	}
 
 	public void sleep() {
