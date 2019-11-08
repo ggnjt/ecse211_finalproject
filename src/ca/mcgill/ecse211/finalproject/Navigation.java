@@ -176,45 +176,46 @@ public class Navigation {
 			readingStart = System.currentTimeMillis();
 			switch (navigationMode) {
 			case TRAVELING:
+				System.out.println("Travelling!");
 				leftMotor.forward();
 				rightMotor.forward();
 
-				if (UltrasonicObstacleDetector.obstacleDetected) {
-
-					navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
-					whileRunning = false;
-					break;
-				}
-
 				double[] currentXYT = odometer.getXYT();
-
+				System.out.println("Travelling ((1))");
 				switch (orientation) {
 				case NORTH:
 
 					if (currentXYT[1] >= target) {
 						whileRunning = false;
-						break;
+						continue;
 					}
 					break;
 				case SOUTH:
 					if (currentXYT[1] <= target) {
 						whileRunning = false;
-						break;
+						continue;
 					}
 					break;
 				case EAST:
 					if (currentXYT[0] >= target) {
 						whileRunning = false;
-						break;
+						continue;
 					}
 					break;
 				case WEST:
 					if (currentXYT[0] <= target) {
 						whileRunning = false;
-						break;
+						continue;
 					}
 					break;
 				}
+				System.out.println("whileRunning=" + whileRunning);
+//				if (UltrasonicObstacleDetector.obstacleDetected) {
+//					navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
+//					whileRunning = false;
+//					break;
+//				}
+				System.out.println("Travelling ((2))");
 				if (ColorPoller.isCorrecting) {
 					navigationMode = TravelingMode.CORRECTING;
 					setSpeed(40); // TODO put in resources
@@ -224,15 +225,16 @@ public class Navigation {
 				break;
 
 			case CORRECTING:
+				System.out.println("Correcting!");
 				boolean[] lineCorrectionStatus;
 				lineCorrectionStatus = colorPoller.getLineDetectionStatus();
-				if (lineCorrectionStatus[0] && !lineCorrectionStatus[1]) {
-					leftMotor.stop();
-				} else if (!lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
-					rightMotor.stop();
-				} else if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
+//				if (lineCorrectionStatus[0] && !lineCorrectionStatus[1]) {
+//					leftMotor.stop();
+//				} else if (!lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
+//					rightMotor.stop();
+//				} else if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
+				if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
 					colorPoller.resetLineDetection();
-					ColorPoller.isCorrecting = false;
 					navigationMode = TravelingMode.TRAVELING;
 					setSpeed(100); // TODO put in resources
 					leftMotor.forward();
@@ -397,10 +399,11 @@ public class Navigation {
 			// else {
 			// turnTo(move[0] == 1? 0:180);
 			// }
-
+			System.out.println("1");
 			moveForwardByOneTile();
 
 		} else if (Arrays.equals(move, previousMove)) {
+			System.out.println("2");
 			if (!moveForwardByOneTile()) {
 				backUp();
 				success = false;

@@ -70,7 +70,7 @@ public class ColorPoller implements Runnable {
 	 * A threshold value used to determine a large enough change in sensor
 	 * measurement
 	 */
-	private static final float SENSOR_DERIVATIVE_THRESHOLD = 0.03f;
+	private static final float SENSOR_DERIVATIVE_THRESHOLD = 0.05f;
 
 	/**
 	 * a global kill switch for the poller thread
@@ -79,11 +79,11 @@ public class ColorPoller implements Runnable {
 	/**
 	 * whether or not the left sensor is currently detecting a black line
 	 */
-	private static boolean leftLineDetected;
+	private static volatile boolean leftLineDetected;
 	/**
 	 * whether or not the right sensor is currently detecting a black line
 	 */
-	private static boolean rightLineDetected;
+	private static volatile boolean rightLineDetected;
 	/**
 	 * flag indicating whether the robot is in the process of odometry correction
 	 */
@@ -96,7 +96,7 @@ public class ColorPoller implements Runnable {
 	 */
 	public void run() {
 		long readingStart, readingEnd;
-		int i = 0;
+//		int i = 0;
 		while (!kill) {
 			if (wait) {
 				try {
@@ -106,8 +106,8 @@ public class ColorPoller implements Runnable {
 				}
 			}
 			else {
-				System.out.println(i);
-				i++;
+//				System.out.println(i);
+//				i++;
 				
 				readingStart = System.currentTimeMillis();
 
@@ -143,7 +143,7 @@ public class ColorPoller implements Runnable {
 
 				leftPrev = leftSample;
 				rightPrev = rightSample;
-
+//				System.out.println("left= " + leftDer + " right= " + rightDer);
 				readingEnd = System.currentTimeMillis();
 				if (readingEnd - readingStart < 60) {
 					try {
@@ -210,28 +210,34 @@ public class ColorPoller implements Runnable {
 	 * value readings
 	 */
 	public static void correctXYT() {
-		int updatedTheta;
 		double[] currXYT = odometer.getXYT();
 		/*
 		 * Resets the angle (since we are only driving in cardinal directions, there are
 		 * only 4 possibilities
 		 */
-		if (currXYT[2] >= 315 || currXYT[2] < 45) {
-			updatedTheta = 0;
-			odometer.setTheta(updatedTheta);
-			correctY(currXYT, updatedTheta);
-		} else if (currXYT[2] >= 45 && currXYT[2] < 135) {
-			updatedTheta = 90;
-			odometer.setTheta(updatedTheta);
-			correctX(currXYT, updatedTheta);
-		} else if (currXYT[2] > 135 && currXYT[2] < 225) {
-			updatedTheta = 180;
-			odometer.setTheta(updatedTheta);
-			correctY(currXYT, updatedTheta);
-		} else if (currXYT[2] >= 225 && currXYT[2] < 315) {
-			updatedTheta = 270;
-			odometer.setTheta(updatedTheta);
-			correctX(currXYT, updatedTheta);
+		switch (navigation.orientation){
+		case NORTH:
+			odometer.setTheta(0);
+			correctY(currXYT);
+			navigation.yTile++;
+			break;
+		case SOUTH:
+			odometer.setTheta(180);
+			correctY(currXYT);
+			navigation.yTile--;
+			break;
+		case EAST:
+			odometer.setTheta(90);
+			correctX(currXYT);
+			navigation.xTile++;
+			break;
+		case WEST:
+			odometer.setTheta(270);
+			correctX(currXYT);
+			navigation.xTile--;
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -244,11 +250,10 @@ public class ColorPoller implements Runnable {
 	 * @param currXYT
 	 * @param updatedTheta
 	 */
-	private static void correctX(double[] currXYT, int updatedTheta) {
+	private static void correctX(double[] currXYT) {
 		double currX = currXYT[0];
 		currX = TILE_SIZE * (Math.round((currX) / TILE_SIZE));
 		odometer.setX(currX);
-
 	}
 
 	/**
@@ -260,32 +265,26 @@ public class ColorPoller implements Runnable {
 	 * @param currXYT
 	 * @param updatedTheta
 	 */
-	private static void correctY(double[] currXYT, int updatedTheta) {
+	private static void correctY(double[] currXYT) {
 		double currY = currXYT[1];
 		currY = TILE_SIZE * (Math.round((currY) / TILE_SIZE));
 		odometer.setY(currY);
 	}
 
 	public void resetLineDetection() {
+		isCorrecting = false;
+		leftLineDetected = false;
+		rightLineDetected = false;
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		leftLineDetected = false;
-		rightLineDetected = false;
+		
 	}
 
 	public void sleep() {
 		wait=true;
-	}
-
-	public void sleepFor(long millis) {
-		try {
-			Thread.sleep(millis);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public void wake() {
@@ -293,7 +292,7 @@ public class ColorPoller implements Runnable {
 	}
 
 	public boolean[] getLineDetectionStatus() {
-		System.out.println("left=" + leftLineDetected + " right= " + rightLineDetected);
+		System.out.println("left= " + leftLineDetected + " right= " + rightLineDetected);
 		boolean[] result = { leftLineDetected, rightLineDetected };
 		return result;
 	}

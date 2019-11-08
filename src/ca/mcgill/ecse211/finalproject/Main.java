@@ -29,10 +29,10 @@ public class Main {
     ArrayList<int[]> moves = new ArrayList<int[]>();
     moves.add(new int[] {0,1});
     moves.add(new int[] {0,1});
-    moves.add(new int[] {1,0});
-    moves.add(new int[] {1,0});
-    moves.add(new int[] {0,-1});
-    moves.add(new int[] {1,0});
+//    moves.add(new int[] {1,0});
+//    moves.add(new int[] {1,0});
+//    moves.add(new int[] {0,-1});
+//    moves.add(new int[] {1,0});
     moves.add(new int[] {0,1});
    
     for (int [] move: moves) {
