@@ -70,7 +70,7 @@ public class ColorPoller implements Runnable {
 	 * A threshold value used to determine a large enough change in sensor
 	 * measurement
 	 */
-	private static final float SENSOR_DERIVATIVE_THRESHOLD = 0.1f;
+	private static final float SENSOR_DERIVATIVE_THRESHOLD = 0.03f;
 
 	/**
 	 * a global kill switch for the poller thread
@@ -89,48 +89,68 @@ public class ColorPoller implements Runnable {
 	 */
 	public static boolean isCorrecting;
 
+	
+	public static boolean wait = false;
 	/**
 	 * run method for the two collor pollers
 	 */
 	public void run() {
 		long readingStart, readingEnd;
-
+		int i = 0;
 		while (!kill) {
-			readingStart = System.currentTimeMillis();
-
-			leftSampleProvider.fetchSample(leftSampleColor, 0);
-			rightSampleProvider.fetchSample(rightSampleColor, 0);
-			leftSample = leftSampleColor[0];
-			rightSample = rightSampleColor[0];
-			leftDer = leftSample - leftPrev;
-			rightDer = rightSample - rightPrev;
-
-			if (!leftLineDetected) { // If we have already detected a line, don't try to detect it again because it
-										// will give
-										// a false negative
-				leftLineDetected = leftDetectBlackLine();
-				if (!isCorrecting) {
-					isCorrecting = leftLineDetected;
-				}
-			}
-			if (!rightLineDetected) { // If we have already detected a line, don't try to detect it again because it
-										// will give
-										// a false negative
-				rightLineDetected = rightDetectBlackLine();
-				if (!isCorrecting) {
-					isCorrecting = rightLineDetected;
-				}
-			}
-
-			leftPrev = leftSample;
-			rightPrev = rightSample;
-
-			readingEnd = System.currentTimeMillis();
-			if (readingEnd - readingStart < 100) {
+			if (wait) {
 				try {
-					Thread.sleep(100 - (readingEnd - readingStart));
+					Thread.sleep(60);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
+				}
+			}
+			else {
+				System.out.println(i);
+				i++;
+				
+				readingStart = System.currentTimeMillis();
+
+				leftSampleProvider.fetchSample(leftSampleColor, 0);
+				rightSampleProvider.fetchSample(rightSampleColor, 0);
+				leftSample = leftSampleColor[0];
+				rightSample = rightSampleColor[0];
+				leftDer = leftSample - leftPrev;
+				rightDer = rightSample - rightPrev;
+
+				if (!leftLineDetected) { // If we have already detected a line, don't try to detect it again because it
+											// will give
+											// a false negative
+					leftLineDetected = leftDetectBlackLine();
+					if (leftLineDetected) {
+						leftMotor.stop();
+					}
+					if (!isCorrecting) {
+						isCorrecting = leftLineDetected;
+					}
+				}
+				if (!rightLineDetected) { // If we have already detected a line, don't try to detect it again because it
+											// will give
+											// a false negative
+					rightLineDetected = rightDetectBlackLine();
+					if (rightLineDetected) {
+						rightMotor.stop();
+					}
+					if (!isCorrecting) {
+						isCorrecting = rightLineDetected;
+					}
+				}
+
+				leftPrev = leftSample;
+				rightPrev = rightSample;
+
+				readingEnd = System.currentTimeMillis();
+				if (readingEnd - readingStart < 60) {
+					try {
+						Thread.sleep(60 - (readingEnd - readingStart));
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -257,11 +277,7 @@ public class ColorPoller implements Runnable {
 	}
 
 	public void sleep() {
-		try {
-			this.wait();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		wait=true;
 	}
 
 	public void sleepFor(long millis) {
@@ -273,7 +289,7 @@ public class ColorPoller implements Runnable {
 	}
 
 	public void wake() {
-		this.notify();
+		wait=false;
 	}
 
 	public boolean[] getLineDetectionStatus() {

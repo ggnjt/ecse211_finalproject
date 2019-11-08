@@ -154,10 +154,11 @@ public class Navigation {
 	 *         an obstacle
 	 */
 	public boolean moveForwardByOneTile() {
+		long readingStart, readingEnd;
 		navigationMode = TravelingMode.TRAVELING;
 		boolean whileRunning = true;
 		double target = 0;
-		switch(orientation) {
+		switch (orientation) {
 		case NORTH:
 			target = yTile * TILE_SIZE + 0.5 * TILE_SIZE;
 			break;
@@ -172,6 +173,7 @@ public class Navigation {
 			break;
 		}
 		while (whileRunning) {
+			readingStart = System.currentTimeMillis();
 			switch (navigationMode) {
 			case TRAVELING:
 				leftMotor.forward();
@@ -242,10 +244,13 @@ public class Navigation {
 				whileRunning = false;
 				break;
 			}
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			readingEnd = System.currentTimeMillis();
+			if (readingEnd - readingStart < 60) {
+				try {
+					Thread.sleep(60 - (readingEnd - readingStart));
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		stopTheRobot();
@@ -307,7 +312,7 @@ public class Navigation {
 	/**
 	 * turns the robot 90 degrees right and sleep the color sensor threads
 	 */
-	public void turnRight() {
+	public synchronized void turnRight() {
 		colorPoller.sleep();
 		leftMotor.rotate(convertAngle(90.0), true);
 		rightMotor.rotate(convertAngle(-90.0), false);

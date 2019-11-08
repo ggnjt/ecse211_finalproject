@@ -1,5 +1,8 @@
 package ca.mcgill.ecse211.finalproject;
 
+import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
+import static ca.mcgill.ecse211.finalproject.Resources.odometer;
+
 import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizer;
 import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.Odometer;
@@ -64,7 +67,7 @@ public class Resources {
   /**
    * The robot width in centimeters.
    */
-  public static final double TRACK = 18.1;
+  public static final double TRACK = 12.3;
 
   /**
    * The speed at which the robot moves forward in degrees per second.
@@ -121,7 +124,7 @@ public class Resources {
   /**
    * The left motor.
    */
-  public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+  public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("C"));
 
   /**
    * The right motor.
@@ -186,4 +189,7 @@ public class Resources {
    * Test path finder TODO: the way the path finder is initialized is subject to change
    */
   public static final PathFinder pathFinder = PathFinder.test(15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
+  
+  public static final Thread odoT = new Thread(odometer);
+  public static final Thread cT = new Thread(colorPoller);
 }

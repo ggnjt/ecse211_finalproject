@@ -23,10 +23,8 @@ public class Main {
    * @param args
    */
   public static void main(String[] args) {
-    Thread a = new Thread(odometer);
-    Thread c = new Thread(colorPoller);
-    a.start();
-    c.start();
+    Resources.odoT.start();
+    Resources.cT.start();
     
     ArrayList<int[]> moves = new ArrayList<int[]>();
     moves.add(new int[] {0,1});
@@ -38,6 +36,7 @@ public class Main {
     moves.add(new int[] {0,1});
    
     for (int [] move: moves) {
+    	
     	navigation.processNextMove(move);
     }
     // // Thread b = new Thread(usPoller);
