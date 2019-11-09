@@ -87,7 +87,7 @@ public class ColorPoller implements Runnable {
 	/**
 	 * flag indicating whether the robot is in the process of odometry correction
 	 */
-	public static boolean isCorrecting = false;
+	public static volatile boolean isCorrecting = false;
 
 	
 	public static boolean wait = false;
