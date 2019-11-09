@@ -1,9 +1,5 @@
 package ca.mcgill.ecse211.finalproject;
 
-import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
-import static ca.mcgill.ecse211.finalproject.Resources.odometer;
-
-import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizer;
 import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.Odometer;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
@@ -12,7 +8,6 @@ import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3ColorSensor;
-import lejos.hardware.sensor.EV3UltrasonicSensor;
 
 /**
  * This class is used to define static resources in one place for easy access and to avoid cluttering the rest of the
@@ -144,7 +139,7 @@ public class Resources {
   /**
    * The ultrasonic sensor.
    */
-  public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S4);
+  // public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S4);
 
   /**
    * left color sensor
@@ -163,12 +158,12 @@ public class Resources {
   /**
    * The ultrasonic poller.
    */
-  public static final UltrasonicPoller usPoller = new UltrasonicPoller();
+  // public static final UltrasonicPoller usPoller = new UltrasonicPoller();
 
   /**
    * US localizer
    */
-  public static final UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer();
+  // public static final UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer();
 
   /**
    * colorPoller
@@ -189,7 +184,7 @@ public class Resources {
    * Test path finder TODO: the way the path finder is initialized is subject to change
    */
   public static final PathFinder pathFinder = PathFinder.test(15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
-  
+
   public static final Thread odoT = new Thread(odometer);
   public static final Thread cT = new Thread(colorPoller);
 }

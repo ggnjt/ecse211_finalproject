@@ -1,12 +1,7 @@
 package ca.mcgill.ecse211.finalproject;
 
-// import static ca.mcgill.ecse211.finalproject.Resources.shooterMotor;
-import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
 import static ca.mcgill.ecse211.finalproject.Resources.navigation;
-import static ca.mcgill.ecse211.finalproject.Resources.odometer;
-
 import java.util.ArrayList;
-
 import lejos.hardware.Button;
 
 
@@ -27,6 +22,11 @@ public class Main {
     Resources.cT.start();
     
     ArrayList<int[]> moves = new ArrayList<int[]>();
+    moves.add(new int[] {0,1});
+    moves.add(new int[] {0,1});
+    moves.add(new int[] {0,1});
+    moves.add(new int[] {0,1});
+    moves.add(new int[] {0,1});
     moves.add(new int[] {0,1});
     moves.add(new int[] {0,1});
 //    moves.add(new int[] {1,0});

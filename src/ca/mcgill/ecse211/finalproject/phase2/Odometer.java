@@ -1,6 +1,10 @@
 package ca.mcgill.ecse211.finalproject.phase2;
 
-import static ca.mcgill.ecse211.finalproject.Resources.*;
+import static ca.mcgill.ecse211.finalproject.Resources.TRACK;
+import static ca.mcgill.ecse211.finalproject.Resources.WHEEL_RAD;
+import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
+import static ca.mcgill.ecse211.finalproject.Resources.odometer;
+import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
