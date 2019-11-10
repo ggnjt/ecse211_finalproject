@@ -85,7 +85,7 @@ public class Navigation {
 	/**
 	 * flag for successful move
 	 */
-	public boolean moveSeccessful = false;
+	public boolean moveSuccessful = false;
 
 	/**
 	 * flag for interruption
@@ -240,13 +240,17 @@ public class Navigation {
 			pathFinder.setObstacle(xTile, yTile);
 			break;
 		}
+		if (moveSuccessful) {
+			xTile = move[0];
+			yTile = move[1];
+		}
 	}
 
 	// ============lab 3 stuff==============//
 
 	// This is a blocking GoTo (blocks other threads)
 	private void goTo(int X, int Y) {
-		moveSeccessful = false;
+		moveSuccessful = false;
 		interrupted = false;
 		double currentX = odometer.getXYT()[0];
 		double currentY = odometer.getXYT()[1];
@@ -280,7 +284,7 @@ public class Navigation {
 		rightMotor.rotate(convertDistance(distance2go), false);
 
 		if (!interrupted) {
-			moveSeccessful = true;
+			moveSuccessful = true;
 		}
 	}
 
