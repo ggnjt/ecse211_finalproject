@@ -5,6 +5,9 @@ import static ca.mcgill.ecse211.finalproject.Resources.leftColorSensor;
 import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.rightColorSensor;
+
+import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
+import ca.mcgill.ecse211.finalproject.Resources;
 import lejos.hardware.Sound;
 import lejos.robotics.SampleProvider;
 
@@ -92,7 +95,6 @@ public class ColorPoller implements Runnable {
 	 */
 	public void run() {
 		long readingStart, readingEnd;
-		// int i = 0;
 		while (!kill) {
 			if (wait) {
 				System.out.println("waiting");
@@ -101,18 +103,33 @@ public class ColorPoller implements Runnable {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-			} else {
-				// System.out.println(i);
-				// i++;
-
+			} else {		
 				readingStart = System.currentTimeMillis();
-				System.out.println("left:" + leftSample + "right: " + rightSample + " " + isCorrecting);
+				
+				System.out.println("left:" + leftSample + "right: " + rightSample);
+				
 				leftSampleProvider.fetchSample(leftSampleColor, 0);
 				rightSampleProvider.fetchSample(rightSampleColor, 0);
 				leftSample = leftSampleColor[0];
 				rightSample = rightSampleColor[0];
 				leftDer = leftSample - leftPrev;
 				rightDer = rightSample - rightPrev;
+				
+				
+				
+				if (navigation.navigationMode == TravelingMode.TRAVELING || navigation.navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
+					leftLineDetected = leftDetectBlackLine();
+					rightLineDetected = rightDetectBlackLine();
+					if (leftLineDetected || rightLineDetected) {
+						navigation.navigationMode = TravelingMode.CORRECTING;
+						navigation.stopTheRobot();
+						navigation.setSpeed(40);
+					}
+				} else if (navigation.navigationMode == TravelingMode.CORRECTING) {
+					
+				}
+				
+				
 				if (!leftLineDetected) { // If we have already detected a line, don't try to detect it again because it
 											// will give
 											// a false negative
@@ -208,35 +225,28 @@ public class ColorPoller implements Runnable {
 	 * value readings
 	 */
 	public static void correctXYT() {
-		double[] currXYT = odometer.getXYT();
-		/*
-		 * Resets the angle (since we are only driving in cardinal directions, there are
-		 * only 4 possibilities
-		 */
-		switch (navigation.orientation) {
-		case NORTH:
-			odometer.setTheta(0);
-			correctY(currXYT);
-			navigation.yTile++;
-			break;
-		case SOUTH:
-			odometer.setTheta(180);
-			correctY(currXYT);
-			navigation.yTile--;
-			break;
-		case EAST:
-			odometer.setTheta(90);
-			correctX(currXYT);
-			navigation.xTile++;
-			break;
-		case WEST:
-			odometer.setTheta(270);
-			correctX(currXYT);
-			navigation.xTile--;
-			break;
-		default:
-			break;
-		}
+	    int updatedTheta;
+	    double[] currXYT = odometer.getXYT();
+	    /*
+	     * Resets the angle (since we are only driving in cardinal directions, there are only 4 possibilities
+	     */
+	    if (currXYT[2] >= 315 || currXYT[2] < 45) {
+	      updatedTheta = 0;
+	      odometer.setTheta(updatedTheta);
+	      correctY(currXYT, updatedTheta);
+	    } else if (currXYT[2] >= 45 && currXYT[2] < 135) {
+	      updatedTheta = 90;
+	      odometer.setTheta(updatedTheta);
+	      correctX(currXYT, updatedTheta);
+	    } else if (currXYT[2] >= 135 && currXYT[2] < 225) {
+	      updatedTheta = 180;
+	      odometer.setTheta(updatedTheta);
+	      correctY(currXYT, updatedTheta);
+	    } else if (currXYT[2] >= 225 && currXYT[2] < 315) {
+	      updatedTheta = 270;
+	      odometer.setTheta(updatedTheta);
+	      correctX(currXYT, updatedTheta);
+	    }
 	}
 
 	/**
@@ -248,10 +258,14 @@ public class ColorPoller implements Runnable {
 	 * @param currXYT
 	 * @param updatedTheta
 	 */
-	private static void correctX(double[] currXYT) {
+	private static void correctX(double[] currXYT, double updatedTheta) {
 		double currX = currXYT[0];
 		currX = TILE_SIZE * (Math.round((currX) / TILE_SIZE));
-		odometer.setX(currX);
+		if (updatedTheta == 90) {
+			odometer.setX(currX + Resources.SENSOR_RADIUS);
+		} else {
+			odometer.setX(currX - Resources.SENSOR_RADIUS);
+		}
 	}
 
 	/**
@@ -263,10 +277,14 @@ public class ColorPoller implements Runnable {
 	 * @param currXYT
 	 * @param updatedTheta
 	 */
-	private static void correctY(double[] currXYT) {
+	private static void correctY(double[] currXYT, double updatedTheta) {
 		double currY = currXYT[1];
 		currY = TILE_SIZE * (Math.round((currY) / TILE_SIZE));
-		odometer.setY(currY);
+		if (updatedTheta == 0) {
+			odometer.setX(currY + Resources.SENSOR_RADIUS);
+		} else {
+			odometer.setX(currY - Resources.SENSOR_RADIUS);
+		}
 	}
 
 	public static void resetLineDetection() {

@@ -129,39 +129,6 @@ public class Odometer extends Thread {
 			double dY = deltaDist * Math.cos(Math.toRadians(dTheta + theta)); // Calculate the distance traveled in y
 			odometer.update(dX, dY, dTheta);
 
-			double[] currentXYT = getXYT();
-
-			switch (navigation.orientation) {
-			case NORTH:
-				if (currentXYT[1] >= navigation.target) {
-					navigation.moveRunning = false;
-					continue;
-				}
-				break;
-			case SOUTH:
-				if (currentXYT[1] <= navigation.target) {
-					navigation.moveRunning = false;
-					continue;
-				}
-				break;
-			case EAST:
-				if (currentXYT[0] >= navigation.target) {
-					navigation.moveRunning = false;
-					continue;
-				}
-				break;
-			case WEST:
-				if (currentXYT[0] <= navigation.target) {
-					navigation.moveRunning = false;
-					continue;
-				}
-				break;
-			}
-
-			synchronized (navigation) {
-				navigation.notify();
-			}
-
 			// this ensures that the odometer only runs once every period
 			updateEnd = System.currentTimeMillis();
 			if (updateEnd - updateStart < ODOMETER_PERIOD) {
