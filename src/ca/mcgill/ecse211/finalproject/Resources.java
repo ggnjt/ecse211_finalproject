@@ -52,7 +52,8 @@ public class Resources {
   /**
    * Distance to light sensor from center of rotation in centimeters
    */
-  public static final double SENSOR_RADIUS = 14.3;
+  public static final double SENSOR_RADIUS = 14.3d
+      ;
 
   /**
    * The wheel radius in centimeters.

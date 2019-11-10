@@ -1,6 +1,8 @@
 package ca.mcgill.ecse211.finalproject;
 
+import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
 import static ca.mcgill.ecse211.finalproject.Resources.navigation;
+import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import java.util.ArrayList;
 import lejos.hardware.Button;
 
@@ -20,24 +22,20 @@ public class Main {
   public static void main(String[] args) {
     Resources.odoT.start();
     Resources.cT.start();
+    odometer.setXYT(TILE_SIZE/2.0d, TILE_SIZE/2.0d, 0);
     
     ArrayList<int[]> moves = new ArrayList<int[]>();
     moves.add(new int[] {0,1});
-    moves.add(new int[] {0,1});
-    moves.add(new int[] {0,1});
-    moves.add(new int[] {0,1});
-    moves.add(new int[] {0,1});
-    moves.add(new int[] {0,1});
-    moves.add(new int[] {0,1});
-//    moves.add(new int[] {1,0});
-//    moves.add(new int[] {1,0});
-//    moves.add(new int[] {0,-1});
-//    moves.add(new int[] {1,0});
-    moves.add(new int[] {0,1});
+    moves.add(new int[] {0,2});
+    moves.add(new int[] {0,3});
+    moves.add(new int[] {0,4});
+    moves.add(new int[] {0,5});
    
     for (int [] move: moves) {
-    	
     	navigation.processNextMove(move);
+    	while (!navigation.moveSuccessful) {
+    	  navigation.processNextMove(move);
+    	}
     }
     // // Thread b = new Thread(usPoller);
     // b.start();
