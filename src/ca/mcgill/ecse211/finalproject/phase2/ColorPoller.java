@@ -91,13 +91,12 @@ public class ColorPoller implements Runnable {
     leftSample = leftSampleColor[0];
     leftDer = leftSample - leftPrev;
   }
-
+  
   private void readRight() {
     rightSampleProvider.fetchSample(rightSampleColor, 0);
     rightSample = rightSampleColor[0];
     rightDer = rightSample - rightPrev;
   }
-
   /**
    * run method for the two color poller
    */
@@ -112,31 +111,29 @@ public class ColorPoller implements Runnable {
         }
       } else {
         readingStart = System.currentTimeMillis();
-
-        if (!leftLineDetected)
-          readLeft();
-        if (!rightLineDetected)
-          readRight();
-
-        synchronized (navigation) {
-          if (navigation.navigationMode == TravelingMode.TRAVELING
-              || navigation.navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
-            leftLineDetected = leftDetectBlackLine();
-            rightLineDetected = rightDetectBlackLine();
-            if (leftLineDetected || rightLineDetected) {
-              navigation.navigationMode = TravelingMode.CORRECTING;
-              navigation.setSpeed(40);
+       
+        if(!leftLineDetected) readLeft();
+        if(!rightLineDetected) readRight();
+        
+        if (navigation.navigationMode == TravelingMode.TRAVELING
+            || navigation.navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
+          leftLineDetected = leftDetectBlackLine();
+          rightLineDetected = rightDetectBlackLine();
+          if (leftLineDetected || rightLineDetected) {
+            navigation.navigationMode = TravelingMode.CORRECTING;
+            navigation.setSpeed(40);
+            synchronized (navigation) {
               navigation.interrupted = true;
             }
-          } else if (navigation.navigationMode == TravelingMode.CORRECTING) {
-            if (!leftLineDetected) {
-              leftLineDetected = leftDetectBlackLine();
-            } else if (!rightLineDetected) {
-              rightLineDetected = rightDetectBlackLine();
-            }
+          }
+        } else if (navigation.navigationMode == TravelingMode.CORRECTING) {
+          if (!leftLineDetected) {
+            leftLineDetected = leftDetectBlackLine();
+          } else if (!rightLineDetected) {
+            rightLineDetected = rightDetectBlackLine();
           }
         }
-
+        
         leftPrev = leftSample;
         rightPrev = rightSample;
         readingEnd = System.currentTimeMillis();
