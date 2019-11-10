@@ -6,6 +6,7 @@ import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.rightColorSensor;
 
+import ca.mcgill.ecse211.finalproject.Navigation;
 import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
 import ca.mcgill.ecse211.finalproject.Resources;
 import lejos.hardware.Sound;
@@ -120,40 +121,23 @@ public class ColorPoller implements Runnable {
 				if (navigation.navigationMode == TravelingMode.TRAVELING || navigation.navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
 					leftLineDetected = leftDetectBlackLine();
 					rightLineDetected = rightDetectBlackLine();
-					if (leftLineDetected || rightLineDetected) {
+					if (leftLineDetected || rightLineDetected) { //state switch
 						navigation.navigationMode = TravelingMode.CORRECTING;
+						navigation.interrupted = true;
 						navigation.stopTheRobot();
 						navigation.setSpeed(40);
+						navigation.processNextMove(navigation.currentMove);
 					}
 				} else if (navigation.navigationMode == TravelingMode.CORRECTING) {
-					
-				}
-				
-				
-				if (!leftLineDetected) { // If we have already detected a line, don't try to detect it again because it
-											// will give
-											// a false negative
-					leftLineDetected = leftDetectBlackLine();
-					isCorrecting = !isCorrecting && rightLineDetected;
-					if (isCorrecting && leftLineDetected) {
-						navigation.stopTheRobot();
-						navigation.setSpeed(40);
-						synchronized (navigation) {
-							navigation.notify();
+					if (!leftLineDetected) { 
+						leftLineDetected = leftDetectBlackLine();
+						if (leftLineDetected) {
+							navigation.stopTheRobot();
 						}
-					}
-				}
-
-				if (!rightLineDetected) { // If we have already detected a line, don't try to detect it again because it
-											// will give
-											// a false negative
-					rightLineDetected = rightDetectBlackLine();
-					isCorrecting = !isCorrecting && leftLineDetected;
-					if (isCorrecting && rightLineDetected) {
-						navigation.stopTheRobot();
-						navigation.setSpeed(40);
-						synchronized (navigation) {
-							navigation.notify();
+					} else if (!rightLineDetected) {
+						rightLineDetected = rightDetectBlackLine();
+						if (rightLineDetected) {
+							navigation.stopTheRobot();
 						}
 					}
 				}
