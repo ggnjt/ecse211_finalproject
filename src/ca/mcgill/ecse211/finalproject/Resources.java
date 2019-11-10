@@ -56,7 +56,7 @@ public class Resources {
   /**
    * Distance to light sensor from center of rotation in centimeters
    */
-  public static final double SENSOR_RADIUS = 14.3d;
+  public static final double SENSOR_RADIUS = 7d;
 
   /**
    * The wheel radius in centimeters.
@@ -66,7 +66,7 @@ public class Resources {
   /**
    * The robot width in centimeters.
    */
-  public static final double TRACK = 16.7;
+  public static final double TRACK = 14.3;
 
   /**
    * The speed at which the robot moves forward in degrees per second.
@@ -139,6 +139,11 @@ public class Resources {
    * The LCD.
    */
   public static final TextLCD LCD = LocalEV3.get().getTextLCD();
+  
+  /**
+   * display
+   */
+  public static final Display display = new Display();
 
   /**
    * The ultrasonic sensor.

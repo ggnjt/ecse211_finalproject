@@ -33,7 +33,7 @@ public class ColorSampler implements Runnable {
   /**
    * A threshold value used to determine a large enough change in sensor measurement
    */
-  private static final float SENSOR_DERIVATIVE_THRESHOLD = 0.05f; // DO NOT CHANGE ME
+  private static final float SENSOR_DERIVATIVE_THRESHOLD = 0.08f; // DO NOT CHANGE ME
 
   /**
    * blackLine
