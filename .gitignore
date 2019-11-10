@@ -1,5 +1,4 @@
 .metadata
-*.jar
 bin/
 tmp/
 *.tmp
@@ -10,7 +9,6 @@ local.properties
 .settings/
 .loadpath
 .recommenders
-*.jar
 
 # Compiled class file
 **.class
@@ -26,7 +24,6 @@ local.properties
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.nar
 *.ear
@@ -42,7 +39,6 @@ hs_err_pid*
 ##############################
 .mtj.tmp/
 *.class
-*.jar
 *.war
 *.ear
 *.nar
@@ -113,3 +109,4 @@ nb-configuration.xml
 ## OS X
 ##############################
 .DS_Store
+/*.jar
