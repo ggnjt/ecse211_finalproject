@@ -1,6 +1,7 @@
 package ca.mcgill.ecse211.finalproject;
 
 import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
+import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
 import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import java.util.ArrayList;
@@ -20,26 +21,55 @@ public class Main {
    * @param args
    */
   public static void main(String[] args) {
-    Resources.odoT.start();
-    Resources.cT.start();
-    odometer.setXYT(TILE_SIZE/2.0d, TILE_SIZE/2.0d, 0);
-    
+    Thread odoT = new Thread(odometer);
+    Thread cT = new Thread(colorPoller);
+    odoT.start();
+    cT.start();
+
+    odometer.setXYT(TILE_SIZE / 2.0d, TILE_SIZE / 2.0d, 0);
+
     ArrayList<int[]> moves = new ArrayList<int[]>();
-    moves.add(new int[] {0,1});
-    moves.add(new int[] {0,2});
-    moves.add(new int[] {0,3});
-    moves.add(new int[] {0,4});
-    moves.add(new int[] {0,5});
-   
-    for (int [] move: moves) {
-    	navigation.processNextMove(move);
-    	while (!navigation.moveSuccessful) {
-    	  navigation.processNextMove(move);
-    	}
+    moves.add(new int[] {0, 1});
+    moves.add(new int[] {0, 2});
+    moves.add(new int[] {0, 3});
+    moves.add(new int[] {0, 4});
+    moves.add(new int[] {0, 5});
+
+    moves.add(new int[] {1, 5});
+    moves.add(new int[] {2, 5});
+    moves.add(new int[] {3, 5});
+    moves.add(new int[] {4, 5});
+    moves.add(new int[] {5, 5});
+
+
+    moves.add(new int[] {5, 4});
+    moves.add(new int[] {5, 3});
+    moves.add(new int[] {5, 2});
+    moves.add(new int[] {5, 1});
+    moves.add(new int[] {5, 0});
+    
+
+    moves.add(new int[] {4, 0});
+    moves.add(new int[] {3, 0});
+    moves.add(new int[] {2, 0});
+    moves.add(new int[] {1, 0});
+    moves.add(new int[] {0, 0});
+    
+  //
+  //    moves.add(new int[] {0, 1});
+  //    moves.add(new int[] {0, 2});
+  //    moves.add(new int[] {0, 3});
+  //    moves.add(new int[] {0, 4});
+  //    moves.add(new int[] {0, 5});
+    for (int[] move : moves) {
+      navigation.processNextMove(move);
+      while (!navigation.moveSuccessful) {
+        navigation.processNextMove(move);
+      }
     }
     // // Thread b = new Thread(usPoller);
     // b.start();
-    // 
+    //
     // for(int[] move: pathFinder.findPath()) {
     // navigation.processNextMove(move);
     // }
@@ -71,7 +101,7 @@ public class Main {
     // ArrayList<int[]> lel = pf.findPath();
     //
     // for (int[] lol : lel) {
-    // 
+    //
     // }
     //
     // pf.setObstacle(9, 5);
@@ -82,7 +112,7 @@ public class Main {
     //
     // lel = pf.findPath();
     // for (int[] lol : lel) {
-    // 
+    //
     // }
 
 

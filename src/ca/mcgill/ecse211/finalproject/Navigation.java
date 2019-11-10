@@ -12,7 +12,6 @@ import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.pathFinder;
 import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
-import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
 
 /**
@@ -81,19 +80,14 @@ public class Navigation {
   public int targetY = 0;
 
   /**
-   * flag for successful move
-   */
-  public volatile boolean moveSuccessful = false;
-
-  /**
-   * flag for interruption
-   */
-  public volatile boolean interrupted = false;
-
-  /**
    * a size 2 array representing the previous move made by the robot
    */
   public int[] currentMove = {0, 0};
+
+  /**
+   * public static moveSuccessful
+   */
+  public boolean moveSuccessful = false;
 
   /**
    * Constructor for the Navigation class.
@@ -122,34 +116,6 @@ public class Navigation {
    */
   public int convertAngle(double angle) {
     return convertDistance((Math.PI * TRACK * angle) / 360.0);
-  }
-
-  /**
-   * move forward until the robot encounters an obstacle or finishes the movement of one tile length
-   * 
-   * @return boolean which returns true if the robot finishes without encountering an obstacle
-   */
-
-  public void backUp() {
-    System.out.println("backing up...");
-    double distance = 0;
-    switch (orientation) {
-      case NORTH:
-        distance = odometer.getXYT()[1] - ((double) yTile + 0.5) * TILE_SIZE;
-        break;
-      case EAST:
-        distance = odometer.getXYT()[0] - ((double) xTile + 0.5) * TILE_SIZE;
-        break;
-      case SOUTH:
-        distance = -(odometer.getXYT()[1] - ((double) yTile + 0.5) * TILE_SIZE);
-        break;
-      case WEST:
-        distance = -(odometer.getXYT()[0] - ((double) xTile + 0.5) * TILE_SIZE);
-        break;
-    }
-    leftMotor.rotate(-convertDistance(distance), true);
-    rightMotor.rotate(-convertDistance(distance), false);
-
   }
 
   /**
@@ -187,7 +153,6 @@ public class Navigation {
    * stops the robot in place
    */
   public void stopTheRobot() {
-    // isNavigating = false;
     leftMotor.stop(true);
     rightMotor.stop(false);
   }
@@ -204,23 +169,14 @@ public class Navigation {
     currentMove = move;
     switch (navigationMode) {
       case TRAVELING:
-        System.out.println("Moving!");
         goTo(targetX, targetY);
         break;
       case CORRECTING:
-        System.out.println("Correcting!");
-        boolean[] lineCorrectionStatus;
-        lineCorrectionStatus = colorPoller.getLineDetectionStatus();
-        if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
-          navigationMode = TravelingMode.TRAVELING; // state switch
-          setSpeed(FORWARD_SPEED); 
-          ColorPoller.correctXYT();
-          ColorPoller.resetLineDetection();
-          goTo(targetX, targetY);
-        } else if (ColorPoller.leftLineDetected) {
-          rightMotor.forward();
-        } else if (ColorPoller.rightLineDetected) {
-          leftMotor.forward();
+        try {
+          Thread.sleep(200);
+        } catch (InterruptedException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
         }
         break;
       case OBSTACLE_ENCOUNTERED:
@@ -237,9 +193,8 @@ public class Navigation {
   // ============lab 3 stuff==============//
 
   // This is a blocking GoTo (blocks other threads)
-  private void goTo(int X, int Y) {
-    moveSuccessful = false;
-    interrupted = false;
+  public void goTo(int X, int Y) {
+    moveSuccessful = true;
     double currentX = odometer.getXYT()[0];
     double currentY = odometer.getXYT()[1];
     double currentTheta = odometer.getXYT()[2];
@@ -261,7 +216,6 @@ public class Navigation {
       angleDeviation += 360;
     }
 
-    
     colorPoller.sleep();
     leftMotor.rotate(convertAngle(angleDeviation), true);
     rightMotor.rotate(-convertAngle(angleDeviation), false);
@@ -271,11 +225,5 @@ public class Navigation {
 
     leftMotor.rotate(convertDistance(distance2go), true);
     rightMotor.rotate(convertDistance(distance2go), false);
-
-    synchronized (this) {
-      if (!interrupted) {
-        moveSuccessful = true;
-      }
-    }
   }
 }
