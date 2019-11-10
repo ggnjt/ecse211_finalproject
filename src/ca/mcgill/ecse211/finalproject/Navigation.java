@@ -212,10 +212,10 @@ public class Navigation {
         boolean[] lineCorrectionStatus;
         lineCorrectionStatus = colorPoller.getLineDetectionStatus();
         if (lineCorrectionStatus[0] && lineCorrectionStatus[1]) {
+          navigationMode = TravelingMode.TRAVELING; // state switch
+          setSpeed(FORWARD_SPEED); 
           ColorPoller.correctXYT();
           ColorPoller.resetLineDetection();
-          navigationMode = TravelingMode.TRAVELING; // state switch
-          setSpeed(FORWARD_SPEED); // TODO put in resources
           goTo(targetX, targetY);
         } else if (ColorPoller.leftLineDetected) {
           rightMotor.forward();
