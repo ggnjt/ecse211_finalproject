@@ -215,12 +215,12 @@ public class Resources {
    * The IP address of the server that transmits data to the robot. Set this to the default for the beta demo and
    * competition.
    */
-  public static final String SERVER_IP = "192.168.2.14";
+  public static final String SERVER_IP = "192.168.2.20";
 
   /**
    * Your team number.
    */
-  public static final int TEAM_NUMBER = 1;
+  public static final int TEAM_NUMBER = 9;
 
   /**
    * Enables printing of debug info from the WiFi class.
@@ -230,7 +230,7 @@ public class Resources {
   /**
    * Enable this to attempt to receive Wi-Fi parameters at the start of the program.
    */
-  public static final boolean RECEIVE_WIFI_PARAMS = true;
+  public static final boolean RECEIVE_WIFI_PARAMS = false;
 
   // DECLARE YOUR CURRENT RESOURCES HERE
   // eg, motors, sensors, constants, etc
@@ -240,7 +240,13 @@ public class Resources {
    * Container for the Wi-Fi parameters.
    */
   public static Map<String, Object> wifiParameters;
-
+  
+  // Used to receive the parameters from the server.
+  static {
+  	if (RECEIVE_WIFI_PARAMS) {
+  		receiveWifiParameters();
+  	}
+  }
   /**
    * Red team number.
    */

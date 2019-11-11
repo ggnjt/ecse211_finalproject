@@ -1,8 +1,6 @@
 package ca.mcgill.ecse211.finalproject;
 
-import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
-import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
-import static ca.mcgill.ecse211.finalproject.Resources.navigation;
+import static ca.mcgill.ecse211.finalproject.Resources.*;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import java.util.ArrayList;
 import lejos.hardware.Button;
@@ -44,6 +42,7 @@ public class Main {
 		moves.add(new int[] { 3, 0 });
 		moves.add(new int[] { 2, 0 });
 		moves.add(new int[] { 1, 0 });
+		moves.add(new int[] { 0, 0 });
 
 		for (int[] move : moves) {
 			navigation.processNextMove(move);
