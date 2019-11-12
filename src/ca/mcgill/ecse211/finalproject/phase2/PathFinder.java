@@ -9,7 +9,9 @@ import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.red;
 import static ca.mcgill.ecse211.finalproject.Resources.redCorner;
 import static ca.mcgill.ecse211.finalproject.Resources.tng;
-import static ca.mcgill.ecse211.finalproject.Resources.tnr;
+import static ca.mcgill.ecse211.finalproject.Resources.bin;
+//TODO Remove after beta
+//import static ca.mcgill.ecse211.finalproject.Resources.tnr;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,9 +88,14 @@ public class PathFinder {
 	 * @param islandURY  upper right corner Y coordinate of the central island
 	 */
 	public PathFinder(boolean isRedTeam) {
-		int corner = isRedTeam ? redCorner : greenCorner;
-		Region base = isRedTeam ? red : green;
-		Region tn = isRedTeam ? tnr : tng;
+// TODO Uncomment after beta
+//		int corner = isRedTeam ? redCorner : greenCorner;
+//		Region base = isRedTeam ? red : green;
+//		Region tn = isRedTeam ? tnr : tng;
+		
+		int corner = greenCorner;
+		Region base = green;
+		Region tn = tng;
 
 		System.out.println("Corner: " + corner);
 		System.out.println("Base: " + base.toString());
@@ -145,6 +152,8 @@ public class PathFinder {
 			navigation.yTile = ARENA_Y - 1;
 			break;
 		}
+		PathFinder.targetX = (int) bin.x;
+		PathFinder.targetY = (int) bin.y;
 	}
 
 	/**

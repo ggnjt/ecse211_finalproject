@@ -31,8 +31,8 @@ public class Resources {
 	/**
 	 * The dimensions sizes in squares
 	 */
-	public static final int ARENA_X = 15;
-	public static final int ARENA_Y = 9;
+	public static final int ARENA_X = 8;
+	public static final int ARENA_Y = 8;
 
 	/**
 	 * The threshold in intensity delta for determining when a line has been
@@ -186,7 +186,7 @@ public class Resources {
 	 * The IP address of the server that transmits data to the robot. Set this to
 	 * the default for the beta demo and competition.
 	 */
-	public static final String SERVER_IP = "192.168.2.20";
+	public static final String SERVER_IP = "192.168.2.54";
 
 	/**
 	 * Your team number.
@@ -257,7 +257,8 @@ public class Resources {
 	/**
 	 * The red tunnel footprint.
 	 */
-	public static Region tnr = new Region("TNR_LL_x", "TNR_LL_y", "TNR_UR_x", "TNR_UR_y");
+	// public static Region tnr = new Region("TNR_LL_x", "TNR_LL_y", "TNR_UR_x", "TNR_UR_y");
+	public static double targetAngle = Math.max(get("TNR_LL_x"), get("TNR_UR_x"));
 
 	/**
 	 * The green tunnel footprint.

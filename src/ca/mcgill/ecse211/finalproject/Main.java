@@ -52,23 +52,24 @@ public class Main {
 		Thread cT = new Thread(colorPoller);
 		cT.start();
 
-		ArrayList<int[]> moves = new ArrayList<int[]>();
-		moves.add(new int[] { 0, 1 });
-		moves.add(new int[] { 0, 2 });
-		moves.add(new int[] { 0, 3 });
-
-		moves.add(new int[] { 1, 3 });
-		moves.add(new int[] { 2, 3 });
-		moves.add(new int[] { 3, 3 });
-
-		moves.add(new int[] { 3, 4 });
-		moves.add(new int[] { 3, 5 });
-
-		moves.add(new int[] { 3, 4 });
-		moves.add(new int[] { 3, 3 });
-		moves.add(new int[] { 3, 2 });
-		moves.add(new int[] { 3, 1 });
-		moves.add(new int[] { 3, 0 });
+		ArrayList<int[]> moves = pathFinder.findPath();
+//		ArrayList<int[]> moves = new ArrayList<int[]>();
+//		moves.add(new int[] { 0, 1 });
+//		moves.add(new int[] { 0, 2 });
+//		moves.add(new int[] { 0, 3 });
+//
+//		moves.add(new int[] { 1, 3 });
+//		moves.add(new int[] { 2, 3 });
+//		moves.add(new int[] { 3, 3 });
+//
+//		moves.add(new int[] { 3, 4 });
+//		moves.add(new int[] { 3, 5 });
+//
+//		moves.add(new int[] { 3, 4 });
+//		moves.add(new int[] { 3, 3 });
+//		moves.add(new int[] { 3, 2 });
+//		moves.add(new int[] { 3, 1 });
+//		moves.add(new int[] { 3, 0 });
 		for (int[] move : moves) {
 			navigation.processNextMove(move);
 			
