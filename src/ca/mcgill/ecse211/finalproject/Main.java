@@ -27,9 +27,10 @@ public class Main {
 		Thread b = new Thread(usLocalizer);
 		//Thread a = new Thread(USdisplay);
 		Thread c = new Thread(usPoller);
+		odometer.start();
 		b.start();
 		c.start();
-		
+		System.out.println(odometer.isAlive());
 		while (!P1finished) {
 			Main.sleepFor(2000);
 		}
@@ -45,9 +46,9 @@ public class Main {
 			e.printStackTrace();
 		}
 //		Sound.beepSequenceUp();	
-//		LCD.clear();
-	//	Thread lcd = new Thread (Resources.display);
-	//	lcd.start();
+		LCD.clear();
+		Thread lcd = new Thread (Resources.display);
+		lcd.start();
 		Thread cT = new Thread(colorPoller);
 		cT.start();
 
@@ -60,18 +61,20 @@ public class Main {
 		moves.add(new int[] { 2, 3 });
 		moves.add(new int[] { 3, 3 });
 
+		moves.add(new int[] { 3, 4 });
+		moves.add(new int[] { 3, 5 });
+
+		moves.add(new int[] { 3, 4 });
+		moves.add(new int[] { 3, 3 });
 		moves.add(new int[] { 3, 2 });
 		moves.add(new int[] { 3, 1 });
-
 		moves.add(new int[] { 3, 0 });
-		moves.add(new int[] { 2, 0 });
-		moves.add(new int[] { 1, 0 });
-		moves.add(new int[] { 0, 0 });
 		for (int[] move : moves) {
 			navigation.processNextMove(move);
 			
 			while (!navigation.moveSuccessful) {
 				if (navigation.navigationMode == TravelingMode.TRAVELING) {
+					
 					navigation.processNextMove(move);
 					Sound.beepSequenceUp();
 				}

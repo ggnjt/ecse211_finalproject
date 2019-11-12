@@ -124,7 +124,7 @@ public class ColorPoller implements Runnable {
 							rightMotor.forward(); 
 						}
 						rightCounter++;
-						if (rightCounter > 10) { //fail safe
+						if (rightCounter > 40) { //fail safe
 							navigation.stopTheRobot();
 							rightLineDetected = true;
 							rightCounter = 0;
@@ -134,7 +134,7 @@ public class ColorPoller implements Runnable {
 							leftMotor.forward();
 						}
 						leftCounter++;
-						if (leftCounter > 10) {
+						if (leftCounter > 40) {
 							navigation.stopTheRobot();
 							leftLineDetected = true;
 							leftCounter = 0;

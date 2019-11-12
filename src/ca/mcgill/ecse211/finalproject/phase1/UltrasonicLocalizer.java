@@ -174,7 +174,7 @@ public class UltrasonicLocalizer implements Runnable {
 		leftMotor.forward();
 		rightMotor.forward();
 		spaceCounter++;
-		if (spaceCounter > 110) {
+		if (spaceCounter > 100) {
 			navigation.stopTheRobot();
 			state = SearchingState.BACK_Y;
 			spaceCounter = 0;
@@ -203,7 +203,7 @@ public class UltrasonicLocalizer implements Runnable {
 		leftMotor.forward();
 		rightMotor.forward();
 		spaceCounter++;
-		if (spaceCounter > 110) {
+		if (spaceCounter > 100) {
 			navigation.stopTheRobot();
 			state = SearchingState.FINISHING;
 			spaceCounter = 0;
