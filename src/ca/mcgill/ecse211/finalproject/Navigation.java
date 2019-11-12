@@ -7,7 +7,6 @@ import static ca.mcgill.ecse211.finalproject.Resources.FORWARD_SPEED;
 import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
 import static ca.mcgill.ecse211.finalproject.Resources.TRACK;
 import static ca.mcgill.ecse211.finalproject.Resources.WHEEL_RAD;
-import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
 import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 //import static ca.mcgill.ecse211.finalproject.Resources.pathFinder;
@@ -23,15 +22,6 @@ import lejos.hardware.Sound;
  * @author elias
  */
 public class Navigation {
-	/**
-	 * orientation of the robot
-	 * 
-	 * @author yp
-	 *
-	 */
-	public enum Orientation {
-		NORTH, SOUTH, EAST, WEST
-	}
 
 	/**
 	 * traveling state of the robot, either traveling, correcting angle or detected
@@ -53,12 +43,7 @@ public class Navigation {
 	}
 
 	/**
-	 * current position and orientation of the robot on the grid
-	 */
-	public Orientation orientation = Orientation.NORTH; // initial orientation
-
-	/**
-	 * current state of the robot
+	 * current moving state of the robot
 	 */
 	public TravelingMode navigationMode = TravelingMode.TRAVELING;
 
@@ -73,22 +58,17 @@ public class Navigation {
 	public int yTile = 0;
 
 	/**
-	 * current target x coordinate
+	 * target x coordinate of the current move being processed
 	 */
 	public int targetX = 0;
 
 	/**
-	 * current target y coordinate
+	 * target y coordinate of the current move being processed
 	 */
 	public int targetY = 0;
 
 	/**
-	 * a size 2 array representing the previous move made by the robot
-	 */
-	public int[] currentMove = { 0, 0 };
-
-	/**
-	 * public static moveSuccessful
+	 * whether the current move being processed in sucessful
 	 */
 	public boolean moveSuccessful = false;
 
@@ -167,16 +147,14 @@ public class Navigation {
 	}
 
 	/**
-	 * process a move which takes the form of a size 2 array. The robot will either
-	 * turn right, turn left or go straight, then move by one tile
+	 * process a move which takes the form of a size 2 array. The robot will turn
+	 * and move towards the center of that tile
 	 * 
-	 * @param move a size 2 array representing the move. This can only take the
-	 *             following forms: {1,0}{-1,0}{0,1}{0,-1}
+	 * @param move a size 2 representing the coordinates of the target tile
 	 */
 	public void processNextMove(int[] move) {
 		targetX = move[0];
 		targetY = move[1];
-		currentMove = move;
 		switch (navigationMode) {
 		case TRAVELING:
 			goTo(targetX, targetY);
@@ -202,14 +180,14 @@ public class Navigation {
 		}
 	}
 
-	// ============lab 3 stuff==============//
-
-	// This is a blocking GoTo (blocks other threads)
+	/**
+	 * turn and move to the center of a target tile
+	 * 
+	 * @param X x-coordinates of the target tile
+	 * @param Y y-coordinates of the target tile
+	 */
 	public void goTo(int X, int Y) {
-//		if (moveSuccessful) {
-//			return;
-//		}
-		moveSuccessful = true;
+		
 		double currentX = odometer.getXYT()[0];
 		double currentY = odometer.getXYT()[1];
 		double currentTheta = odometer.getXYT()[2];
@@ -231,13 +209,38 @@ public class Navigation {
 			angleDeviation += 360;
 		}
 		double distance2go = Math.sqrt(X2go * X2go + Y2go * Y2go);
-		// colorPoller.sleep();
+		Resources.colorPoller.sleep();
 		leftMotor.rotate(convertAngle(angleDeviation), true);
 		rightMotor.rotate(-convertAngle(angleDeviation), false);
-		// colorPoller.wake();
+		Resources.colorPoller.wake();
+		moveSuccessful = true;
 
 		leftMotor.rotate(convertDistance(distance2go), true);
 		rightMotor.rotate(convertDistance(distance2go), false);
+	}
+
+	/**
+	 * turn to the target absolute theta
+	 * 
+	 * @param theta target angle to turn towards, 0 being facing North
+	 */
+	public void turnTo(double theta) {
+		double angleDiff = theta - odometer.getXYT()[2];
+		// Don't correct the angle if it is within a certain threshold
+		if (Math.abs(angleDiff) < 3.0 || Math.abs(angleDiff) > 357.0) {
+			return;
+		}
+		leftMotor.setSpeed(Resources.ROTATE_SPEED);
+		rightMotor.setSpeed(Resources.ROTATE_SPEED);
+		// This ensures the robot uses the minimal angle when turning to theta
+		if (Math.abs(angleDiff) > 180.0) {
+			angleDiff = Math.signum(angleDiff) * 360.0 - angleDiff;
+			leftMotor.rotate(convertAngle(-angleDiff), true);
+			rightMotor.rotate(convertAngle(angleDiff), false);
+		} else {
+			leftMotor.rotate(convertAngle(angleDiff), true);
+			rightMotor.rotate(convertAngle(-angleDiff), false);
+		}
 		Sound.beepSequence();
 	}
 }

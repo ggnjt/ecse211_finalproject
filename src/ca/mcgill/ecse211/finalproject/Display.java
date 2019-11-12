@@ -36,13 +36,8 @@ public class Display implements Runnable {
 			// Retrieve x, y and Theta information
 			position = odometer.getXYT();
 
-			// Print x,y, and theta information
-			
-			
-			
 			DecimalFormat numberFormat = new DecimalFormat("######0.00");
-			
-//			
+
 			LCD.drawString("X: " + numberFormat.format(position[0]), 0, 1);
 			LCD.drawString("Y: " + numberFormat.format(position[1]), 0, 2);
 			LCD.drawString("T: " + numberFormat.format(position[2]), 0, 3);

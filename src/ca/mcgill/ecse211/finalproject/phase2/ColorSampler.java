@@ -11,76 +11,77 @@ import lejos.robotics.SampleProvider;
  *
  */
 public class ColorSampler implements Runnable {
-  /**
-   * SampleProvider
-   */
-  private SampleProvider sampleProvider;
+	/**
+	 * SampleProvider
+	 */
+	private SampleProvider sampleProvider;
 
-  /**
-   * sample reading from the color sensor
-   */
-  private float[] sample;
+	/**
+	 * sample reading from the color sensor
+	 */
+	private float[] sample;
 
-  /**
-   * private float prev
-   */
-  public float prev = 0.0f;
+	/**
+	 * private float prev
+	 */
+	public float prev = 0.0f;
 
-  /**
-   * private float der
-   */
-  private float der = 0.0f;
+	/**
+	 * private float der
+	 */
+	private float der = 0.0f;
 
-  /**
-   * blackLine
-   */
-  private boolean blackLine = false;
+	/**
+	 * blackLine
+	 */
+	private boolean blackLine = false;
 
-  /**
-   * Consturctor from a color sensor
-   * 
-   * @param colorSensor
-   */
-  public ColorSampler(EV3ColorSensor colorSensor) {
-    super();
-    this.sampleProvider = colorSensor.getRedMode();;
-    this.sample = new float[colorSensor.sampleSize()];
-  }
+	/**
+	 * Consturctor from a color sensor
+	 * 
+	 * @param colorSensor
+	 */
+	public ColorSampler(EV3ColorSensor colorSensor) {
+		super();
+		this.sampleProvider = colorSensor.getRedMode();
+		;
+		this.sample = new float[colorSensor.sampleSize()];
+	}
 
-  /**
-   * run method for the two color poller
-   */
-  public void run() {
-    long readingStart, readingEnd;
+	/**
+	 * run method for the two color poller
+	 */
+	public void run() {
+		long readingStart, readingEnd;
 
-    while (true) {
-      readingStart = System.currentTimeMillis();
-      sampleProvider.fetchSample(sample, 0);
-      float singleSample = sample[0];
-      der = singleSample - prev;
-      blackLine = (der < 0 && Math.abs(der) > Resources.INTENSITY_THRESHOLD);
-      readingEnd = System.currentTimeMillis();
-      prev = singleSample;
+		while (true) {
+			readingStart = System.currentTimeMillis();
+			sampleProvider.fetchSample(sample, 0);
+			float singleSample = sample[0];
+			der = singleSample - prev;
+			blackLine = (der < 0 && Math.abs(der) > Resources.INTENSITY_THRESHOLD);
+			readingEnd = System.currentTimeMillis();
+			prev = singleSample;
 
-      readingEnd = System.currentTimeMillis();
-      if (readingEnd - readingStart < 60) {
-        try {
-          Thread.sleep(60 - (readingEnd - readingStart));
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
-    }
-  }
+			readingEnd = System.currentTimeMillis();
+			if (readingEnd - readingStart < 60) {
+				try {
+					Thread.sleep(60 - (readingEnd - readingStart));
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
-  /**
-   * get derivative
-   */
-  public float getDer() {
-    return der;
-  }
+	/**
+	 * get derivative
+	 */
+	public float getDer() {
+		return der;
+	}
 
-  public boolean getBlackLine() {
-    return blackLine;
-  }
+	public boolean getBlackLine() {
+		return blackLine;
+	}
 }

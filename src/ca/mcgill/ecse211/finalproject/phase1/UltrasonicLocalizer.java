@@ -102,7 +102,8 @@ public class UltrasonicLocalizer implements Runnable {
 				finishing();
 				break;
 			case FINISHED:
-				odometer.setXYT(TILE_SIZE / 2d, TILE_SIZE / 2d, 0);
+				// odometer.setXYT(TILE_SIZE / 2d, TILE_SIZE / 2d, 0); //miving this to
+				// pathfinder constructor
 				navigation.stopTheRobot();
 				kill = true;
 				Main.P1finished = true;
@@ -145,7 +146,7 @@ public class UltrasonicLocalizer implements Runnable {
 			spaceCounter = 0;
 		if (spaceCounter > 3) {
 			state = SearchingState.YWALL;
-			navigation.setSpeed(LOW_SPEED); // slows the robot down to get better readings
+			navigation.setSpeed(CORRECTION_SPPED); // slows the robot down to get better readings
 			spaceCounter = 0;
 		}
 	}
@@ -156,7 +157,7 @@ public class UltrasonicLocalizer implements Runnable {
 	 * we know that the robot is relatively perpendicular to the y-axis wall
 	 */
 	private static void detectYWall() {
-		if (spaceCounter < 50) {
+		if (spaceCounter < 40) {
 			spaceCounter++;
 		} else {
 			navigation.setSpeed(FORWARD_SPEED);
@@ -223,6 +224,7 @@ public class UltrasonicLocalizer implements Runnable {
 		// rotate clockwise to avoid running into the wall here
 		state = SearchingState.FINISHED;
 	}
+
 	// ==================(motion methods)==================//
 
 	/**

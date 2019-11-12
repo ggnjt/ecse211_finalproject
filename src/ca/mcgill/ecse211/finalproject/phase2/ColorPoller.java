@@ -34,17 +34,17 @@ public class ColorPoller implements Runnable {
 	private boolean rightLineDetected = false;
 
 	/**
-	 * make the thread wait while turning
+	 * boolean to make the thread wait while turning
 	 */
 	public static boolean wait = false;
 
 	/**
-	 * leftSampler
+	 * left light Sampler
 	 */
 	ColorSampler leftSampler;
 
 	/**
-	 * Right Sampler
+	 * right light Sampler
 	 */
 	ColorSampler rightSampler;
 
@@ -57,10 +57,20 @@ public class ColorPoller implements Runnable {
 	 * RightColorThread
 	 */
 	Thread rightColorThread;
-	
+
+	/**
+	 * safety net counter for no line detection on the right
+	 */
 	private int rightCounter = 0;
+
+	/**
+	 * safety net counter for no line detection on the left
+	 */
 	private int leftCounter = 0;
 
+	/**
+	 * constructor
+	 */
 	public ColorPoller() {
 		super();
 		leftSampler = new ColorSampler(leftColorSensor);
@@ -95,10 +105,9 @@ public class ColorPoller implements Runnable {
 					if (leftLineDetected || rightLineDetected) {
 						navigation.stopTheRobot();
 						navigation.navigationMode = TravelingMode.CORRECTING;
-						navigation.setSpeed(25);
+						navigation.setSpeed(Resources.CORRECTION_SPPED);
 						navigation.moveSuccessful = false;
-					}
-					else {
+					} else {
 						rightCounter = 0;
 						leftCounter = 0;
 					}
@@ -109,22 +118,23 @@ public class ColorPoller implements Runnable {
 					leftLineDetected = leftLineDetected || leftSampler.getBlackLine();
 					rightLineDetected = rightLineDetected || rightSampler.getBlackLine();
 					boolean stopped = !leftMotor.isMoving() && !rightMotor.isMoving();
-					if (leftLineDetected && rightLineDetected || Math.abs(leftSampler.prev - rightSampler.prev) < 0.02) {
+					if (leftLineDetected && rightLineDetected
+							|| Math.abs(leftSampler.prev - rightSampler.prev) < 0.02) {
 						// Correct
 						correctXYT();
 						// clear the line
-						leftMotor.rotate(70, true);
-						rightMotor.rotate(70, false);
+						leftMotor.rotate(60, true);
+						rightMotor.rotate(60, false);
 						navigation.stopTheRobot();
 						navigation.setSpeed(FORWARD_SPEED);
 						navigation.navigationMode = TravelingMode.TRAVELING;
 						resetLineDetection();
 					} else if (leftLineDetected) {
 						if (stopped) {
-							rightMotor.forward(); 
+							rightMotor.forward();
 						}
 						rightCounter++;
-						if (rightCounter > 40) { //fail safe
+						if (rightCounter > 40) { // fail safe
 							navigation.stopTheRobot();
 							rightLineDetected = true;
 							rightCounter = 0;
@@ -218,6 +228,9 @@ public class ColorPoller implements Runnable {
 		}
 	}
 
+	/**
+	 * reset the line detect booleans to false
+	 */
 	public void resetLineDetection() {
 		leftLineDetected = false;
 		rightLineDetected = false;
@@ -228,10 +241,16 @@ public class ColorPoller implements Runnable {
 		}
 	}
 
+	/**
+	 * makes the color poller thread sleep while turning
+	 */
 	public void sleep() {
 		wait = true;
 	}
 
+	/**
+	 * wake the thread up after sleeping
+	 */
 	public void wake() {
 		wait = false;
 	}

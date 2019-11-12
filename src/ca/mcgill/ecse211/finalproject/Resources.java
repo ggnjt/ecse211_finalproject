@@ -58,7 +58,7 @@ public class Resources {
 	/**
 	 * The speed at which the robot moves forward in degrees per second.
 	 */
-	public static final int FORWARD_SPEED = 90;
+	public static final int FORWARD_SPEED = 110; // TODO: optimize this
 
 	/**
 	 * The speed at which the robot rotates in degrees per second.
@@ -68,7 +68,7 @@ public class Resources {
 	/**
 	 * Low speed used for more accurate sensor radians
 	 */
-	public static final int LOW_SPEED = 15;
+	public static final int CORRECTION_SPPED = 25;
 
 	/**
 	 * The motor acceleration in degrees per second squared.
@@ -186,7 +186,7 @@ public class Resources {
 	 * The IP address of the server that transmits data to the robot. Set this to
 	 * the default for the beta demo and competition.
 	 */
-	public static final String SERVER_IP = "192.168.2.54";
+	public static final String SERVER_IP = "192.168.2.56";
 
 	/**
 	 * Your team number.
@@ -257,7 +257,8 @@ public class Resources {
 	/**
 	 * The red tunnel footprint.
 	 */
-	// public static Region tnr = new Region("TNR_LL_x", "TNR_LL_y", "TNR_UR_x", "TNR_UR_y");
+	// public static Region tnr = new Region("TNR_LL_x", "TNR_LL_y", "TNR_UR_x",
+	// "TNR_UR_y");
 	public static double targetAngle = Math.max(get("TNR_LL_x"), get("TNR_UR_x"));
 
 	/**
@@ -278,7 +279,7 @@ public class Resources {
 		if (!RECEIVE_WIFI_PARAMS || wifiParameters != null) {
 			return;
 		}
-		//System.out.println("Waiting to receive Wi-Fi parameters.");
+		// System.out.println("Waiting to receive Wi-Fi parameters.");
 
 		// Connect to server and get the data, catching any errors that might occur
 		try (WifiConnection conn = new WifiConnection(SERVER_IP, TEAM_NUMBER, ENABLE_DEBUG_WIFI_PRINT)) {
@@ -305,7 +306,7 @@ public class Resources {
 	 * Test path finder TODO: the way the path finder is initialized is subject to
 	 * change
 	 */
-	public static final PathFinder pathFinder = new PathFinder(redTeam == TEAM_NUMBER);
+	public static PathFinder pathFinder; //YP: not final because I want to construct this after localization
 
 	/**
 	 * Returns the Wi-Fi parameter int value associated with the given key.

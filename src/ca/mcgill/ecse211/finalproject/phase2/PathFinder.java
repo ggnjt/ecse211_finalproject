@@ -2,22 +2,21 @@ package ca.mcgill.ecse211.finalproject.phase2;
 
 import static ca.mcgill.ecse211.finalproject.Resources.ARENA_X;
 import static ca.mcgill.ecse211.finalproject.Resources.ARENA_Y;
+import static ca.mcgill.ecse211.finalproject.Resources.bin;
+//TODO Remove after beta
+//import static ca.mcgill.ecse211.finalproject.Resources.tnr;
 import static ca.mcgill.ecse211.finalproject.Resources.green;
 import static ca.mcgill.ecse211.finalproject.Resources.greenCorner;
 import static ca.mcgill.ecse211.finalproject.Resources.island;
 import static ca.mcgill.ecse211.finalproject.Resources.navigation;
-import static ca.mcgill.ecse211.finalproject.Resources.red;
-import static ca.mcgill.ecse211.finalproject.Resources.redCorner;
 import static ca.mcgill.ecse211.finalproject.Resources.tng;
-import static ca.mcgill.ecse211.finalproject.Resources.bin;
-//TODO Remove after beta
-//import static ca.mcgill.ecse211.finalproject.Resources.tnr;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.PriorityQueue;
 import java.util.Stack;
 
+import ca.mcgill.ecse211.finalproject.Resources;
 import ca.mcgill.ecse211.finalproject.Resources.Region;
 
 /**
@@ -68,31 +67,16 @@ public class PathFinder {
 	private static int targetY;
 
 	/**
-	 * constructor which initialized the map and the path finder. the enemy tunnel
-	 * and base are not considered and regarded as the same as the river this should
-	 * be called after localization
+	 * Contructor of the FathFinder
 	 * 
-	 * @param arenaSizeX arena x size -1
-	 * @param arenaSizeY arena y size -1
-	 * @param tunnelLLX  lower left corner X coordinate of OUR tunnel
-	 * @param tunnelLLY  lower left corner Y coordinate of OUR tunnel
-	 * @param tunnelURX  upper right corner X coordinate of OUR tunnel
-	 * @param tunnelURY  upper right corner Y coordinate of OUR tunnel
-	 * @param baseLLX    lower left corner X coordinate of OUR base
-	 * @param baseLLY    lower left corner Y coordinate of OUR base
-	 * @param baseURX    upper right corner X coordinate of OUR base
-	 * @param baseURY    upper right corner Y coordinate of OUR base
-	 * @param islandLLX  lower left corner X coordinate of the central island
-	 * @param islandLLY  lower left corner Y coordinate of the central island
-	 * @param islandURX  upper right corner X coordinate of the central island
-	 * @param islandURY  upper right corner Y coordinate of the central island
+	 * @param isRedTeam whether your team is the red team
 	 */
 	public PathFinder(boolean isRedTeam) {
 // TODO Uncomment after beta
 //		int corner = isRedTeam ? redCorner : greenCorner;
 //		Region base = isRedTeam ? red : green;
 //		Region tn = isRedTeam ? tnr : tng;
-		
+
 		int corner = greenCorner;
 		Region base = green;
 		Region tn = tng;
@@ -121,37 +105,76 @@ public class PathFinder {
 				map[i][j].setStatus(1);
 			}
 		}
-		// set tunnel
-		for (int i = (int) tn.ll.x; i < (int) tn.ur.x; i++) {
-			for (int j = (int) tn.ll.y; j < (int) tn.ur.y; j++) {
-				map[i][j].setStatus(2);
-			}
-		}
+
 		// set island
 		for (int i = (int) island.ll.x; i < (int) island.ur.x; i++) {
 			for (int j = (int) island.ll.y; j < (int) island.ur.y; j++) {
 				map[i][j].setStatus(3);
 			}
 		}
+		// set tunnel
+		for (int i = (int) tn.ll.x; i < (int) tn.ur.x; i++) {
+			for (int j = (int) tn.ll.y; j < (int) tn.ur.y; j++) {
+				map[i][j].setStatus(2);
+			}
+		}
+
+		// set safeguard for tunnel, setting all tiles beside the tunnel to be river
+//		if ((int) tn.ur.x - (int) tn.ll.x > 1) { // long tunnel is horizontal
+//			int[] llCoord = { (int) tn.ll.x, (int) tn.ll.y };
+//			if (llCoord[1] - 1 >= 0 && llCoord[1] + 1 < ARENA_Y) {
+//				map[llCoord[0]][llCoord[1] - 1].setStatus(0);
+//				map[llCoord[0] + 1][llCoord[1] - 1].setStatus(0);
+//				map[llCoord[0]][llCoord[1] + 1].setStatus(0);
+//				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
+//			} else if (llCoord[1] - 1 >= 0) {
+//				map[llCoord[0]][llCoord[1] - 1].setStatus(0);
+//				map[llCoord[0] + 1][llCoord[1] - 1].setStatus(0);
+//			} else {
+//				map[llCoord[0]][llCoord[1] + 1].setStatus(0);
+//				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
+//			}
+//		} else if ((int) tn.ur.y - (int) tn.ll.y > 1) { // long tunnel is vertical
+//			int[] llCoord = { (int) tn.ll.x, (int) tn.ll.y };
+//			if (llCoord[0] - 1 >= 0 && llCoord[0] + 1 < ARENA_X) {
+//				map[llCoord[0] - 1][llCoord[1]].setStatus(0);
+//				map[llCoord[0] - 1][llCoord[1] + 1].setStatus(0);
+//				map[llCoord[0] + 1][llCoord[1]].setStatus(0);
+//				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
+//			} else if (llCoord[1] - 1 >= 0) {
+//				map[llCoord[0] - 1][llCoord[1]].setStatus(0);
+//				map[llCoord[0] - 1][llCoord[1] + 1].setStatus(0);
+//			} else {
+//				map[llCoord[0] + 1][llCoord[1]].setStatus(0);
+//				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
+//			}
+//		}
 
 		switch (corner) {
-		case 0:
+		case 0: // face north
 			navigation.xTile = 0;
 			navigation.yTile = 0;
+			Resources.odometer.setXYT(Resources.TILE_SIZE / 2d, Resources.TILE_SIZE / 2d, 0);
 			break;
-		case 1:
+		case 1: // face west
 			navigation.xTile = ARENA_X - 1;
 			navigation.yTile = 0;
+			Resources.odometer.setXYT(Resources.TILE_SIZE * (ARENA_X - 1 + 0.5), Resources.TILE_SIZE / 2d, 270);
 			break;
-		case 2:
+		case 2: // face south
 			navigation.xTile = ARENA_X - 1;
 			navigation.yTile = ARENA_Y - 1;
+			Resources.odometer.setXYT(Resources.TILE_SIZE * (ARENA_X - 1 + 0.5),
+					Resources.TILE_SIZE * (ARENA_Y - 1 + 0.5), 180);
 			break;
-		case 3:
+		case 3: // face east
 			navigation.xTile = 0;
 			navigation.yTile = ARENA_Y - 1;
+			Resources.odometer.setXYT(Resources.TILE_SIZE / 2d, Resources.TILE_SIZE * (ARENA_Y - 1 + 0.5), 180);
 			break;
 		}
+
+		// ====subject to change====//
 		PathFinder.targetX = (int) bin.x;
 		PathFinder.targetY = (int) bin.y;
 	}
@@ -253,11 +276,9 @@ public class PathFinder {
 			closed[current.X][current.Y] = true;
 
 			if (current.equals(map[targetX][targetY])) {
-				// at this point, you are at a target and the route can be traced back by using
-				// the parent Squares
 				ArrayList<int[]> result = new ArrayList<int[]>();
 				// we use a Stack to help reverse the linked list and calculate the movement
-				// (instead of using squares)
+				// (instead of returning squares)
 				Stack<Square> ghettoStack = new Stack<Square>();
 				ghettoStack.push(current);
 				while (current.parent != null) {
@@ -269,32 +290,33 @@ public class PathFinder {
 					int[] entry = { current.X, current.Y };
 					result.add(entry);
 				}
+				result.remove(0);
 				return result;
 			}
 
-			Square t;
+			Square targetSquare;
 			if (current.X - 1 >= 0) {
-				t = map[current.X - 1][current.Y];
-				t.hCost = current.getDistanceTo(map[targetX][targetY]);
-				checkAndUpdateCost(current, t, current.finalCost + 1);
+				targetSquare = map[current.X - 1][current.Y]; // WEST
+				targetSquare.hCost = current.getDistanceTo(map[targetX][targetY]);
+				checkAndUpdateCost(current, targetSquare, current.finalCost + 1);
 			}
 
 			if (current.Y - 1 >= 0) {
-				t = map[current.X][current.Y - 1];
-				t.hCost = current.getDistanceTo(map[targetX][targetY]);
-				checkAndUpdateCost(current, t, current.finalCost + 1);
+				targetSquare = map[current.X][current.Y - 1]; // SOUTH
+				targetSquare.hCost = current.getDistanceTo(map[targetX][targetY]);
+				checkAndUpdateCost(current, targetSquare, current.finalCost + 1);
 			}
 
 			if (current.Y + 1 < map[0].length) {
-				t = map[current.X][current.Y + 1];
-				t.hCost = current.getDistanceTo(map[targetX][targetY]);
-				checkAndUpdateCost(current, t, current.finalCost + 1);
+				targetSquare = map[current.X][current.Y + 1]; // NORTH
+				targetSquare.hCost = current.getDistanceTo(map[targetX][targetY]);
+				checkAndUpdateCost(current, targetSquare, current.finalCost + 1);
 			}
 
 			if (current.X + 1 < map.length) {
-				t = map[current.X + 1][current.Y];
-				t.hCost = current.getDistanceTo(map[targetX][targetY]);
-				checkAndUpdateCost(current, t, current.finalCost + 1);
+				targetSquare = map[current.X + 1][current.Y]; // EAST
+				targetSquare.hCost = current.getDistanceTo(map[targetX][targetY]);
+				checkAndUpdateCost(current, targetSquare, current.finalCost + 1);
 			}
 		}
 		return null;
@@ -302,7 +324,7 @@ public class PathFinder {
 
 	/**
 	 * ***** code copied over from lab 5 **** finds the square which the robot can
-	 * launch from 4 squares away from the target
+	 * launch from 5 squares away from the target
 	 * 
 	 * @param targetX x-coordinate of the target of the ball
 	 * @param targetY y-coordinate of the target of the ball
