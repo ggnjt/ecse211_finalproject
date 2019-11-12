@@ -13,6 +13,7 @@ import java.util.Arrays;
 
 import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
 import ca.mcgill.ecse211.finalproject.Resources;
+import lejos.hardware.Sound;
 
 /**
  * Class which takes care of color sensor polling, signal filtering as well as
@@ -56,6 +57,9 @@ public class ColorPoller implements Runnable {
 	 * RightColorThread
 	 */
 	Thread rightColorThread;
+	
+	private int rightCounter = 0;
+	private int leftCounter = 0;
 
 	public ColorPoller() {
 		super();
@@ -84,46 +88,65 @@ public class ColorPoller implements Runnable {
 			} else {
 				long readingStart, readingEnd;
 				readingStart = System.currentTimeMillis();
-
 				switch (navigation.navigationMode) {
 				case TRAVELING:
 					leftLineDetected = leftSampler.getBlackLine();
 					rightLineDetected = rightSampler.getBlackLine();
 					if (leftLineDetected || rightLineDetected) {
-						navigation.navigationMode = TravelingMode.CORRECTING;
-						navigation.setSpeed(40);
-						navigation.moveSuccessful = false;
 						navigation.stopTheRobot();
+						navigation.navigationMode = TravelingMode.CORRECTING;
+						navigation.setSpeed(25);
+						navigation.moveSuccessful = false;
+					}
+					else {
+						rightCounter = 0;
+						leftCounter = 0;
 					}
 					break;
 				case OBSTACLE_ENCOUNTERED:
+					break;
 				case CORRECTING:
 					leftLineDetected = leftLineDetected || leftSampler.getBlackLine();
 					rightLineDetected = rightLineDetected || rightSampler.getBlackLine();
-
-					if (leftLineDetected && rightLineDetected) {
-						// clear the line
-						leftMotor.rotate(4, true);
-						rightMotor.rotate(4, false);
-
+					boolean stopped = !leftMotor.isMoving() && !rightMotor.isMoving();
+					if (leftLineDetected && rightLineDetected || Math.abs(leftSampler.prev - rightSampler.prev) < 0.02) {
 						// Correct
 						correctXYT();
-
+						// clear the line
+						leftMotor.rotate(70, true);
+						rightMotor.rotate(70, false);
+						navigation.stopTheRobot();
 						navigation.setSpeed(FORWARD_SPEED);
 						navigation.navigationMode = TravelingMode.TRAVELING;
 						resetLineDetection();
 					} else if (leftLineDetected) {
-						rightMotor.forward();
+						if (stopped) {
+							rightMotor.forward(); 
+						}
+						rightCounter++;
+						if (rightCounter > 10) { //fail safe
+							navigation.stopTheRobot();
+							rightLineDetected = true;
+							rightCounter = 0;
+						}
 					} else if (rightLineDetected) {
-						leftMotor.forward();
+						if (stopped) {
+							leftMotor.forward();
+						}
+						leftCounter++;
+						if (leftCounter > 10) {
+							navigation.stopTheRobot();
+							leftLineDetected = true;
+							leftCounter = 0;
+						}
 					}
 					break;
 				}
 
 				readingEnd = System.currentTimeMillis();
-				if (readingEnd - readingStart < 60) {
+				if (readingEnd - readingStart < 50) {
 					try {
-						Thread.sleep(60 - (readingEnd - readingStart));
+						Thread.sleep(50 - (readingEnd - readingStart));
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -139,30 +162,24 @@ public class ColorPoller implements Runnable {
 	public static void correctXYT() {
 		double updatedTheta = 0d;
 		double[] currXYT = odometer.getXYT();
-		System.out.println("before:" + Arrays.toString(currXYT));
 		/*
 		 * Resets the angle (since we are only driving in cardinal directions, there are
 		 * only 4 possibilities
 		 */
 		if (currXYT[2] >= 45 && currXYT[2] < 135) {
 			updatedTheta = 90d; // facing EAST
-			System.out.println("EAST");
 			correctX(currXYT[0], updatedTheta);
 		} else if (currXYT[2] >= 135 && currXYT[2] < 225) {
 			updatedTheta = 180d; // facing SOUTH
-			System.out.println("SOUTH");
 			correctY(currXYT[1], updatedTheta);
 		} else if (currXYT[2] >= 225 && currXYT[2] < 315) {
 			updatedTheta = 270d; // facing WEST
-			System.out.println("WEST");
 			correctX(currXYT[0], updatedTheta);
 		} else {
 			updatedTheta = 0d; // facing NORTH
-			System.out.println("NORTH");
 			correctY(currXYT[1], updatedTheta);
 		}
 		odometer.setTheta(updatedTheta);
-		System.out.println("after:" + Arrays.toString(odometer.getXYT()));
 	}
 
 	/**

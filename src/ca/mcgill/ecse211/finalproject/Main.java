@@ -1,9 +1,14 @@
 package ca.mcgill.ecse211.finalproject;
 
 import static ca.mcgill.ecse211.finalproject.Resources.*;
-import static ca.mcgill.ecse211.finalproject.Resources.odometer;
+
 import java.util.ArrayList;
+
+import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
+import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizer;
+//import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizer;
 import lejos.hardware.Button;
+import lejos.hardware.Sound;
 
 /**
  * The main driver class for the odometry lab.
@@ -11,6 +16,7 @@ import lejos.hardware.Button;
 public class Main {
 	public static final int TARGETX = 6;
 	public static final int TARGETY = 3;
+	public static boolean P1finished = false;
 
 	/**
 	 * The main entry point.
@@ -18,14 +24,32 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Thread lcd = new Thread (Resources.display);
-		lcd.start();
-		Thread odoT = new Thread(odometer);
+		Thread b = new Thread(usLocalizer);
+		//Thread a = new Thread(USdisplay);
+		Thread c = new Thread(usPoller);
+		b.start();
+		c.start();
+		
+		while (!P1finished) {
+			Main.sleepFor(2000);
+		}
+		
+		UltrasonicPoller.kill = true;
+		
+		try {
+				b.join(5000);
+				c.join(5000);
+				System.out.println("success!");
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+//		Sound.beepSequenceUp();	
+//		LCD.clear();
+	//	Thread lcd = new Thread (Resources.display);
+	//	lcd.start();
 		Thread cT = new Thread(colorPoller);
-		odoT.start();
 		cT.start();
-
-		odometer.setXYT(TILE_SIZE / 2.0d, TILE_SIZE / 2.0d, 0);
 
 		ArrayList<int[]> moves = new ArrayList<int[]>();
 		moves.add(new int[] { 0, 1 });
@@ -43,11 +67,17 @@ public class Main {
 		moves.add(new int[] { 2, 0 });
 		moves.add(new int[] { 1, 0 });
 		moves.add(new int[] { 0, 0 });
-
 		for (int[] move : moves) {
 			navigation.processNextMove(move);
+			
 			while (!navigation.moveSuccessful) {
-				navigation.processNextMove(move);
+				if (navigation.navigationMode == TravelingMode.TRAVELING) {
+					navigation.processNextMove(move);
+					Sound.beepSequenceUp();
+				}
+				else {
+					Main.sleepFor(200);
+				}
 			}
 		}
 		

@@ -2,9 +2,13 @@ package ca.mcgill.ecse211.finalproject;
 
 import java.math.BigDecimal;
 import java.util.Map;
+
+import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizer;
 import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.Odometer;
-import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
+//import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
+//import ca.mcgill.ecse211.finalproject.UltrasonicPoller;
+//import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizerDisplay;
 /** WIFI package stuff */
 import ca.mcgill.ecse211.wificlient.WifiConnection;
 import lejos.hardware.ev3.LocalEV3;
@@ -12,6 +16,7 @@ import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.EV3UltrasonicSensor;
 
 /**
  * This class is used to define static resources in one place for easy access and to avoid cluttering the rest of the
@@ -28,35 +33,14 @@ public class Resources {
   public static final int ARENA_Y = 8;
 
   /**
-   * The threshold for when the signal is considered to have triggered a rising or falling edge.
-   */
-  public final int SIGNAL_THRESHOLD = 50;
-
-  /**
    * The threshold in intensity delta for determining when a line has been detected
    */
-  public static final double INTENSITY_THRESHOLD = 0.05;
-
-  /**
-   * The threshold for the delta between the current and previous value of the ultrasonic sensor. Used to detect rising
-   * and falling edges.
-   */
-  public static final int DELTA_THRESHOLD = 7;
-
-  /**
-   * The margin around NOISE_THRESHOLD to account for any noise in the signal.
-   */
-  public static final int NOISE_MARGIN = 3;
-
-  /**
-   * Distance to waypoint threshold in centimeters
-   */
-  public static final double WPOINT_RAD = 1;
+  public static final double INTENSITY_THRESHOLD = 0.07f;
 
   /**
    * Distance to light sensor from center of rotation in centimeters
    */
-  public static final double SENSOR_RADIUS = 7d;
+  public static final double SENSOR_RADIUS = 5d;
 
   /**
    * The wheel radius in centimeters.
@@ -66,12 +50,12 @@ public class Resources {
   /**
    * The robot width in centimeters.
    */
-  public static final double TRACK = 14.3;
+  public static final double TRACK = 13.16; //plis dont touch
 
   /**
    * The speed at which the robot moves forward in degrees per second.
    */
-  public static final int FORWARD_SPEED = 80;
+  public static final int FORWARD_SPEED = 70;
 
   /**
    * The speed at which the robot rotates in degrees per second.
@@ -89,24 +73,9 @@ public class Resources {
   public static final int ACCELERATION = 1000;
 
   /**
-   * Timeout period in milliseconds.
-   */
-  public static final int TIMEOUT_PERIOD = 3000;
-
-  /**
    * The tile size in centimeters.
    */
   public static final double TILE_SIZE = 30.48;
-
-  /**
-   * The furthest the ultrasonic distance can effectively see.
-   */
-  public static final int MAX_US_DISTANCE = 100;
-
-  /**
-   * The distance from the front of the ultrasonic sensor to the wheel base.
-   */
-  public static final int US_SENSOR_RADIUS = 5;
 
   /**
    * speed for the launcher motor
@@ -144,11 +113,16 @@ public class Resources {
    * display
    */
   public static final Display display = new Display();
+  
+  /**
+   * us display
+   */
+  //public static final UltrasonicLocalizerDisplay USdisplay = new UltrasonicLocalizerDisplay();
 
   /**
    * The ultrasonic sensor.
    */
-  // public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S4);
+  public static final EV3UltrasonicSensor US_SENSOR = new EV3UltrasonicSensor(SensorPort.S3);
 
   /**
    * left color sensor
@@ -167,12 +141,12 @@ public class Resources {
   /**
    * The ultrasonic poller.
    */
-  // public static final UltrasonicPoller usPoller = new UltrasonicPoller();
+  public static final UltrasonicPoller usPoller = new UltrasonicPoller();
 
   /**
    * US localizer
    */
-  // public static final UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer();
+  public static final UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer();
 
   /**
    * colorPoller
@@ -192,7 +166,7 @@ public class Resources {
   /**
    * Test path finder TODO: the way the path finder is initialized is subject to change
    */
-  public static final PathFinder pathFinder = PathFinder.test(15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
+  //public static final PathFinder pathFinder = PathFinder.test(15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
 
 
   /** ---------------------------- WIFI PACKAGE ---------------------------- */

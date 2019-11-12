@@ -1,5 +1,6 @@
 package ca.mcgill.ecse211.finalproject.phase2;
 
+import ca.mcgill.ecse211.finalproject.Resources;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.SampleProvider;
 
@@ -23,17 +24,12 @@ public class ColorSampler implements Runnable {
   /**
    * private float prev
    */
-  private float prev = 0.0f;
+  public float prev = 0.0f;
 
   /**
    * private float der
    */
   private float der = 0.0f;
-
-  /**
-   * A threshold value used to determine a large enough change in sensor measurement
-   */
-  private static final float SENSOR_DERIVATIVE_THRESHOLD = 0.08f; // DO NOT CHANGE ME
 
   /**
    * blackLine
@@ -62,14 +58,14 @@ public class ColorSampler implements Runnable {
       sampleProvider.fetchSample(sample, 0);
       float singleSample = sample[0];
       der = singleSample - prev;
-      blackLine = (der < 0 && Math.abs(der) > SENSOR_DERIVATIVE_THRESHOLD);
+      blackLine = (der < 0 && Math.abs(der) > Resources.INTENSITY_THRESHOLD);
       readingEnd = System.currentTimeMillis();
       prev = singleSample;
 
       readingEnd = System.currentTimeMillis();
-      if (readingEnd - readingStart < 100) {
+      if (readingEnd - readingStart < 60) {
         try {
-          Thread.sleep(100 - (readingEnd - readingStart));
+          Thread.sleep(60 - (readingEnd - readingStart));
         } catch (InterruptedException e) {
           e.printStackTrace();
         }

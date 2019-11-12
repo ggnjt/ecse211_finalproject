@@ -10,10 +10,11 @@ import static ca.mcgill.ecse211.finalproject.Resources.WHEEL_RAD;
 import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
 import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
-import static ca.mcgill.ecse211.finalproject.Resources.pathFinder;
+//import static ca.mcgill.ecse211.finalproject.Resources.pathFinder;
 import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
+import lejos.hardware.Sound;
 
 /**
  * Class where all of the navigation of the robot is handled
@@ -181,22 +182,23 @@ public class Navigation {
 			goTo(targetX, targetY);
 			break;
 		case CORRECTING:
-			try {
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			try {
+//				System.out.println("sleeping in nav, mode:" + navigationMode.toString());
+//				Thread.sleep(100);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 			break;
 		case OBSTACLE_ENCOUNTERED:
+			Sound.buzz();
 			PathFinder.resetMap();
-			pathFinder.setObstacle(xTile, yTile);
+			// pathFinder.setObstacle(xTile, yTile);
 			break;
 		}
 		if (moveSuccessful) {
-			System.out.println("This is called?");
-			xTile = move[0];
-			yTile = move[1];
+			xTile = (int) (odometer.getXYT()[0] / TILE_SIZE);
+			yTile = (int) (odometer.getXYT()[1] / TILE_SIZE);
 		}
 	}
 
@@ -204,6 +206,9 @@ public class Navigation {
 
 	// This is a blocking GoTo (blocks other threads)
 	public void goTo(int X, int Y) {
+//		if (moveSuccessful) {
+//			return;
+//		}
 		moveSuccessful = true;
 		double currentX = odometer.getXYT()[0];
 		double currentY = odometer.getXYT()[1];
@@ -225,16 +230,14 @@ public class Navigation {
 		} else if (angleDeviation < -180) {
 			angleDeviation += 360;
 		}
-
-		colorPoller.sleep();
+		double distance2go = Math.sqrt(X2go * X2go + Y2go * Y2go);
+		// colorPoller.sleep();
 		leftMotor.rotate(convertAngle(angleDeviation), true);
 		rightMotor.rotate(-convertAngle(angleDeviation), false);
-		colorPoller.wake();
-
-		double distance2go = Math.sqrt(X2go * X2go + Y2go * Y2go);
+		// colorPoller.wake();
 
 		leftMotor.rotate(convertDistance(distance2go), true);
 		rightMotor.rotate(convertDistance(distance2go), false);
-		
+		Sound.beepSequence();
 	}
 }
