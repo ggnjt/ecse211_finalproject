@@ -1,11 +1,18 @@
 package ca.mcgill.ecse211.finalproject;
 
+import static ca.mcgill.ecse211.finalproject.Resources.ARENA_X;
+import static ca.mcgill.ecse211.finalproject.Resources.ARENA_Y;
+import static ca.mcgill.ecse211.finalproject.Resources.island;
+import static ca.mcgill.ecse211.finalproject.Resources.red;
+import static ca.mcgill.ecse211.finalproject.Resources.redCorner;
+import static ca.mcgill.ecse211.finalproject.Resources.tnr;
 import java.math.BigDecimal;
 import java.util.Map;
 
 import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizer;
 import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.Odometer;
+import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
 //import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
 //import ca.mcgill.ecse211.finalproject.UltrasonicPoller;
 //import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizerDisplay;
@@ -29,8 +36,8 @@ public class Resources {
   /**
    * The dimensions sizes in squares
    */
-  public static final int ARENA_X = 14;
-  public static final int ARENA_Y = 8;
+  public static final int ARENA_X = 15;
+  public static final int ARENA_Y = 9;
 
   /**
    * The threshold in intensity delta for determining when a line has been detected
@@ -163,12 +170,6 @@ public class Resources {
    */
   public static Odometer odometer = Odometer.getOdometer();
 
-  /**
-   * Test path finder TODO: the way the path finder is initialized is subject to change
-   */
-  //public static final PathFinder pathFinder = PathFinder.test(15, 9, 4, 7, 6, 8, 0, 5, 4, 9, 6, 5, 15, 9, 12, 6);
-
-
   /** ---------------------------- WIFI PACKAGE ---------------------------- */
   /**
    * Integrate this carefully with your existing Resources class (See below for where to add your code from your current
@@ -204,7 +205,7 @@ public class Resources {
   /**
    * Enable this to attempt to receive Wi-Fi parameters at the start of the program.
    */
-  public static final boolean RECEIVE_WIFI_PARAMS = false;
+  public static final boolean RECEIVE_WIFI_PARAMS = true;
 
   // DECLARE YOUR CURRENT RESOURCES HERE
   // eg, motors, sensors, constants, etc
@@ -297,6 +298,11 @@ public class Resources {
       System.err.println("Error: " + e.getMessage());
     }
   }
+
+  /**
+   * Test path finder TODO: the way the path finder is initialized is subject to change
+   */
+  public static final PathFinder pathFinder = new PathFinder(redTeam == TEAM_NUMBER);
 
   /**
    * Returns the Wi-Fi parameter int value associated with the given key.
