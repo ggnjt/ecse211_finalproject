@@ -18,6 +18,9 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		pathFinder.printMap();
+		Button.waitForAnyPress();
+		System.exit(0);
 		Thread lcd = new Thread (Resources.display);
 		lcd.start();
 		Thread odoT = new Thread(odometer);

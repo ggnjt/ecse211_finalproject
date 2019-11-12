@@ -1,8 +1,6 @@
 package ca.mcgill.ecse211.finalproject.phase2;
 
-import static ca.mcgill.ecse211.finalproject.Resources.ARENA_X;
-import static ca.mcgill.ecse211.finalproject.Resources.ARENA_Y;
-import static ca.mcgill.ecse211.finalproject.Resources.navigation;
+import static ca.mcgill.ecse211.finalproject.Resources.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.PriorityQueue;
@@ -74,16 +72,23 @@ public class PathFinder {
    * @param islandURX upper right corner X coordinate of the central island
    * @param islandURY upper right corner Y coordinate of the central island
    */
-  public PathFinder(int arenaSizeX, int arenaSizeY, int tunnelLLX, int tunnelLLY, int tunnelURX, int tunnelURY,
-      int baseLLX, int baseLLY, int baseURX, int baseURY, int islandLLX, int islandLLY, int islandURX, int islandURY,
-      int corner) {
-
-    PathFinder.map = new Square[arenaSizeX][arenaSizeY];
-    PathFinder.closed = new boolean[arenaSizeX][arenaSizeY];
+  public PathFinder(boolean isRedTeam) {
+  	int corner = isRedTeam ? redCorner : greenCorner;
+  	Region base = isRedTeam ? red : green;
+  	Region tn = isRedTeam ? tnr : tng;
+  	
+  	System.out.println("Corner: " + corner);
+  	System.out.println("Base: " + base.toString());
+  	System.out.println("Tn: " + tn.toString());
+  	System.out.println("Island: " + island.toString());
+  	System.out.println("Arena X: " + ARENA_X + " Arena Y: " + ARENA_Y);
+  	
+    PathFinder.map = new Square[ARENA_X][ARENA_Y];
+    PathFinder.closed = new boolean[ARENA_X][ARENA_Y];
 
     // set river
-    for (int i = 0; i < arenaSizeX; i++) {
-      for (int j = 0; j < arenaSizeY; j++) {
+    for (int i = 0; i < ARENA_X; i++) {
+      for (int j = 0; j < ARENA_Y; j++) {
         Square sq = new Square(i, j);
         map[i][j] = sq;
         sq.setStatus(0);
@@ -91,20 +96,20 @@ public class PathFinder {
     }
 
     // set base
-    for (int i = baseLLX; i < baseURX; i++) {
-      for (int j = baseLLY; j < baseURY; j++) {
+    for (int i = (int) base.ll.x; i < (int) base.ur.x; i++) {
+      for (int j = (int) base.ll.y; j < (int) base.ur.y; j++) {
         map[i][j].setStatus(1);
       }
     }
     // set tunnel
-    for (int i = tunnelLLX; i < tunnelURX; i++) {
-      for (int j = tunnelLLY; j < tunnelURY; j++) {
+    for (int i = (int) tn.ll.x; i < (int) tn.ur.x; i++) {
+      for (int j = (int) tn.ll.y; j < (int) tn.ur.y; j++) {
         map[i][j].setStatus(2);
       }
     }
     // set island
-    for (int i = islandLLX; i < islandURX; i++) {
-      for (int j = islandLLY; j < islandURY; j++) {
+    for (int i = (int) island.ll.x; i < (int) island.ur.x; i++) {
+      for (int j = (int) island.ll.y; j < (int) island.ur.y; j++) {
         map[i][j].setStatus(3);
       }
     }
@@ -116,18 +121,18 @@ public class PathFinder {
         navigation.orientation = Navigation.Orientation.NORTH;
         break;
       case 1:
-        currentX = ARENA_X;
+        currentX = ARENA_X - 1;
         currentY = 0;
         navigation.orientation = Navigation.Orientation.WEST;
         break;
       case 2:
-        currentX = ARENA_X;
-        currentY = ARENA_Y;
+        currentX = ARENA_X - 1;
+        currentY = ARENA_Y - 1;
         navigation.orientation = Navigation.Orientation.SOUTH;
         break;
       case 3:
         currentX = 0;
-        currentY = ARENA_Y;
+        currentY = ARENA_Y - 1;
         navigation.orientation = Navigation.Orientation.EAST;
         break;
     }
@@ -201,6 +206,8 @@ public class PathFinder {
         }
       }
     }
+    System.out.println(currentX);
+    System.out.println(currentY);
     image[currentX][currentY] = 'C';
     image[targetX][targetY] = 'T';
     for (char[] row : image) {
@@ -408,11 +415,8 @@ public class PathFinder {
    * @param targetY
    * @return
    */
-  public static PathFinder test(int arenaSizeX, int arenaSizeY, int tunnelLLX, int tunnelLLY, int tunnelURX,
-      int tunnelURY, int baseLLX, int baseLLY, int baseURX, int baseURY, int islandLLX, int islandLLY, int islandURX,
-      int islandURY, int targetX, int targetY) {
-    PathFinder pf = new PathFinder(arenaSizeX, arenaSizeY, tunnelLLX, tunnelLLY, tunnelURX, tunnelURY, baseLLX, baseLLY,
-        baseURX, baseURY, islandLLX, islandLLY, islandURX, islandURY, 0);
+  public static PathFinder test(boolean isRedTeam, int targetX, int targetY) {
+    PathFinder pf = new PathFinder(isRedTeam);
     PathFinder.targetX = targetX;
     PathFinder.targetY = targetY;
     return pf;
