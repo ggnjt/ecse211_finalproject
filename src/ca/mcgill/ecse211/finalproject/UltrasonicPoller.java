@@ -15,7 +15,7 @@ import lejos.robotics.SampleProvider;
 public class UltrasonicPoller implements Runnable {
 	private int distance;
 	private float[] usData;
-	private static final short BUFFER_SIZE = 13;
+	private static final short BUFFER_SIZE = 11;
 	private int[] filterBuffer = new int[BUFFER_SIZE];
 	public static boolean kill = false;
 	private SampleProvider sampleProvider;

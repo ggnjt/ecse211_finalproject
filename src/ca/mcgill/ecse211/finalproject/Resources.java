@@ -53,7 +53,7 @@ public class Resources {
 	/**
 	 * The robot width in centimeters.
 	 */
-	public static final double TRACK = 12.12; // plis dont touch 13.16
+	public static final double TRACK = 11.90; // plis dont touch
 
 	/**
 	 * The speed at which the robot moves forward in degrees per second.
@@ -63,7 +63,7 @@ public class Resources {
 	/**
 	 * The speed at which the robot rotates in degrees per second.
 	 */
-	public static final int ROTATE_SPEED = 100;
+	public static final int ROTATE_SPEED = 140;
 
 	/**
 	 * Low speed used for more accurate sensor radians
