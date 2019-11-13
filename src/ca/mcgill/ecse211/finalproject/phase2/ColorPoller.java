@@ -11,6 +11,7 @@ import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 
 import java.util.Arrays;
 
+import ca.mcgill.ecse211.finalproject.Navigation;
 import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
 import ca.mcgill.ecse211.finalproject.Resources;
 import lejos.hardware.Sound;
@@ -106,7 +107,10 @@ public class ColorPoller implements Runnable {
 						navigation.stopTheRobot();
 						navigation.navigationMode = TravelingMode.CORRECTING;
 						navigation.setSpeed(Resources.CORRECTION_SPPED);
-						navigation.moveSuccessful = false;
+						synchronized(navigation) {
+							navigation.moveSuccessful = false;
+							Navigation.interrupted = true;
+						}
 					} else {
 						rightCounter = 0;
 						leftCounter = 0;
@@ -119,12 +123,12 @@ public class ColorPoller implements Runnable {
 					rightLineDetected = rightLineDetected || rightSampler.getBlackLine();
 					boolean stopped = !leftMotor.isMoving() && !rightMotor.isMoving();
 					if (leftLineDetected && rightLineDetected
-							|| Math.abs(leftSampler.prev - rightSampler.prev) < 0.02) {
+							|| Math.abs(leftSampler.prev - rightSampler.prev) < 0.022) {
 						// Correct
 						correctXYT();
 						// clear the line
-						leftMotor.rotate(60, true);
-						rightMotor.rotate(60, false);
+						leftMotor.rotate(40, true);
+						rightMotor.rotate(40, false);
 						navigation.stopTheRobot();
 						navigation.setSpeed(FORWARD_SPEED);
 						navigation.navigationMode = TravelingMode.TRAVELING;
@@ -134,7 +138,7 @@ public class ColorPoller implements Runnable {
 							rightMotor.forward();
 						}
 						rightCounter++;
-						if (rightCounter > 40) { // fail safe
+						if (rightCounter > 30) { // fail safe
 							navigation.stopTheRobot();
 							rightLineDetected = true;
 							rightCounter = 0;
@@ -144,7 +148,7 @@ public class ColorPoller implements Runnable {
 							leftMotor.forward();
 						}
 						leftCounter++;
-						if (leftCounter > 40) {
+						if (leftCounter > 30) {
 							navigation.stopTheRobot();
 							leftLineDetected = true;
 							leftCounter = 0;

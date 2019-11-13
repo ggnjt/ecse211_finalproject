@@ -29,37 +29,36 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 
-//		Thread USPollerThread = new Thread(usPoller);
-//		Thread USLocalizerThread = new Thread(usLocalizer);
-		odometer.start();
-//		USPollerThread.start();
-////		USLocalizerThread.start();
-//		while (!P1finished) {
-//			Main.sleepFor(2000);
-//		}
+//		Resources.leftMotor.forward();
+//		Resources.rightMotor.forward();
 
-//		UltrasonicPoller.kill = true;
-//
-//		try {
-//			USPollerThread.join(5000); // this should be remvoed after
-//			USLocalizerThread.join(5000);
-//			System.out.println("success!");
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		Thread USPollerThread = new Thread(Resources.usPoller);
+		Thread USLocalizerThread = new Thread(Resources.usLocalizer);
+		odometer.start();
+		USPollerThread.start();
+		USLocalizerThread.start();
+		while (!P1finished) {
+			Main.sleepFor(2000);
+		}
+
+		UltrasonicPoller.kill = true;
+
+		try {
+			USPollerThread.join(5000); // this should be remvoed after
+			USLocalizerThread.join(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		Resources.pathFinder = new PathFinder(redTeam == TEAM_NUMBER);
-		//Resources.pathFinder.printMap();		
-		
-		
-		LCD.clear();
+		// Resources.pathFinder.printMap();
+
 		Thread cT = new Thread(colorPoller);
 		cT.start();
 
 		ArrayList<int[]> moves = Resources.pathFinder.findPath();
 
-		
 		for (int[] move : moves) {
 			System.out.println(Arrays.toString(move));
 			navigation.processNextMove(move);
@@ -67,13 +66,13 @@ public class Main {
 			while (!navigation.moveSuccessful) {
 				if (navigation.navigationMode == TravelingMode.TRAVELING) {
 					navigation.processNextMove(move);
-					Sound.beepSequenceUp();
 				} else {
-					Main.sleepFor(100);
+					Main.sleepFor(60);
 				}
 			}
 		}
-
+		navigation.turnTo(180);
+		Resources.shooterMotor.rotate(150);
 		Button.waitForAnyPress();
 
 		// ==== Phase 3: launch the ball ==== //

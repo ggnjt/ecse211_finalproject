@@ -157,7 +157,7 @@ public class UltrasonicLocalizer implements Runnable {
 	 * we know that the robot is relatively perpendicular to the y-axis wall
 	 */
 	private static void detectYWall() {
-		if (spaceCounter < 40) {
+		if (spaceCounter < 20) {
 			spaceCounter++;
 		} else {
 			navigation.setSpeed(FORWARD_SPEED);
@@ -175,7 +175,7 @@ public class UltrasonicLocalizer implements Runnable {
 		leftMotor.forward();
 		rightMotor.forward();
 		spaceCounter++;
-		if (spaceCounter > 100) {
+		if (spaceCounter > 75) {
 			navigation.stopTheRobot();
 			state = SearchingState.BACK_Y;
 			spaceCounter = 0;
@@ -204,7 +204,7 @@ public class UltrasonicLocalizer implements Runnable {
 		leftMotor.forward();
 		rightMotor.forward();
 		spaceCounter++;
-		if (spaceCounter > 100) {
+		if (spaceCounter > 75) {
 			navigation.stopTheRobot();
 			state = SearchingState.FINISHING;
 			spaceCounter = 0;

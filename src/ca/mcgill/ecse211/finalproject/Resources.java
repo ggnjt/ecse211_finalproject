@@ -58,7 +58,7 @@ public class Resources {
 	/**
 	 * The speed at which the robot moves forward in degrees per second.
 	 */
-	public static final int FORWARD_SPEED = 110; // TODO: optimize this
+	public static final int FORWARD_SPEED = 145; // TODO: optimize this
 
 	/**
 	 * The speed at which the robot rotates in degrees per second.
@@ -68,7 +68,7 @@ public class Resources {
 	/**
 	 * Low speed used for more accurate sensor radians
 	 */
-	public static final int CORRECTION_SPPED = 25;
+	public static final int CORRECTION_SPPED = 45;
 
 	/**
 	 * The motor acceleration in degrees per second squared.
@@ -104,7 +104,7 @@ public class Resources {
 	/**
 	 * motor for the ball launcher
 	 */
-	public static final EV3LargeRegulatedMotor shooterMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+	public static final EV3LargeRegulatedMotor shooterMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 
 	/**
 	 * The LCD.

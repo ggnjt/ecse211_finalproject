@@ -71,6 +71,8 @@ public class Navigation {
 	 * whether the current move being processed in sucessful
 	 */
 	public boolean moveSuccessful = false;
+	
+	public static boolean interrupted = false;
 
 	/**
 	 * Constructor for the Navigation class.
@@ -187,7 +189,7 @@ public class Navigation {
 	 * @param Y y-coordinates of the target tile
 	 */
 	public void goTo(int X, int Y) {
-		
+		interrupted = false;
 		double currentX = odometer.getXYT()[0];
 		double currentY = odometer.getXYT()[1];
 		double currentTheta = odometer.getXYT()[2];
@@ -213,10 +215,14 @@ public class Navigation {
 		leftMotor.rotate(convertAngle(angleDeviation), true);
 		rightMotor.rotate(-convertAngle(angleDeviation), false);
 		Resources.colorPoller.wake();
-		moveSuccessful = true;
+		
 
 		leftMotor.rotate(convertDistance(distance2go), true);
 		rightMotor.rotate(convertDistance(distance2go), false);
+		if (!interrupted) {
+			moveSuccessful = true;
+		}
+		Sound.beepSequence();
 	}
 
 	/**
@@ -241,6 +247,6 @@ public class Navigation {
 			leftMotor.rotate(convertAngle(angleDiff), true);
 			rightMotor.rotate(convertAngle(-angleDiff), false);
 		}
-		Sound.beepSequence();
+		
 	}
 }
