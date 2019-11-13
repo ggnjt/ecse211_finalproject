@@ -56,9 +56,14 @@ public class Resources {
 	public static final double TRACK = 11.90; // plis dont touch
 
 	/**
-	 * The speed at which the robot moves forward in degrees per second.
+	 * The lower speed at which the robot moves towards a black line
 	 */
-	public static final int FORWARD_SPEED = 145; // TODO: optimize this
+	public static final int LOW_FORWARD_SPEED = 110; // TODO: optimize this
+	
+	/**
+	 * the higher speed at which the robot moves away from a black line
+	 */
+	public static final int HIGH_FORWARD_SPEED = 220;
 
 	/**
 	 * The speed at which the robot rotates in degrees per second.

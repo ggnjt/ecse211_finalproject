@@ -1,6 +1,5 @@
 package ca.mcgill.ecse211.finalproject.phase2;
 
-import static ca.mcgill.ecse211.finalproject.Resources.FORWARD_SPEED;
 import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
 import static ca.mcgill.ecse211.finalproject.Resources.leftColorSensor;
 import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
@@ -8,13 +7,9 @@ import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.rightColorSensor;
 import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
-
-import java.util.Arrays;
-
 import ca.mcgill.ecse211.finalproject.Navigation;
 import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
 import ca.mcgill.ecse211.finalproject.Resources;
-import lejos.hardware.Sound;
 
 /**
  * Class which takes care of color sensor polling, signal filtering as well as
@@ -123,14 +118,17 @@ public class ColorPoller implements Runnable {
 					rightLineDetected = rightLineDetected || rightSampler.getBlackLine();
 					boolean stopped = !leftMotor.isMoving() && !rightMotor.isMoving();
 					if (leftLineDetected && rightLineDetected
-							|| Math.abs(leftSampler.prev - rightSampler.prev) < 0.022) { //tweak moi plz
+							|| Math.abs(leftSampler.currentSample - rightSampler.currentSample) < 0.030) { //tweak moi plz
+					  
+					  System.out.println(Math.abs(leftSampler.currentSample - rightSampler.currentSample) < 0.03);
 						// Correct
 						correctXYT();
 						// clear the line
 						leftMotor.rotate(40, true); //how far you clear the black line
 						rightMotor.rotate(40, false);
 						navigation.stopTheRobot();
-						navigation.setSpeed(FORWARD_SPEED);
+						navigation.setSpeed(Resources.HIGH_FORWARD_SPEED);
+						//navigation.setSpeed(FORWARD_SPEED);
 						navigation.navigationMode = TravelingMode.TRAVELING;
 						resetLineDetection();
 					} else if (leftLineDetected) {
@@ -138,7 +136,7 @@ public class ColorPoller implements Runnable {
 							rightMotor.forward();
 						}
 						rightCounter++;
-						if (rightCounter > 30) { // fail safe //if miss line reading move this many cycles
+						if (rightCounter > 20) { // fail safe //if miss line reading move this many cycles
 							navigation.stopTheRobot();
 							rightLineDetected = true;
 							rightCounter = 0;
@@ -148,7 +146,7 @@ public class ColorPoller implements Runnable {
 							leftMotor.forward();
 						}
 						leftCounter++;
-						if (leftCounter > 30) {
+						if (leftCounter > 20) {
 							navigation.stopTheRobot();
 							leftLineDetected = true;
 							leftCounter = 0;
@@ -158,9 +156,9 @@ public class ColorPoller implements Runnable {
 				}
 
 				readingEnd = System.currentTimeMillis();
-				if (readingEnd - readingStart < 50) {
+				if (readingEnd - readingStart < 40) {
 					try {
-						Thread.sleep(50 - (readingEnd - readingStart));
+						Thread.sleep(40 - (readingEnd - readingStart));
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}

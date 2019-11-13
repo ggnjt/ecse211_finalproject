@@ -56,19 +56,23 @@ public class Main {
 
 		for (int[] move : moves) {
 			System.out.println(Arrays.toString(move));
+			navigation.setSpeed(Resources.LOW_FORWARD_SPEED);
 			navigation.processNextMove(move);
 
-			while (!navigation.moveSuccessful) {
+			while (!navigation.moveSuccessful || Navigation.interrupted) {
 				if (navigation.navigationMode == TravelingMode.TRAVELING) {
 					navigation.processNextMove(move);
 				} else {
-					Main.sleepFor(60);
+					Main.sleepFor(100);
 				}
 			}
 		}
 		navigation.turnTo(Resources.targetAngle-180);
-		Sound.twoBeeps();
 		Sound.beep();
+		Main.sleepFor(500);
+		Sound.beep();
+        Main.sleepFor(500);
+        Sound.beep();
 		Resources.shooterMotor.rotate(165);
 		Button.waitForAnyPress();
 

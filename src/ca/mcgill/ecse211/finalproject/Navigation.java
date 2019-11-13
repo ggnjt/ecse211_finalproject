@@ -3,15 +3,12 @@ package ca.mcgill.ecse211.finalproject;
 import static ca.mcgill.ecse211.finalproject.Resources.ACCELERATION;
 import static ca.mcgill.ecse211.finalproject.Resources.ARENA_X;
 import static ca.mcgill.ecse211.finalproject.Resources.ARENA_Y;
-import static ca.mcgill.ecse211.finalproject.Resources.FORWARD_SPEED;
 import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
 import static ca.mcgill.ecse211.finalproject.Resources.TRACK;
 import static ca.mcgill.ecse211.finalproject.Resources.WHEEL_RAD;
 import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
-//import static ca.mcgill.ecse211.finalproject.Resources.pathFinder;
 import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
-
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
 import lejos.hardware.Sound;
 
@@ -78,7 +75,7 @@ public class Navigation {
 	 * Constructor for the Navigation class.
 	 */
 	public Navigation() {
-		setSpeed(FORWARD_SPEED);
+		setSpeed(Resources.LOW_FORWARD_SPEED);
 		leftMotor.setAcceleration(ACCELERATION);
 		rightMotor.setAcceleration(ACCELERATION);
 	}
@@ -222,7 +219,7 @@ public class Navigation {
 		if (!interrupted) {
 			moveSuccessful = true;
 		}
-		Sound.beepSequence();
+		Main.sleepFor(100);
 	}
 
 	/**

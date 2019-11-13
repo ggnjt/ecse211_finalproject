@@ -157,10 +157,10 @@ public class UltrasonicLocalizer implements Runnable {
 	 * we know that the robot is relatively perpendicular to the y-axis wall
 	 */
 	private static void detectYWall() {
-		if (spaceCounter < 20) {
+		if (spaceCounter < 10) {
 			spaceCounter++;
 		} else {
-			navigation.setSpeed(FORWARD_SPEED);
+			navigation.setSpeed(HIGH_FORWARD_SPEED);
 			navigation.stopTheRobot();
 			state = SearchingState.RAM_Y;
 			spaceCounter = 0;
@@ -175,7 +175,7 @@ public class UltrasonicLocalizer implements Runnable {
 		leftMotor.forward();
 		rightMotor.forward();
 		spaceCounter++;
-		if (spaceCounter > 75) {
+		if (spaceCounter > 35) {
 			navigation.stopTheRobot();
 			state = SearchingState.BACK_Y;
 			spaceCounter = 0;
@@ -187,9 +187,9 @@ public class UltrasonicLocalizer implements Runnable {
 	 * face the x-axis wall.
 	 */
 	private static void backOffFromYWall() {
-		navigation.setSpeed(FORWARD_SPEED);
-		leftMotor.rotate(navigation.convertDistance(-4.0), true);
-		rightMotor.rotate(navigation.convertDistance(-4.0), false);
+		navigation.setSpeed(HIGH_FORWARD_SPEED);
+		leftMotor.rotate(navigation.convertDistance(-5.0), true);
+		rightMotor.rotate(navigation.convertDistance(-5.0), false);
 		leftMotor.rotate(navigation.convertAngle(-90.0), true);
 		rightMotor.rotate(navigation.convertAngle(90.0), false);
 		navigation.stopTheRobot();
@@ -204,7 +204,7 @@ public class UltrasonicLocalizer implements Runnable {
 		leftMotor.forward();
 		rightMotor.forward();
 		spaceCounter++;
-		if (spaceCounter > 75) {
+		if (spaceCounter > 35) {
 			navigation.stopTheRobot();
 			state = SearchingState.FINISHING;
 			spaceCounter = 0;
@@ -217,8 +217,8 @@ public class UltrasonicLocalizer implements Runnable {
 	 * exactly 0 degrees
 	 */
 	private static void finishing() {
-		leftMotor.rotate(navigation.convertDistance(-4.0), true);
-		rightMotor.rotate(navigation.convertDistance(-4.0), false);
+		leftMotor.rotate(navigation.convertDistance(-5.0), true);
+		rightMotor.rotate(navigation.convertDistance(-5.0), false);
 		leftMotor.rotate(navigation.convertAngle(180.0), true);
 		rightMotor.rotate(navigation.convertAngle(-180.0), false);
 		// rotate clockwise to avoid running into the wall here

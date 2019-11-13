@@ -24,7 +24,7 @@ public class ColorSampler implements Runnable {
 	/**
 	 * private float prev
 	 */
-	public float prev = 0.0f;
+	private float prev = 0.0f;
 
 	/**
 	 * private float der
@@ -35,6 +35,8 @@ public class ColorSampler implements Runnable {
 	 * blackLine
 	 */
 	private boolean blackLine = false;
+	
+	public float currentSample = 0.0f;
 
 	/**
 	 * Consturctor from a color sensor
@@ -57,16 +59,16 @@ public class ColorSampler implements Runnable {
 		while (true) {
 			readingStart = System.currentTimeMillis();
 			sampleProvider.fetchSample(sample, 0);
-			float singleSample = sample[0];
-			der = singleSample - prev;
+			currentSample = sample[0];
+			der = currentSample - prev;
 			blackLine = (der < 0 && Math.abs(der) > Resources.INTENSITY_THRESHOLD);
 			readingEnd = System.currentTimeMillis();
-			prev = singleSample;
+			prev = currentSample;
 
 			readingEnd = System.currentTimeMillis();
-			if (readingEnd - readingStart < 60) {
+			if (readingEnd - readingStart < 40) {
 				try {
-					Thread.sleep(60 - (readingEnd - readingStart));
+					Thread.sleep(40 - (readingEnd - readingStart));
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
