@@ -1,6 +1,5 @@
 package ca.mcgill.ecse211.finalproject;
 
-import static ca.mcgill.ecse211.finalproject.Resources.LCD;
 import static ca.mcgill.ecse211.finalproject.Resources.TEAM_NUMBER;
 import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
 import static ca.mcgill.ecse211.finalproject.Resources.navigation;
@@ -29,30 +28,26 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 
-//		Resources.leftMotor.forward();
-//		Resources.rightMotor.forward();
-
 		Thread USPollerThread = new Thread(Resources.usPoller);
 		Thread USLocalizerThread = new Thread(Resources.usLocalizer);
 		odometer.start();
 		USPollerThread.start();
 		USLocalizerThread.start();
 		while (!P1finished) {
-			Main.sleepFor(2000);
+			Main.sleepFor(1000);
 		}
-
-		UltrasonicPoller.kill = true;
+		Sound.beepSequence();
+		
+		UltrasonicPoller.kill = true;// this should be removed after demo
 
 		try {
-			USPollerThread.join(5000); // this should be remvoed after
+			USPollerThread.join(5000); // this should be removed after demo
 			USLocalizerThread.join(5000);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Sadness is the ichor of life");
 		}
 
 		Resources.pathFinder = new PathFinder(redTeam == TEAM_NUMBER);
-		// Resources.pathFinder.printMap();
 
 		Thread cT = new Thread(colorPoller);
 		cT.start();
@@ -71,19 +66,11 @@ public class Main {
 				}
 			}
 		}
-		navigation.turnTo(180);
-		Resources.shooterMotor.rotate(150);
+		navigation.turnTo(Resources.targetAngle-180);
+		Sound.twoBeeps();
+		Sound.beep();
+		Resources.shooterMotor.rotate(165);
 		Button.waitForAnyPress();
-
-		// ==== Phase 3: launch the ball ==== //
-		// while (shots < 5) {
-		// shooterMotor.rotate(-190); // cock the launcher
-		// Sound.twoBeeps(); // beep for dramatic effect
-		// shooterMotor.rotate(240); // shoot
-		// shooterMotor.rotate(-50); // reset angle
-		// Button.waitForAnyPress(); // wait for reload
-		// shots++;
-		// }
 
 		System.exit(0);
 	}

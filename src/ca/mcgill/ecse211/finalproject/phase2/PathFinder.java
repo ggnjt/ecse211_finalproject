@@ -120,35 +120,35 @@ public class PathFinder {
 		}
 
 		// set safeguard for tunnel, setting all tiles beside the tunnel to be river
-//		if ((int) tn.ur.x - (int) tn.ll.x > 1) { // long tunnel is horizontal
-//			int[] llCoord = { (int) tn.ll.x, (int) tn.ll.y };
-//			if (llCoord[1] - 1 >= 0 && llCoord[1] + 1 < ARENA_Y) {
-//				map[llCoord[0]][llCoord[1] - 1].setStatus(0);
-//				map[llCoord[0] + 1][llCoord[1] - 1].setStatus(0);
-//				map[llCoord[0]][llCoord[1] + 1].setStatus(0);
-//				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
-//			} else if (llCoord[1] - 1 >= 0) {
-//				map[llCoord[0]][llCoord[1] - 1].setStatus(0);
-//				map[llCoord[0] + 1][llCoord[1] - 1].setStatus(0);
-//			} else {
-//				map[llCoord[0]][llCoord[1] + 1].setStatus(0);
-//				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
-//			}
-//		} else if ((int) tn.ur.y - (int) tn.ll.y > 1) { // long tunnel is vertical
-//			int[] llCoord = { (int) tn.ll.x, (int) tn.ll.y };
-//			if (llCoord[0] - 1 >= 0 && llCoord[0] + 1 < ARENA_X) {
-//				map[llCoord[0] - 1][llCoord[1]].setStatus(0);
-//				map[llCoord[0] - 1][llCoord[1] + 1].setStatus(0);
-//				map[llCoord[0] + 1][llCoord[1]].setStatus(0);
-//				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
-//			} else if (llCoord[1] - 1 >= 0) {
-//				map[llCoord[0] - 1][llCoord[1]].setStatus(0);
-//				map[llCoord[0] - 1][llCoord[1] + 1].setStatus(0);
-//			} else {
-//				map[llCoord[0] + 1][llCoord[1]].setStatus(0);
-//				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
-//			}
-//		}
+		if ((int) tn.ur.x - (int) tn.ll.x > 1) { // long tunnel is horizontal
+			int[] llCoord = { (int) tn.ll.x, (int) tn.ll.y };
+			if (llCoord[1] - 1 >= 0 && llCoord[1] + 1 < ARENA_Y) {
+				map[llCoord[0]][llCoord[1] - 1].setStatus(0);
+				map[llCoord[0] + 1][llCoord[1] - 1].setStatus(0);
+				map[llCoord[0]][llCoord[1] + 1].setStatus(0);
+				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
+			} else if (llCoord[1] - 1 >= 0) {
+				map[llCoord[0]][llCoord[1] - 1].setStatus(0);
+				map[llCoord[0] + 1][llCoord[1] - 1].setStatus(0);
+			} else {
+				map[llCoord[0]][llCoord[1] + 1].setStatus(0);
+				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
+			}
+		} else if ((int) tn.ur.y - (int) tn.ll.y > 1) { // long tunnel is vertical
+			int[] llCoord = { (int) tn.ll.x, (int) tn.ll.y };
+			if (llCoord[0] - 1 >= 0 && llCoord[0] + 1 < ARENA_X) {
+				map[llCoord[0] - 1][llCoord[1]].setStatus(0);
+				map[llCoord[0] - 1][llCoord[1] + 1].setStatus(0);
+				map[llCoord[0] + 1][llCoord[1]].setStatus(0);
+				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
+			} else if (llCoord[1] - 1 >= 0) {
+				map[llCoord[0] - 1][llCoord[1]].setStatus(0);
+				map[llCoord[0] - 1][llCoord[1] + 1].setStatus(0);
+			} else {
+				map[llCoord[0] + 1][llCoord[1]].setStatus(0);
+				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
+			}
+		}
 
 		switch (corner) {
 		case 0: // face north
