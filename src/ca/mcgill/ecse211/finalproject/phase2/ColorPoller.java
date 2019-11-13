@@ -123,11 +123,11 @@ public class ColorPoller implements Runnable {
 					rightLineDetected = rightLineDetected || rightSampler.getBlackLine();
 					boolean stopped = !leftMotor.isMoving() && !rightMotor.isMoving();
 					if (leftLineDetected && rightLineDetected
-							|| Math.abs(leftSampler.prev - rightSampler.prev) < 0.022) {
+							|| Math.abs(leftSampler.prev - rightSampler.prev) < 0.022) { //tweak moi plz
 						// Correct
 						correctXYT();
 						// clear the line
-						leftMotor.rotate(40, true);
+						leftMotor.rotate(40, true); //how far you clear the black line
 						rightMotor.rotate(40, false);
 						navigation.stopTheRobot();
 						navigation.setSpeed(FORWARD_SPEED);
@@ -138,7 +138,7 @@ public class ColorPoller implements Runnable {
 							rightMotor.forward();
 						}
 						rightCounter++;
-						if (rightCounter > 30) { // fail safe
+						if (rightCounter > 30) { // fail safe //if miss line reading move this many cycles
 							navigation.stopTheRobot();
 							rightLineDetected = true;
 							rightCounter = 0;

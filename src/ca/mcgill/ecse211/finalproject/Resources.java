@@ -53,7 +53,7 @@ public class Resources {
 	/**
 	 * The robot width in centimeters.
 	 */
-	public static final double TRACK = 13.16; // plis dont touch
+	public static final double TRACK = 12.12; // plis dont touch 13.16
 
 	/**
 	 * The speed at which the robot moves forward in degrees per second.
@@ -186,7 +186,7 @@ public class Resources {
 	 * The IP address of the server that transmits data to the robot. Set this to
 	 * the default for the beta demo and competition.
 	 */
-	public static final String SERVER_IP = "192.168.2.56";
+	public static final String SERVER_IP = "192.168.2.32";
 
 	/**
 	 * Your team number.

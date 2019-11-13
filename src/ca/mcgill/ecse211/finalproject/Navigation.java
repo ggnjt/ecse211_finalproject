@@ -38,7 +38,7 @@ public class Navigation {
 	 * set Speed
 	 */
 	public void setSpeed(int speed) {
-		leftMotor.setSpeed(speed);
+		leftMotor.setSpeed(speed); 
 		rightMotor.setSpeed(speed);
 	}
 
