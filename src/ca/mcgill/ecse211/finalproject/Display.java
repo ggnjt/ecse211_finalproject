@@ -52,7 +52,6 @@ public class Display implements Runnable {
 				}
 			}
 		} while ((updateEnd - tStart) <= timeout);
-
 	}
 
 	/**

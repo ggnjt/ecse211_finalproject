@@ -58,12 +58,12 @@ public class Resources {
 	/**
 	 * The lower speed at which the robot moves towards a black line
 	 */
-	public static final int LOW_FORWARD_SPEED = 110; // TODO: optimize this
+	public static final int LOW_FORWARD_SPEED = 100; // TODO: optimize this
 	
 	/**
 	 * the higher speed at which the robot moves away from a black line
 	 */
-	public static final int HIGH_FORWARD_SPEED = 220;
+	public static final int HIGH_FORWARD_SPEED = 240;
 
 	/**
 	 * The speed at which the robot rotates in degrees per second.
@@ -185,13 +185,13 @@ public class Resources {
 	/**
 	 * The default server IP used by the profs and TA's.
 	 */
-	public static final String DEFAULT_SERVER_IP = "192.168.2.3";
+	public static final String DEFAULT_SERVER_IP = "192.168.2.53";
 
 	/**
 	 * The IP address of the server that transmits data to the robot. Set this to
 	 * the default for the beta demo and competition.
 	 */
-	public static final String SERVER_IP = "192.168.2.32";
+	public static final String SERVER_IP = "192.168.2.56";
 
 	/**
 	 * Your team number.

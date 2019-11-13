@@ -140,7 +140,7 @@ public class UltrasonicLocalizer implements Runnable {
 	 * turn until it encounters a wall, at which point it slows down
 	 */
 	private static void gazeTheAbyss() {
-		if (reading < TILE_SIZE * 0.9) {
+		if (reading < TILE_SIZE) {
 			spaceCounter++;
 		} else
 			spaceCounter = 0;

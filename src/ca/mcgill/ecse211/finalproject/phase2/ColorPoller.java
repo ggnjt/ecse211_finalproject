@@ -119,8 +119,6 @@ public class ColorPoller implements Runnable {
 					boolean stopped = !leftMotor.isMoving() && !rightMotor.isMoving();
 					if (leftLineDetected && rightLineDetected
 							|| Math.abs(leftSampler.currentSample - rightSampler.currentSample) < 0.030) { //tweak moi plz
-					  
-					  System.out.println(Math.abs(leftSampler.currentSample - rightSampler.currentSample) < 0.03);
 						// Correct
 						correctXYT();
 						// clear the line
@@ -128,7 +126,6 @@ public class ColorPoller implements Runnable {
 						rightMotor.rotate(40, false);
 						navigation.stopTheRobot();
 						navigation.setSpeed(Resources.HIGH_FORWARD_SPEED);
-						//navigation.setSpeed(FORWARD_SPEED);
 						navigation.navigationMode = TravelingMode.TRAVELING;
 						resetLineDetection();
 					} else if (leftLineDetected) {
@@ -136,7 +133,7 @@ public class ColorPoller implements Runnable {
 							rightMotor.forward();
 						}
 						rightCounter++;
-						if (rightCounter > 20) { // fail safe //if miss line reading move this many cycles
+						if (rightCounter > 25) { // fail safe //if miss line reading move this many cycles
 							navigation.stopTheRobot();
 							rightLineDetected = true;
 							rightCounter = 0;
@@ -146,7 +143,7 @@ public class ColorPoller implements Runnable {
 							leftMotor.forward();
 						}
 						leftCounter++;
-						if (leftCounter > 20) {
+						if (leftCounter > 25) {
 							navigation.stopTheRobot();
 							leftLineDetected = true;
 							leftCounter = 0;
@@ -156,9 +153,9 @@ public class ColorPoller implements Runnable {
 				}
 
 				readingEnd = System.currentTimeMillis();
-				if (readingEnd - readingStart < 40) {
+				if (readingEnd - readingStart < 60) {
 					try {
-						Thread.sleep(40 - (readingEnd - readingStart));
+						Thread.sleep(60 - (readingEnd - readingStart));
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -238,7 +235,7 @@ public class ColorPoller implements Runnable {
 		rightLineDetected = false;
 
 		try {
-			Thread.sleep(2000);
+			Thread.sleep(1500);
 		} catch (InterruptedException e) {
 		}
 	}

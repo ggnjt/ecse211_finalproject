@@ -66,9 +66,9 @@ public class ColorSampler implements Runnable {
 			prev = currentSample;
 
 			readingEnd = System.currentTimeMillis();
-			if (readingEnd - readingStart < 40) {
+			if (readingEnd - readingStart < 60) {
 				try {
-					Thread.sleep(40 - (readingEnd - readingStart));
+					Thread.sleep(60 - (readingEnd - readingStart));
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

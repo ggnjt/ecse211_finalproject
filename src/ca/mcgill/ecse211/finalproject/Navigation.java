@@ -7,6 +7,7 @@ import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
 import static ca.mcgill.ecse211.finalproject.Resources.TRACK;
 import static ca.mcgill.ecse211.finalproject.Resources.WHEEL_RAD;
 import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
+import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
@@ -228,6 +229,8 @@ public class Navigation {
 	 * @param theta target angle to turn towards, 0 being facing North
 	 */
 	public void turnTo(double theta) {
+		System.out.println("this is called");
+		
 		double angleDiff = theta - odometer.getXYT()[2];
 		// Don't correct the angle if it is within a certain threshold
 		if (Math.abs(angleDiff) < 3.0 || Math.abs(angleDiff) > 357.0) {
@@ -245,5 +248,11 @@ public class Navigation {
 			rightMotor.rotate(convertAngle(-angleDiff), false);
 		}
 		
+	}
+	
+	public void goToLowerLeftCorner () {
+		turnTo(225);
+		Resources.leftMotor.rotate(convertDistance(0.73*TILE_SIZE), true);
+		Resources.rightMotor.rotate(convertDistance(0.73*TILE_SIZE), false);
 	}
 }
