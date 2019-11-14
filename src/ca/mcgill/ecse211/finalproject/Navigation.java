@@ -1,138 +1,84 @@
 package ca.mcgill.ecse211.finalproject;
 
 import static ca.mcgill.ecse211.finalproject.Resources.ACCELERATION;
-import static ca.mcgill.ecse211.finalproject.Resources.FORWARD_SPEED;
-import static ca.mcgill.ecse211.finalproject.Resources.LCD;
-import static ca.mcgill.ecse211.finalproject.Resources.ROTATE_SPEED;
+import static ca.mcgill.ecse211.finalproject.Resources.ARENA_X;
+import static ca.mcgill.ecse211.finalproject.Resources.ARENA_Y;
 import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
 import static ca.mcgill.ecse211.finalproject.Resources.TRACK;
 import static ca.mcgill.ecse211.finalproject.Resources.WHEEL_RAD;
-import static ca.mcgill.ecse211.finalproject.Resources.WPOINT_RAD;
 import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
+import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
-
+import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
 import lejos.hardware.Sound;
 
+/**
+ * Class where all of the navigation of the robot is handled
+ * 
+ * @author yp
+ * @author elias
+ */
 public class Navigation {
-	// integers to hold which square the robot is currently in
-	public static int xTile = 0;
-	public static int yTile = 0;
 
 	/**
-	 * Lets other methods know if the robot is currently navigating to a waypoint.
+	 * traveling state of the robot, either traveling, correcting angle or detected
+	 * an obstacle
+	 * 
+	 * @author yp
+	 *
 	 */
-	private static boolean isNavigating;
+	public enum TravelingMode {
+		TRAVELING, CORRECTING, OBSTACLE_ENCOUNTERED
+	}
 
 	/**
-	 * An array containing the current X, Y, and theta of the robot, as given by the
-	 * odometer.
+	 * set Speed
 	 */
-	private static double[] position;
-	/**
-	 * Vector in the x direction from the robots current position to the waypoint.
-	 */
-	private static double vectorX;
+	public void setSpeed(int speed) {
+		leftMotor.setSpeed(speed); 
+		rightMotor.setSpeed(speed);
+	}
 
 	/**
-	 * Vector in the y direction from the robots current position to the waypoint.
+	 * current moving state of the robot
 	 */
-	private static double vectorY;
+	public TravelingMode navigationMode = TravelingMode.TRAVELING;
 
 	/**
-	 * The angle the robot needs to go to so that it is a straight line to the
-	 * waypoint.
+	 * current x tile coordinate of the robot
 	 */
-	private static double heading;
+	public int xTile = 0;
+
+	/**
+	 * current x tile coordinate of the robot
+	 */
+	public int yTile = 0;
+
+	/**
+	 * target x coordinate of the current move being processed
+	 */
+	public int targetX = 0;
+
+	/**
+	 * target y coordinate of the current move being processed
+	 */
+	public int targetY = 0;
+
+	/**
+	 * whether the current move being processed in sucessful
+	 */
+	public boolean moveSuccessful = false;
+	
+	public static boolean interrupted = false;
 
 	/**
 	 * Constructor for the Navigation class.
 	 */
 	public Navigation() {
-		isNavigating = false;
+		setSpeed(Resources.LOW_FORWARD_SPEED);
 		leftMotor.setAcceleration(ACCELERATION);
 		rightMotor.setAcceleration(ACCELERATION);
-	}
-
-	/**
-	 * The main method used to travel to a waypoint. The method will loop at
-	 * approximately 20 Hz and make sure the robot is on the correct path towards
-	 * the waypoint. It will call turnTo() if the robot needs to make a change in
-	 * heading. It will also call avoidObject() if the robot is about to run into an
-	 * obstacle.
-	 * 
-	 * @param x the X coordinate of the waypoint
-	 * @param y the Y coordinate of the waypoint
-	 */
-	public static void travelTo(double x, double y) {
-
-		position = odometer.getXYT();
-		vectorX = x - position[0];
-		vectorY = y - position[1];
-
-		while (distance(vectorX, vectorY) > WPOINT_RAD) {
-			position = odometer.getXYT(); // Get position of the robot from the odometer
-			// Update the vectors from the current position to the waypoint
-			vectorX = x - position[0];
-			vectorY = y - position[1];
-			// Update the heading, and ensure it stays between 0 and 360 degrees
-			heading = Math.toDegrees(Math.atan2(vectorX, vectorY));
-			heading = (heading + 360) % 360;
-			LCD.drawString("Heading: " + Double.toString(heading), 0, 3);
-			// If the robot isn't too close to the waypoint, allow it to correct its heading
-			// by rotating
-			if (distance(vectorX, vectorY) > (2 * WPOINT_RAD)) {
-				turnTo(heading);
-			}
-
-			leftMotor.setSpeed(FORWARD_SPEED);
-			rightMotor.setSpeed(FORWARD_SPEED);
-			leftMotor.forward();
-			rightMotor.forward();
-			try {
-				Thread.sleep(50);
-			} catch (Exception e) {
-			}
-
-		}
-		leftMotor.stop(true);
-		rightMotor.stop(false);
-		Sound.twoBeeps(); // Beep when it has reached a waypoint
-	}
-
-	/**
-	 * Rotates the robot to an absolute angle theta. It also ensures the robot turns
-	 * the minimal angle to get to theta.
-	 * 
-	 * @param theta the absolute angle the robot should turn to in degrees
-	 */
-	public static void turnTo(double theta) {
-		double angleDiff = theta - odometer.getXYT()[2];
-		// Don't correct the angle if it is within a certain threshold
-		if (Math.abs(angleDiff) < 3.0 || Math.abs(angleDiff) > 357.0) {
-			return;
-		}
-		leftMotor.setSpeed(ROTATE_SPEED);
-		rightMotor.setSpeed(ROTATE_SPEED);
-		// This ensures the robot uses the minimal angle when turning to theta
-		if (Math.abs(angleDiff) > 180.0) {
-			angleDiff = Math.signum(angleDiff) * 360.0 - angleDiff;
-			leftMotor.rotate(convertAngle(-angleDiff), true);
-			rightMotor.rotate(convertAngle(angleDiff), false);
-		} else {
-			leftMotor.rotate(convertAngle(angleDiff), true);
-			rightMotor.rotate(convertAngle(-angleDiff), false);
-		}
-	}
-
-	/**
-	 * Returns a boolean of whether or not the robot is currently navigating to a
-	 * waypoint.
-	 * 
-	 * @return true if the robot is currently navigating to a waypoint.
-	 */
-	public boolean isNavigating() {
-		return isNavigating;
 	}
 
 	/**
@@ -142,7 +88,7 @@ public class Navigation {
 	 * @param distance
 	 * @return the wheel rotations necessary to cover the distance
 	 */
-	public static int convertDistance(double distance) {
+	public int convertDistance(double distance) {
 		return (int) ((180 * distance) / (Math.PI * WHEEL_RAD));
 	}
 
@@ -153,45 +99,8 @@ public class Navigation {
 	 * @param angle
 	 * @return the wheel rotations necessary to rotate the robot by the angle
 	 */
-	public static int convertAngle(double angle) {
+	public int convertAngle(double angle) {
 		return convertDistance((Math.PI * TRACK * angle) / 360.0);
-	}
-
-	/**
-	 * Calculates the euclidian distance given an X and Y distance, in cm.
-	 * 
-	 * @param deltaX X distance
-	 * @param deltaY Y distance
-	 * @return Euclidean distance
-	 */
-	private static double distance(double deltaX, double deltaY) {
-		return Math.sqrt((Math.pow((deltaX), 2) + Math.pow((deltaY), 2)));
-	}
-
-	/**
-	 * moves the robot forward by x many tile lengths
-	 * 
-	 * @param i number of tile lengths
-	 */
-	public static void moveForwardByTile(double i) {
-		leftMotor.rotate(convertDistance(TILE_SIZE * i), true);
-		rightMotor.rotate(convertDistance(TILE_SIZE * i), false);
-	}
-
-	/**
-	 * turns the robot 90 degrees left
-	 */
-	public static void turnLeft() {
-		leftMotor.rotate(convertAngle(-90.0), true);
-		rightMotor.rotate(convertAngle(90.0), false);
-	}
-
-	/**
-	 * turns the robot 90 degrees right
-	 */
-	public static void turnRight() {
-		leftMotor.rotate(convertAngle(90.0), true);
-		rightMotor.rotate(convertAngle(-90.0), false);
 	}
 
 	/**
@@ -203,17 +112,16 @@ public class Navigation {
 	 * @return the target square coordinates and the angle needed in an int array of
 	 *         size [3]
 	 */
-	public static int[] findTarget(int targetX, int targetY) {
+	public int[] findTarget(int targetX, int targetY) {
 		int[] result = new int[3];
 		double shortest_dist = 100;
 		int[][] notableSquares = { { 0, 5 }, { 4, 4 }, { 5, 0 }, { 4, -4 }, { 0, -5 }, { -4, -4 }, { -5, 0 },
 				{ -4, 4 } };
 		int[] thetaOptions = { 180, 225, 270, 315, 0, 45, 90, 135 };
-
 		for (int i = 0; i < notableSquares.length; i++) {
 			int[] pair = notableSquares[i];
-			boolean ooX = pair[0] + targetX > Resources.ARENA_X || pair[0] + targetX < 0;
-			boolean ooY = pair[1] + targetY > Resources.ARENA_Y || pair[1] + targetY < 0;
+			boolean ooX = pair[0] + targetX > ARENA_X || pair[0] + targetX < 0;
+			boolean ooY = pair[1] + targetY > ARENA_Y || pair[1] + targetY < 0;
 			if (ooX || ooY) {
 				continue;
 			} else {
@@ -229,20 +137,122 @@ public class Navigation {
 		}
 		return result;
 	}
-	
+
 	/**
-	 * moves the robot to the optimal square and take aim
-	 * @param targetX target square X coordinate
-	 * @param targetY target square Y coordinate
+	 * stops the robot in place
 	 */
-	public static void getReadyToShoot(int targetX, int targetY) {
-		int[] destination = findTarget(targetX, targetY);
-		moveForwardByTile(destination[1]);
-		turnRight();
-		moveForwardByTile(destination[0]);
-		turnTo(destination[2]);
-		if (destination[2] % 90 > 0) {
-			moveForwardByTile(0.5); // Minor correction for corner cases
+	public void stopTheRobot() {
+		leftMotor.stop(true);
+		rightMotor.stop(false);
+	}
+
+	/**
+	 * process a move which takes the form of a size 2 array. The robot will turn
+	 * and move towards the center of that tile
+	 * 
+	 * @param move a size 2 representing the coordinates of the target tile
+	 */
+	public void processNextMove(int[] move) {
+		targetX = move[0];
+		targetY = move[1];
+		switch (navigationMode) {
+		case TRAVELING:
+			goTo(targetX, targetY);
+			break;
+		case CORRECTING:
+//			try {
+//				System.out.println("sleeping in nav, mode:" + navigationMode.toString());
+//				Thread.sleep(100);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+			break;
+		case OBSTACLE_ENCOUNTERED:
+			Sound.buzz();
+			PathFinder.resetMap();
+			// pathFinder.setObstacle(xTile, yTile);
+			break;
 		}
+		if (moveSuccessful) {
+			xTile = (int) (odometer.getXYT()[0] / TILE_SIZE);
+			yTile = (int) (odometer.getXYT()[1] / TILE_SIZE);
+		}
+	}
+
+	/**
+	 * turn and move to the center of a target tile
+	 * 
+	 * @param X x-coordinates of the target tile
+	 * @param Y y-coordinates of the target tile
+	 */
+	public void goTo(int X, int Y) {
+		interrupted = false;
+		double currentX = odometer.getXYT()[0];
+		double currentY = odometer.getXYT()[1];
+		double currentTheta = odometer.getXYT()[2];
+		double Xtarget = ((double) X + 0.5) * TILE_SIZE;
+		double Ytarget = ((double) Y + 0.5) * TILE_SIZE;
+
+		double X2go = Xtarget - currentX;
+		double Y2go = Ytarget - currentY;
+
+		double angleTarget = Math.atan(X2go / Y2go) / Math.PI * 180;
+		if (Y2go < 0) {
+			angleTarget += 180;
+		}
+		double angleDeviation = angleTarget - currentTheta;
+
+		if (angleDeviation > 180) {
+			angleDeviation -= 360;
+		} else if (angleDeviation < -180) {
+			angleDeviation += 360;
+		}
+		double distance2go = Math.sqrt(X2go * X2go + Y2go * Y2go);
+		Resources.colorPoller.sleep();
+		leftMotor.rotate(convertAngle(angleDeviation), true);
+		rightMotor.rotate(-convertAngle(angleDeviation), false);
+		Resources.colorPoller.wake();
+		
+
+		leftMotor.rotate(convertDistance(distance2go), true);
+		rightMotor.rotate(convertDistance(distance2go), false);
+		if (!interrupted) {
+			moveSuccessful = true;
+		}
+		Main.sleepFor(100);
+	}
+
+	/**
+	 * turn to the target absolute theta
+	 * 
+	 * @param theta target angle to turn towards, 0 being facing North
+	 */
+	public void turnTo(double theta) {
+		System.out.println("this is called");
+		
+		double angleDiff = theta - odometer.getXYT()[2];
+		// Don't correct the angle if it is within a certain threshold
+		if (Math.abs(angleDiff) < 3.0 || Math.abs(angleDiff) > 357.0) {
+			return;
+		}
+		leftMotor.setSpeed(Resources.ROTATE_SPEED);
+		rightMotor.setSpeed(Resources.ROTATE_SPEED);
+		// This ensures the robot uses the minimal angle when turning to theta
+		if (Math.abs(angleDiff) > 180.0) {
+			angleDiff = Math.signum(angleDiff) * 360.0 - angleDiff;
+			leftMotor.rotate(convertAngle(-angleDiff), true);
+			rightMotor.rotate(convertAngle(angleDiff), false);
+		} else {
+			leftMotor.rotate(convertAngle(angleDiff), true);
+			rightMotor.rotate(convertAngle(-angleDiff), false);
+		}
+		
+	}
+	
+	public void goToLowerLeftCorner () {
+		turnTo(225);
+		Resources.leftMotor.rotate(convertDistance(0.73*TILE_SIZE), true);
+		Resources.rightMotor.rotate(convertDistance(0.73*TILE_SIZE), false);
 	}
 }

@@ -1,8 +1,9 @@
 package ca.mcgill.ecse211.finalproject;
 
 import static ca.mcgill.ecse211.finalproject.Resources.US_SENSOR;
-
 import java.util.Arrays;
+
+import lejos.robotics.SampleProvider;
 
 /**
  * A poller for the ultrasonic sensor. It runs continuously in its own thread,
@@ -14,19 +15,18 @@ import java.util.Arrays;
 public class UltrasonicPoller implements Runnable {
 	private int distance;
 	private float[] usData;
-	private static final short BUFFER_SIZE = 13;
+	private static final short BUFFER_SIZE = 11;
 	private int[] filterBuffer = new int[BUFFER_SIZE];
 	public static boolean kill = false;
+	private SampleProvider sampleProvider;
 
 	public UltrasonicPoller() {
 		usData = new float[US_SENSOR.sampleSize()];
+		sampleProvider = US_SENSOR.getDistanceMode();
 	}
 
-	/*
-	 * Sensors now return floats using a uniform protocol. Need to convert US result
-	 * to an integer [0,255] (non-Javadoc)
-	 * 
-	 * @see java.lang.Thread#run()
+	/**
+	 * run method for the US sensor
 	 */
 	public void run() {
 		int reading;
@@ -35,7 +35,7 @@ public class UltrasonicPoller implements Runnable {
 		while (true) {
 			if (kill)
 				break;
-			US_SENSOR.getDistanceMode().fetchSample(usData, 0); // acquire distance data in meters
+			sampleProvider.fetchSample(usData, 0); // acquire distance data in meters
 			reading = (int) (usData[0] * 100.0); // extract from buffer, convert to cm, cast to int
 			// filling up the median filter and returning -1 as reading
 			if (count < BUFFER_SIZE) {

@@ -1,8 +1,17 @@
 package ca.mcgill.ecse211.finalproject;
 
-//import static ca.mcgill.ecse211.finalproject.Resources.shooterMotor;
-import static ca.mcgill.ecse211.finalproject.Resources.usLocalizer;
-import static ca.mcgill.ecse211.finalproject.Resources.usPoller;
+import static ca.mcgill.ecse211.finalproject.Resources.TEAM_NUMBER;
+import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
+import static ca.mcgill.ecse211.finalproject.Resources.navigation;
+import static ca.mcgill.ecse211.finalproject.Resources.odometer;
+import static ca.mcgill.ecse211.finalproject.Resources.redTeam;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
+import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
+//import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizer;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 
@@ -10,8 +19,7 @@ import lejos.hardware.Sound;
  * The main driver class for the odometry lab.
  */
 public class Main {
-	public static final int TARGETX = 6;
-	public static final int TARGETY = 3;
+	public static boolean P1finished = false;
 
 	/**
 	 * The main entry point.
@@ -20,55 +28,60 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 
-		// ***Part one of the demo: static shooting*** //
-		int shots = 0;
-		while (shots < 5) {
-		//	shooterMotor.rotate(-190); // cock the launcher
-			Sound.twoBeeps(); // beep for dramatic effect
-		//	shooterMotor.rotate(240); // shoot
-		//	shooterMotor.rotate(-50); // reset angle
-			Button.waitForAnyPress(); // wait for reload
-			shots++;
-		}
-
-		// ***Part two of the demo: move to a square and launch the ball*** //
-
-		// ==== Phase 1: localize using US sensor and rammer ==== //
-		Thread pollerThread = new Thread(usPoller);
-		Thread localizerThread = new Thread(usLocalizer);
-		Thread localizerDisplayThread = new Thread(new UltrasonicLocalizerDisplay());
-		pollerThread.start();
-		localizerThread.start();
-		localizerDisplayThread.start();
-		Button.waitForAnyPress();
-
-		// ==== Phase 2: Navigate to position and take aim ==== //
-		// killing all previous threads
-		UltrasonicPoller.kill = true;
-		UltrasonicLocalizerDisplay.kill = true;
-		try {
-			pollerThread.join(5000);
-			localizerThread.join(5000);
-			localizerDisplayThread.join(5000);
-		} catch (InterruptedException e1) {
-			e1.printStackTrace();
-		}
-
-		// Navigate
-		Navigation.getReadyToShoot(TARGETX, TARGETY);
-
-		// ==== Phase 3: launch the ball ==== //
-		shots = 0;
-//		while (shots < 5) {
-//			shooterMotor.rotate(-190); // cock the launcher
-//			Sound.twoBeeps(); // beep for dramatic effect
-//			shooterMotor.rotate(240); // shoot
-//			shooterMotor.rotate(-50); // reset angle
-//			Button.waitForAnyPress(); // wait for reload
-//			shots++;
+//		Thread USPollerThread = new Thread(Resources.usPoller);
+//		Thread USLocalizerThread = new Thread(Resources.usLocalizer);
+		odometer.start();
+//		USPollerThread.start();
+//		USLocalizerThread.start();
+//		while (!P1finished) {
+//			Main.sleepFor(1000);
+//		}
+//		Sound.beepSequence();
+//
+//		UltrasonicPoller.kill = true;// this should be removed after demo
+//
+//		try {
+//			USPollerThread.join(5000); // this should be removed after demo
+//			USLocalizerThread.join(5000);
+//		} catch (InterruptedException e) {
+//			System.out.println("Sadness is the ichor of life");
 //		}
 
-		System.exit(0);
+		Resources.pathFinder = new PathFinder(redTeam == TEAM_NUMBER);
+		Resources.leftMotor.setStallThreshold(100000, 100000);
+		Resources.rightMotor.setStallThreshold(100000, 100000);
+		Thread cT = new Thread(colorPoller);
+		cT.start();
+
+		// ArrayList<int[]> moves = Resources.pathFinder.findPath();
+		ArrayList<int[]> moves = testMoves();
+		while (true) {
+			for (int[] move : moves) {
+				System.out.println(Arrays.toString(move));
+				navigation.setSpeed(Resources.LOW_FORWARD_SPEED);
+				navigation.processNextMove(move);
+
+				while (!navigation.moveSuccessful || Navigation.interrupted) {
+					if (navigation.navigationMode == TravelingMode.TRAVELING) {
+						navigation.processNextMove(move);
+					} else {
+						Main.sleepFor(100);
+					}
+				}
+			}
+		}
+//		colorPoller.sleep();
+//		navigation.goToLowerLeftCorner();
+//		navigation.turnTo((Resources.targetAngle + 180) % 360);
+//		Sound.beep();
+//		Main.sleepFor(500);
+//		Sound.beep();
+//		Main.sleepFor(500);
+//		Sound.beep();
+//		Resources.shooterMotor.rotate(165);
+//		Button.waitForAnyPress();
+//
+//		System.exit(0);
 	}
 
 	public static void sleepFor(long duration) {
@@ -77,5 +90,50 @@ public class Main {
 		} catch (InterruptedException e) {
 			// There is nothing to be done here
 		}
+	}
+
+	public static ArrayList<int[]> testMoves() {
+		ArrayList<int[]> moves = new ArrayList<int[]>();
+		moves.add(new int[] { 0, 1 });
+		moves.add(new int[] { 0, 2 });
+		moves.add(new int[] { 0, 3 });
+		moves.add(new int[] { 0, 4 });
+
+		moves.add(new int[] { 1, 4 });
+		moves.add(new int[] { 1, 3 });
+		moves.add(new int[] { 1, 2 });
+		moves.add(new int[] { 1, 1 });
+		moves.add(new int[] { 1, 0 });
+
+		moves.add(new int[] { 2, 0 });
+		moves.add(new int[] { 2, 1 });
+		moves.add(new int[] { 2, 2 });
+		moves.add(new int[] { 2, 3 });
+		moves.add(new int[] { 2, 4 });
+
+		moves.add(new int[] { 3, 4 });
+		moves.add(new int[] { 3, 3 });
+		moves.add(new int[] { 3, 2 });
+		moves.add(new int[] { 3, 1 });
+		moves.add(new int[] { 3, 0 });
+
+		moves.add(new int[] { 4, 0 });
+		moves.add(new int[] { 4, 1 });
+		moves.add(new int[] { 4, 2 });
+		moves.add(new int[] { 4, 3 });
+		moves.add(new int[] { 4, 4 });
+
+		moves.add(new int[] { 4, 4 });
+		moves.add(new int[] { 4, 3 });
+		moves.add(new int[] { 4, 2 });
+		moves.add(new int[] { 4, 1 });
+		moves.add(new int[] { 4, 0 });
+
+		moves.add(new int[] { 3, 0 });
+		moves.add(new int[] { 2, 0 });
+		moves.add(new int[] { 1, 0 });
+		moves.add(new int[] { 0, 0 });
+
+		return moves;
 	}
 }

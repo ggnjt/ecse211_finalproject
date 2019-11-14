@@ -1,7 +1,8 @@
 package ca.mcgill.ecse211.finalproject;
 
-import static ca.mcgill.ecse211.finalproject.Resources.*;
-
+import static ca.mcgill.ecse211.finalproject.Resources.LCD;
+import static ca.mcgill.ecse211.finalproject.Resources.navigation;
+import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import java.text.DecimalFormat;
 
 /**
@@ -10,8 +11,17 @@ import java.text.DecimalFormat;
  */
 public class Display implements Runnable {
 
+	/**
+	 * XYT values of the odometer
+	 */
 	private double[] position;
+	/**
+	 * update period of the display
+	 */
 	private final long DISPLAY_PERIOD = 500;
+	/**
+	 * max timeout value of the display
+	 */
 	private long timeout = Long.MAX_VALUE;
 
 	public void run() {
@@ -22,15 +32,15 @@ public class Display implements Runnable {
 		long tStart = System.currentTimeMillis();
 		do {
 			updateStart = System.currentTimeMillis();
-
+			LCD.drawString(navigation.navigationMode.toString(), 0, 0);
 			// Retrieve x, y and Theta information
 			position = odometer.getXYT();
 
-			// Print x,y, and theta information
 			DecimalFormat numberFormat = new DecimalFormat("######0.00");
-			LCD.drawString("X: " + numberFormat.format(position[0]), 0, 0);
-			LCD.drawString("Y: " + numberFormat.format(position[1]), 0, 1);
-			LCD.drawString("T: " + numberFormat.format(position[2]), 0, 2);
+
+			LCD.drawString("X: " + numberFormat.format(position[0]), 0, 1);
+			LCD.drawString("Y: " + numberFormat.format(position[1]), 0, 2);
+			LCD.drawString("T: " + numberFormat.format(position[2]), 0, 3);
 
 			// this ensures that the data is updated only once every period
 			updateEnd = System.currentTimeMillis();
@@ -42,7 +52,6 @@ public class Display implements Runnable {
 				}
 			}
 		} while ((updateEnd - tStart) <= timeout);
-
 	}
 
 	/**
