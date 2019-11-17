@@ -84,6 +84,7 @@ public class ColorPoller implements Runnable {
 	 */
 	@Override
 	public void run() {
+		long readingStart, readingEnd;
 		while (true) {
 			if (wait) {
 				try {
@@ -92,7 +93,6 @@ public class ColorPoller implements Runnable {
 					e.printStackTrace();
 				}
 			} else {
-				long readingStart, readingEnd;
 				readingStart = System.currentTimeMillis();
 				switch (navigation.navigationMode) {
 				case TRAVELING:
