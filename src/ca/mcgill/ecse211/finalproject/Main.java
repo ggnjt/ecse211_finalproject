@@ -50,8 +50,8 @@ public class Main {
 
 		Resources.pathFinder = new PathFinder(redTeam == TEAM_NUMBER);
 		
-		Resources.leftMotor.setStallThreshold(20, 10);
-		Resources.rightMotor.setStallThreshold(20, 10);
+		Resources.leftMotor.setStallThreshold(10, 10);
+		Resources.rightMotor.setStallThreshold(10, 10);
 		
 		Thread cT = new Thread(colorPoller);
 		cT.start();
@@ -107,8 +107,6 @@ public class Main {
 		moves.add(new int[] { 0, 1 });
 		moves.add(new int[] { 0, 2 });
 		moves.add(new int[] { 0, 3 });
-		moves.add(new int[] { 0, 4 });
-		moves.add(new int[] { 1, 4 });
 		moves.add(new int[] { 1, 3 });
 		moves.add(new int[] { 1, 2 });
 		moves.add(new int[] { 1, 1 });
@@ -117,21 +115,9 @@ public class Main {
 		moves.add(new int[] { 2, 1 });
 		moves.add(new int[] { 2, 2 });
 		moves.add(new int[] { 2, 3 });
-		moves.add(new int[] { 2, 4 });
-		moves.add(new int[] { 3, 4 });
 		moves.add(new int[] { 3, 3 });
 		moves.add(new int[] { 3, 2 });
 		moves.add(new int[] { 3, 1 });
-		moves.add(new int[] { 3, 0 });
-		moves.add(new int[] { 4, 0 });
-		moves.add(new int[] { 4, 1 });
-		moves.add(new int[] { 4, 2 });
-		moves.add(new int[] { 4, 3 });
-		moves.add(new int[] { 4, 4 });
-		moves.add(new int[] { 4, 3 });
-		moves.add(new int[] { 4, 2 });
-		moves.add(new int[] { 4, 1 });
-		moves.add(new int[] { 4, 0 });
 		moves.add(new int[] { 3, 0 });
 		moves.add(new int[] { 2, 0 });
 		moves.add(new int[] { 1, 0 });
