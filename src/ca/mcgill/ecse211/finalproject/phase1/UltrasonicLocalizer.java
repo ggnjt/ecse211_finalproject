@@ -13,7 +13,7 @@ import ca.mcgill.ecse211.finalproject.Main;
  */
 public class UltrasonicLocalizer implements Runnable {
 
-	public static boolean kill = false;
+	private static boolean kill = false;
 
 	/**
 	 * states when going through localization
@@ -140,7 +140,7 @@ public class UltrasonicLocalizer implements Runnable {
 	 * turn until it encounters a wall, at which point it slows down
 	 */
 	private static void gazeTheAbyss() {
-		if (reading < TILE_SIZE) {
+		if (reading < TILE_SIZE*0.6) {
 			spaceCounter++;
 		} else
 			spaceCounter = 0;
@@ -233,5 +233,9 @@ public class UltrasonicLocalizer implements Runnable {
 	private static void rotateCounterClockWiseNonBLocking() {
 		leftMotor.backward();
 		rightMotor.forward();
+	}
+	
+	public static void kill() {
+		kill = true;
 	}
 }

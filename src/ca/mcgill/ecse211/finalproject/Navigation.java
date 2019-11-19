@@ -33,14 +33,6 @@ public class Navigation {
 	}
 
 	/**
-	 * set Speed
-	 */
-	public void setSpeed(int speed) {
-		leftMotor.setSpeed(speed); 
-		rightMotor.setSpeed(speed);
-	}
-
-	/**
 	 * current moving state of the robot
 	 */
 	public TravelingMode navigationMode = TravelingMode.TRAVELING;
@@ -69,7 +61,7 @@ public class Navigation {
 	 * whether the current move being processed in sucessful
 	 */
 	public boolean moveSuccessful = false;
-	
+
 	public static boolean interrupted = false;
 
 	/**
@@ -101,6 +93,18 @@ public class Navigation {
 	 */
 	public int convertAngle(double angle) {
 		return convertDistance((Math.PI * TRACK * angle) / 360.0);
+	}
+
+	/**
+	 * set Speed
+	 */
+	public void setSpeed(int speed) {
+		synchronized (Resources.leftMotor) {
+			synchronized (Resources.rightMotor) {
+				leftMotor.setSpeed(speed);
+				rightMotor.setSpeed(speed);
+			}
+		}
 	}
 
 	/**
@@ -142,8 +146,12 @@ public class Navigation {
 	 * stops the robot in place
 	 */
 	public void stopTheRobot() {
-		leftMotor.stop(true);
-		rightMotor.stop(false);
+		synchronized (Resources.leftMotor) {
+			synchronized (Resources.rightMotor) {
+				leftMotor.stop(true);
+				rightMotor.stop(false);
+			}
+		}
 	}
 
 	/**
@@ -160,13 +168,7 @@ public class Navigation {
 			goTo(targetX, targetY);
 			break;
 		case CORRECTING:
-//			try {
-//				System.out.println("sleeping in nav, mode:" + navigationMode.toString());
-//				Thread.sleep(100);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			Main.sleepFor(70); // maybe?
 			break;
 		case OBSTACLE_ENCOUNTERED:
 			Sound.buzz();
@@ -187,6 +189,7 @@ public class Navigation {
 	 * @param Y y-coordinates of the target tile
 	 */
 	public void goTo(int X, int Y) {
+		
 		interrupted = false;
 		double currentX = odometer.getXYT()[0];
 		double currentY = odometer.getXYT()[1];
@@ -209,18 +212,24 @@ public class Navigation {
 			angleDeviation += 360;
 		}
 		double distance2go = Math.sqrt(X2go * X2go + Y2go * Y2go);
-		Resources.colorPoller.sleep();
-		leftMotor.rotate(convertAngle(angleDeviation), true);
-		rightMotor.rotate(-convertAngle(angleDeviation), false);
-		Resources.colorPoller.wake();
 		
-
+		Resources.colorPoller.sleep();
+		synchronized (Resources.leftMotor) {
+			synchronized (Resources.rightMotor) {
+				leftMotor.rotate(convertAngle(angleDeviation), true);
+				rightMotor.rotate(-convertAngle(angleDeviation), false);
+			}
+		}
+		Resources.colorPoller.wake();
+		Main.sleepFor(20);
+		
 		leftMotor.rotate(convertDistance(distance2go), true);
 		rightMotor.rotate(convertDistance(distance2go), false);
+
 		if (!interrupted) {
 			moveSuccessful = true;
 		}
-		Main.sleepFor(100);
+		Main.sleepFor(120);
 	}
 
 	/**
@@ -229,8 +238,7 @@ public class Navigation {
 	 * @param theta target angle to turn towards, 0 being facing North
 	 */
 	public void turnTo(double theta) {
-		System.out.println("this is called");
-		
+
 		double angleDiff = theta - odometer.getXYT()[2];
 		// Don't correct the angle if it is within a certain threshold
 		if (Math.abs(angleDiff) < 3.0 || Math.abs(angleDiff) > 357.0) {
@@ -247,12 +255,12 @@ public class Navigation {
 			leftMotor.rotate(convertAngle(angleDiff), true);
 			rightMotor.rotate(convertAngle(-angleDiff), false);
 		}
-		
+
 	}
-	
-	public void goToLowerLeftCorner () {
+
+	public void goToLowerLeftCorner() {
 		turnTo(225);
-		Resources.leftMotor.rotate(convertDistance(0.73*TILE_SIZE), true);
-		Resources.rightMotor.rotate(convertDistance(0.73*TILE_SIZE), false);
+		Resources.leftMotor.rotate(convertDistance(0.73 * TILE_SIZE), true);
+		Resources.rightMotor.rotate(convertDistance(0.73 * TILE_SIZE), false);
 	}
 }

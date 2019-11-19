@@ -38,7 +38,7 @@ public class PathFinder {
 	/**
 	 * a 2-D array used to represent the map
 	 */
-	static private Square[][] map;
+	private static Square[][] map;
 
 	/**
 	 * current x-coordinate of the robot on the grid

@@ -36,7 +36,12 @@ public class ColorSampler implements Runnable {
 	 */
 	private boolean blackLine = false;
 	
+	/**
+	 * current reading
+	 */
 	public float currentSample = 0.0f;
+	
+	public static boolean wait;
 
 	/**
 	 * Consturctor from a color sensor
@@ -57,22 +62,38 @@ public class ColorSampler implements Runnable {
 		long readingStart, readingEnd;
 
 		while (true) {
-			readingStart = System.currentTimeMillis();
-			sampleProvider.fetchSample(sample, 0);
-			currentSample = sample[0];
-			der = currentSample - prev;
-			blackLine = (der < 0 && Math.abs(der) > Resources.INTENSITY_THRESHOLD);
-			readingEnd = System.currentTimeMillis();
-			prev = currentSample;
-
-			readingEnd = System.currentTimeMillis();
-			if (readingEnd - readingStart < 60) {
+			if (wait) {
 				try {
-					Thread.sleep(60 - (readingEnd - readingStart));
+					Thread.sleep(60);
 				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			} else {
+				readingStart = System.currentTimeMillis();
+				sampleProvider.fetchSample(sample, 0);
+				currentSample = sample[0];
+				der = currentSample - prev;
+				blackLine = (der < 0 && Math.abs(der) > Resources.INTENSITY_THRESHOLD);
+				readingEnd = System.currentTimeMillis();
+				prev = currentSample;
+
+				readingEnd = System.currentTimeMillis();
+				if (readingEnd - readingStart < 70) {
+					try {
+						Thread.sleep(70 - (readingEnd - readingStart));
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				} else {
+					try {
+						Thread.sleep(20);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
 			}
+			
 		}
 	}
 
@@ -85,5 +106,13 @@ public class ColorSampler implements Runnable {
 
 	public boolean getBlackLine() {
 		return blackLine;
+	}
+	
+	public static void sleep() {
+		wait = true;
+	}
+	
+	public static void wake () {
+		wait = false;
 	}
 }

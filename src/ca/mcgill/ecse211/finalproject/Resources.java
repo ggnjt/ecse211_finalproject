@@ -53,7 +53,7 @@ public class Resources {
 	/**
 	 * The robot width in centimeters.
 	 */
-	public static final double TRACK = 11.90; // plis dont touch
+	public static final double TRACK = 11.88; // plis dont touch
 
 	/**
 	 * The lower speed at which the robot moves towards a black line
@@ -63,12 +63,12 @@ public class Resources {
 	/**
 	 * the higher speed at which the robot moves away from a black line
 	 */
-	public static final int HIGH_FORWARD_SPEED = 240;
+	public static final int HIGH_FORWARD_SPEED = 280;
 
 	/**
 	 * The speed at which the robot rotates in degrees per second.
 	 */
-	public static final int ROTATE_SPEED = 140;
+	public static final int ROTATE_SPEED = 2000;
 
 	/**
 	 * Low speed used for more accurate sensor radians
