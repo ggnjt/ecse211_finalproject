@@ -53,10 +53,11 @@ public class Main {
 		Resources.leftMotor.setStallThreshold(20, 10);
 		Resources.rightMotor.setStallThreshold(20, 10);
 		
-		Thread cT = new Thread(colorPoller);
-		cT.start();
+		//Thread cT = new Thread(colorPoller);
+		//cT.start();
 
-		stressTest();
+		testLightSensor();
+		//stressTest();
 		// ArrayList<int[]> moves = Resources.pathFinder.findPath();
 
 //		for (int[] move : moves) {
@@ -102,6 +103,40 @@ public class Main {
 		}
 	}
 
+	public static void testLightSensor() {
+		int period = 100;
+		int speed = 90;
+		
+		ColorSampler leftSampler = new ColorSampler(Resources.leftColorSensor);
+		ColorSampler rightSampler = new ColorSampler(Resources.rightColorSensor);
+		Thread leftColorThread = new Thread(leftSampler);
+		Thread rightColorThread = new Thread(rightSampler);
+		leftColorThread.start();
+		rightColorThread.start();
+
+		boolean leftLine = false, rightLine = false;
+		
+		Resources.leftMotor.setSpeed(speed);
+		Resources.rightMotor.setSpeed(speed);
+		Resources.leftMotor.forward();
+		Resources.rightMotor.forward();
+		
+		long readingStart, readingEnd;
+		while (true) {
+			readingStart = System.currentTimeMillis();
+			leftLine = leftLine || leftSampler.getBlackLine();
+			rightLine = rightLine || rightSampler.getBlackLine();
+			if (leftLine && rightLine) {
+				Sound.beepSequenceUp();
+				leftLine = false;
+				rightLine = false;
+			}
+			readingEnd = System.currentTimeMillis();
+			if (readingEnd - readingStart < period) {
+				sleepFor(period - (readingEnd - readingStart));
+			}
+		}
+	}
 	public static void stressTest() {
 		ArrayList<int[]> moves = new ArrayList<int[]>();
 		moves.add(new int[] { 0, 1 });
