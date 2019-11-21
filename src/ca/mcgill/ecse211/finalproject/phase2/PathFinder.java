@@ -9,6 +9,7 @@ import static ca.mcgill.ecse211.finalproject.Resources.green;
 import static ca.mcgill.ecse211.finalproject.Resources.greenCorner;
 import static ca.mcgill.ecse211.finalproject.Resources.island;
 import static ca.mcgill.ecse211.finalproject.Resources.navigation;
+import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.tng;
 
 import java.util.ArrayList;
@@ -39,15 +40,6 @@ public class PathFinder {
 	 * a 2-D array used to represent the map
 	 */
 	private static Square[][] map;
-
-	/**
-	 * current x-coordinate of the robot on the grid
-	 */
-	private static int currentX;
-	/**
-	 * current x-coordinate of the robot on the grid
-	 */
-	private static int currentY;
 
 	/**
 	 * priority queue used in the A* algorithm
@@ -195,13 +187,35 @@ public class PathFinder {
 	}
 
 	/**
-	 * set the target square as an obstacle
+	 * set the target square in front of the robot as an obstacle
 	 * 
 	 * @param x x coordinate of square
 	 * @param y y coordinate of square
 	 */
-	public void setObstacle(int x, int y) {
-		PathFinder.map[x][y].setStatus(-2);
+	public boolean setObstacle() {
+		double [] currXYT = odometer.getXYT();
+		if (currXYT[2] >= 45 && currXYT[2] < 135) {// facing EAST
+			if (navigation.xTile + 1 < Resources.ARENA_X  - 1) {
+				map[navigation.xTile + 1][navigation.yTile].setStatus(-2);
+				return true;
+			}
+		} else if (currXYT[2] >= 135 && currXYT[2] < 225) {// facing SOUTH
+			if (navigation.yTile - 1 > 0) {
+				map[navigation.xTile][navigation.yTile - 1].setStatus(-2);
+				return true;
+			}
+		} else if (currXYT[2] >= 225 && currXYT[2] < 315) {// facing WEST
+			if (navigation.xTile - 1 > 0) {
+				map[navigation.xTile - 1][navigation.yTile].setStatus(-2);
+				return true;
+			}
+		} else {
+			if (navigation.yTile + 1 < Resources.ARENA_Y  - 1) {
+				map[navigation.xTile][navigation.yTile + 1].setStatus(-2);
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -246,9 +260,7 @@ public class PathFinder {
 				}
 			}
 		}
-		System.out.println(currentX);
-		System.out.println(currentY);
-		image[currentX][currentY] = 'C';
+		image[navigation.xTile][navigation.yTile] = 'C';
 		image[targetX][targetY] = 'T';
 		for (char[] row : image) {
 			System.out.println(Arrays.toString(row));
@@ -264,7 +276,7 @@ public class PathFinder {
 	 */
 	public ArrayList<int[]> findPath() {
 
-		open.add(map[currentX][currentY]);
+		open.add(map[navigation.xTile][navigation.xTile]);
 		Square current;
 
 		while (true) {

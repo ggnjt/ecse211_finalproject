@@ -106,7 +106,7 @@ public class UltrasonicLocalizer implements Runnable {
 				// pathfinder constructor
 				navigation.stopTheRobot();
 				kill = true;
-				Main.P1finished = true;
+				Main.localizationFinished = true;
 				break;
 			}
 			try {

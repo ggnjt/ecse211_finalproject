@@ -20,7 +20,8 @@ import lejos.hardware.Sound;
  * The main driver class for the odometry lab.
  */
 public class Main {
-	public static boolean P1finished = false;
+	public static boolean localizationFinished = false;
+	public static ArrayList<int[]> moves;
 
 	/**
 	 * The main entry point.
@@ -55,31 +56,11 @@ public class Main {
 		
 		Thread cT = new Thread(colorPoller);
 		cT.start();
-		stressShooterTest();
+		//stressShooterTest();
 		stressTest();
-		// ArrayList<int[]> moves = Resources.pathFinder.findPath();
-
-//		for (int[] move : moves) {
-//			System.out.println(Arrays.toString(move));
-//			navigation.setSpeed(Resources.LOW_FORWARD_SPEED);
+		// moves = Resources.pathFinder.findPath();
 //
-//			colorPoller.sleep();
-//			ColorSampler.sleep();
-//			Main.sleepFor(60);
-//			System.gc();
-//			colorPoller.wake();
-//			ColorSampler.wake();
-//
-//			navigation.processNextMove(move);
-//
-//			while (!navigation.moveSuccessful || Navigation.interrupted) {
-//				if (navigation.navigationMode == TravelingMode.TRAVELING) {
-//					navigation.processNextMove(move);
-//				} else {
-//					Main.sleepFor(60);
-//				}
-//			}
-//		}
+		
 //		colorPoller.sleep();
 //		navigation.goToLowerLeftCorner();
 //		navigation.turnTo((Resources.targetAngle + 180) % 360);
@@ -151,5 +132,28 @@ public class Main {
 			Resources.shooterMotor.rotate(-165);
 			Button.waitForAnyPress();
 		}
+	}
+	
+	public static boolean run(ArrayList <int[]> moves) {
+		boolean success = true;
+		forloop:
+		for (int[] move : moves) {
+			System.out.println(Arrays.toString(move));
+			navigation.setSpeed(Resources.LOW_FORWARD_SPEED);
+			UltrasonicPoller.sleep();
+			navigation.processNextMove(move);
+
+			while (!navigation.moveSuccessful || Navigation.interrupted) {
+				if (navigation.navigationMode == TravelingMode.TRAVELING) {
+					if (!navigation.processNextMove(move)) {
+						success = false;
+						break forloop;
+					}
+				} else {
+					Main.sleepFor(60);
+				}
+			}
+		}
+		return success;
 	}
 }

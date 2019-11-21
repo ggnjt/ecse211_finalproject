@@ -12,6 +12,7 @@ import ca.mcgill.ecse211.finalproject.Main;
 import ca.mcgill.ecse211.finalproject.Navigation;
 import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
 import ca.mcgill.ecse211.finalproject.Resources;
+import ca.mcgill.ecse211.finalproject.UltrasonicPoller;
 
 /**
  * Class which takes care of color sensor polling, signal filtering as well as
@@ -130,6 +131,9 @@ public class ColorPoller implements Runnable {
 								navigation.stopTheRobot();
 								navigation.setSpeed(Resources.HIGH_FORWARD_SPEED);
 								navigation.navigationMode = TravelingMode.TRAVELING;
+								// synchronized() {
+								UltrasonicPoller.wake();
+								// }
 							}
 						}
 						resetLineDetection();

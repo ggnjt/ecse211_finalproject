@@ -160,7 +160,8 @@ public class Navigation {
 	 * 
 	 * @param move a size 2 representing the coordinates of the target tile
 	 */
-	public void processNextMove(int[] move) {
+	public boolean processNextMove(int[] move) {
+		boolean result = true;
 		targetX = move[0];
 		targetY = move[1];
 		switch (navigationMode) {
@@ -171,15 +172,20 @@ public class Navigation {
 			Main.sleepFor(70); // maybe?
 			break;
 		case OBSTACLE_ENCOUNTERED:
+			Resources.colorPoller.sleep();
 			Sound.buzz();
-			PathFinder.resetMap();
-			// pathFinder.setObstacle(xTile, yTile);
+			if (Resources.pathFinder.setObstacle()) {
+				PathFinder.resetMap();
+				Resources.pathFinder.findPath();
+				result = false;
+			}
 			break;
 		}
 		if (moveSuccessful) {
 			xTile = (int) (odometer.getXYT()[0] / TILE_SIZE);
 			yTile = (int) (odometer.getXYT()[1] / TILE_SIZE);
 		}
+		return result;
 	}
 
 	/**
@@ -228,6 +234,11 @@ public class Navigation {
 
 		if (!interrupted) {
 			moveSuccessful = true;
+		}
+		if (UltrasonicPoller.hasDetected()) {
+			synchronized (navigationMode) {
+				navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
+			}
 		}
 		Main.sleepFor(120);
 	}
