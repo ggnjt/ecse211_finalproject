@@ -88,7 +88,7 @@ public class Resources {
 	/**
 	 * speed for the launcher motor
 	 */
-	public static final int SHOOTER_MOTOR_SPEED = 300;
+	public static final int SHOOTER_MOTOR_SPEED = 500;
 
 	/**
 	 * obstacle detection threshold

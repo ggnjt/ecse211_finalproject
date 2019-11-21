@@ -47,7 +47,7 @@ public class Main {
 //		} catch (InterruptedException e) {
 //			System.out.println("Sadness is the ichor of life");
 //		}
-
+		//Resources.shooterMotor.setSpeed(Resources.SHOOTER_MOTOR_SPEED);
 		Resources.pathFinder = new PathFinder(redTeam == TEAM_NUMBER);
 		
 		Resources.leftMotor.setStallThreshold(10, 10);
@@ -55,7 +55,7 @@ public class Main {
 		
 		Thread cT = new Thread(colorPoller);
 		cT.start();
-
+		stressShooterTest();
 		stressTest();
 		// ArrayList<int[]> moves = Resources.pathFinder.findPath();
 
@@ -142,5 +142,14 @@ public class Main {
 			}
 		}
 
+	}
+	
+	public static void stressShooterTest() {
+		while (true) {
+			Resources.shooterMotor.rotate(165);
+			Resources.shooterMotor.flt(true);
+			Resources.shooterMotor.rotate(-165);
+			Button.waitForAnyPress();
+		}
 	}
 }
