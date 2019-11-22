@@ -28,7 +28,8 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
+		
+		launcherSequenceTest();
 //		Thread USPollerThread = new Thread(Resources.usPoller);
 //		Thread USLocalizerThread = new Thread(Resources.usLocalizer);
 		odometer.start();
@@ -99,6 +100,21 @@ public class Main {
 			Thread.sleep(duration);
 		} catch (InterruptedException e) {
 			// There is nothing to be done here
+		}
+	}
+	
+	public static void launcherSequenceTest() {
+		int accel = 5000;
+		int speed = 500;
+		
+		Resources.shooterMotor.setAcceleration(accel);
+		Resources.shooterMotor.setSpeed(speed);
+		
+		while (true) {
+			Resources.shooterMotor.rotate(180);
+			Resources.shooterMotor.rotate(-165);
+			Resources.shooterMotor.flt();
+			Button.waitForAnyPress();
 		}
 	}
 
