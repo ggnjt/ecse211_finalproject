@@ -60,11 +60,11 @@ public class PathFinder {
 	/**
 	 * current target X coordinate
 	 */
-	private static int targetX;
+	public static int targetX;
 	/**
 	 * target Y coordinate
 	 */
-	private static int targetY;
+	public static int targetY;
 
 	/**
 	 * Contructor of the FathFinder
@@ -175,8 +175,9 @@ public class PathFinder {
 		}
 
 		// ====subject to change====//
-		PathFinder.targetX = (int) bin.x;
-		PathFinder.targetY = (int) bin.y;
+		int[] launchCoords = findLaunchPointToTarget((int) bin.x, (int) bin.y);
+		targetX = launchCoords[0];
+		targetY = launchCoords[1];
 	}
 
 	/**
@@ -263,7 +264,10 @@ public class PathFinder {
 	 *         robot should move to in order to reach to the target
 	 */
 	public ArrayList<int[]> findPath() {
-
+		int[] launchCoords = findLaunchPointToTarget((int) bin.x, (int) bin.y);
+		targetX = launchCoords[0];
+		targetY = launchCoords[1];
+		
 		open.add(map[currentX][currentY]);
 		Square current;
 
@@ -324,34 +328,33 @@ public class PathFinder {
 
 	/**
 	 * ***** code copied over from lab 5 **** finds the square which the robot can
-	 * launch from 5 squares away from the target
-	 * 
-	 * @param targetX x-coordinate of the target of the ball
-	 * @param targetY y-coordinate of the target of the ball
-	 * @return an int array of size 2, which represents the coordinates of the ideal
-	 *         launch point
+	 * launch from 6 squares away from the target
+	 *
+	 * @return an int array of size 3, which contains the x and y coordinates of the launch location, as well as the angle
+	 * to turn to for launching the ball.
 	 */
-	private static int[] findLaunchPointToTarget(int targetX, int targetY) {
+	private static int[] findLaunchPointToTarget(int binX, int binY) {
 		int[] result = new int[3];
 		double shortest_dist = 100;
-		int[][] notableSquares = { { 0, 6 }, { 4, 4 }, { 6, 0 }, { 4, -4 }, { 0, -6 }, { -4, -4 }, { -6, 0 },
-				{ -4, 4 } };
+		int[][] notableSquares = { { 0, 6 }, { 5, 5 }, { 6, 0 }, { 5, -5 }, { 0, -6 }, { -5, -5 }, { -6, 0 },
+				{ -5, 5 } };
 		int[] thetaOptions = { 180, 225, 270, 315, 0, 45, 90, 135 };
 		for (int i = 0; i < notableSquares.length; i++) {
 			int[] pair = notableSquares[i];
-			boolean ooX = pair[0] + targetX > ARENA_X || pair[0] + targetX < 0;
-			boolean ooY = pair[1] + targetY > ARENA_Y || pair[1] + targetY < 0;
+			boolean ooX = pair[0] + binX > ARENA_X || pair[0] + binX < 0;
+			boolean ooY = pair[1] + binY > ARENA_Y || pair[1] + binY < 0;
 			boolean invalid = map[pair[0]][pair[1]].status != 3;
 			if (ooX || ooY || invalid) {
 				continue;
 			} else {
 				double dist = Math
-						.sqrt((pair[0] + targetX) * (pair[0] + targetX) + (pair[1] + targetY) * (pair[1] + targetY));
+						.sqrt((navigation.xTile - (pair[0] + binX)) * (navigation.xTile - (pair[0] + binX)) +
+								(navigation.yTile - (pair[1] + binY)) * (navigation.yTile - (pair[1] + binY)));
 				if (dist < shortest_dist) {
-					result[0] = pair[0] + targetX;
-					result[1] = pair[1] + targetY;
+					result[0] = pair[0] + binX;
+					result[1] = pair[1] + binY;
 					shortest_dist = dist;
-					result[2] = (thetaOptions[i] - 90 + 360) % 360;
+					result[2] = (thetaOptions[i] + 360) % 360;
 				}
 			}
 		}
@@ -385,7 +388,7 @@ public class PathFinder {
 		int Y;
 		/**
 		 * number represents the type of terrain of the sqaure 0 => river or enemy
-		 * base/tunnel 3 => central island 2 => tunnel 1 => base -2=> obstacle
+		 * base/tunnel 3 => central island 2 => tunnel 1 => base -2 => obstacle
 		 */
 		int status;
 		/**

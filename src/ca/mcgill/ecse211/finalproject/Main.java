@@ -50,13 +50,15 @@ public class Main {
 
 		Resources.pathFinder = new PathFinder(redTeam == TEAM_NUMBER);
 		
+		targetFinderTest();
+		
 		Resources.leftMotor.setStallThreshold(20, 10);
 		Resources.rightMotor.setStallThreshold(20, 10);
 		
 		Thread cT = new Thread(colorPoller);
 		cT.start();
 
-		stressTest();
+		//stressTest();
 		// ArrayList<int[]> moves = Resources.pathFinder.findPath();
 
 //		for (int[] move : moves) {
@@ -102,6 +104,16 @@ public class Main {
 		}
 	}
 
+	public static void targetFinderTest() {
+		System.out.println("~~~~~~~~Initial target~~~~~~~~");
+		Resources.pathFinder.printMap();
+		Resources.pathFinder.setObstacle(PathFinder.targetX, PathFinder.targetY);
+		Resources.pathFinder.findPath();
+		System.out.println("~~~~~~~~~~New target~~~~~~~~~~");
+		Resources.pathFinder.printMap();
+		System.exit(0);
+	}
+	
 	public static void stressTest() {
 		ArrayList<int[]> moves = new ArrayList<int[]>();
 		moves.add(new int[] { 0, 1 });
