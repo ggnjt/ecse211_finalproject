@@ -93,7 +93,7 @@ public class Resources {
 	/**
 	 * obstacle detection threshold
 	 */
-	public static final double ObstacleDetectionThreashold = 10.0;
+	public static final double ObstacleDetectionThreashold = 13.0;
 
 	// ------------------EV3 Components--------------------
 	/**

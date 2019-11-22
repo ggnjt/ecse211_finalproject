@@ -141,6 +141,10 @@ public class Main {
 
 	public static boolean run(ArrayList<int[]> moves) {
 		System.out.println("Running");
+		Resources.pathFinder.printMap();
+		for (int[] derp : moves) {
+			System.out.println(Arrays.toString(derp));
+		}
 		for (int[] move : moves) {
 			System.out.println("Current move: " + Arrays.toString(move));
 			UltrasonicPoller.resetDetection();
@@ -151,7 +155,12 @@ public class Main {
 				UltrasonicPoller.resetDetection();
 				if (navigation.navigationMode == TravelingMode.TRAVELING) {
 					navigation.processNextMove(move);
+				} else if (navigation.navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED){
+					UltrasonicPoller.resetDetection();
+					System.out.println("I am here... breaking the loop");
+					break;
 				} else {
+					System.out.println("I am here but " + navigation.navigationMode.toString() + navigation.moveSuccessful + "&" + Navigation.interrupted);
 					Main.sleepFor(70);
 				}
 			}
@@ -160,15 +169,12 @@ public class Main {
 					Resources.pathFinder.printMap();
 					PathFinder.resetMap();
 					Main.moves = Resources.pathFinder.findPath();
-					for (int [] derp : Main.moves) {
-						System.out.println(Arrays.toString(derp));
-					}
 					navigation.navigationMode = TravelingMode.TRAVELING;
 					navigation.moveSuccessful = false;
 					Navigation.interrupted = true;
+					System.out.println("exiting b/c obstacle..");
+					return false;
 				}
-				System.out.println("exiting b/c obstacle..");
-				return false;
 			}
 		}
 		return true;

@@ -193,29 +193,24 @@ public class PathFinder {
 	 * @param y y coordinate of square
 	 */
 	public boolean setObstacle() {
-		double [] currXYT = odometer.getXYT();
-		if (currXYT[2] >= 45 && currXYT[2] < 135) {// facing EAST
-			if (navigation.xTile + 1 < Resources.ARENA_X  - 1) {
+		if (!isFacingAWall()) {
+			double[] currXYT = odometer.getXYT();
+			if (currXYT[2] >= 45 && currXYT[2] < 135) {// facing EAST
 				map[navigation.xTile + 1][navigation.yTile].setStatus(-2);
 				return true;
-			}
-		} else if (currXYT[2] >= 135 && currXYT[2] < 225) {// facing SOUTH
-			if (navigation.yTile - 1 > 0) {
+			} else if (currXYT[2] >= 135 && currXYT[2] < 225) {// facing SOUTH
 				map[navigation.xTile][navigation.yTile - 1].setStatus(-2);
 				return true;
-			}
-		} else if (currXYT[2] >= 225 && currXYT[2] < 315) {// facing WEST
-			if (navigation.xTile - 1 > 0) {
+			} else if (currXYT[2] >= 225 && currXYT[2] < 315) {// facing WEST
 				map[navigation.xTile - 1][navigation.yTile].setStatus(-2);
 				return true;
-			}
-		} else {
-			if (navigation.yTile + 1 < Resources.ARENA_Y  - 1) {
+			} else {
 				map[navigation.xTile][navigation.yTile + 1].setStatus(-2);
 				return true;
 			}
 		}
 		return false;
+
 	}
 
 	/**
@@ -279,7 +274,7 @@ public class PathFinder {
 		open.add(map[navigation.xTile][navigation.yTile]);
 		Square current;
 		while (true) {
-			
+
 			current = open.poll();
 			if (current == null) {
 				System.out.println("Something went horribly wrong, no path found");
@@ -297,9 +292,9 @@ public class PathFinder {
 					ghettoStack.push(current.parent);
 					current = current.parent;
 				}
-				
-				ghettoStack.pop(); //this is the current square I know what I'm doing I think
-				
+
+				ghettoStack.pop(); // this is the current square I know what I'm doing I think
+
 				while (!ghettoStack.isEmpty()) {
 					current = ghettoStack.pop();
 					int[] entry = { current.X, current.Y };
@@ -457,9 +452,32 @@ public class PathFinder {
 
 	}
 
-	public static void setTarget (int x, int y) {
+	public static void setTarget(int x, int y) {
 		targetX = x;
 		targetY = y;
+	}
+
+	public static boolean isFacingAWall() {
+
+		double[] currXYT = odometer.getXYT();
+		if (currXYT[2] >= 45 && currXYT[2] < 135) {// facing EAST
+			if (navigation.xTile + 1 > Resources.ARENA_X - 1) {
+				return true;
+			}
+		} else if (currXYT[2] >= 135 && currXYT[2] < 225) {// facing SOUTH
+			if (navigation.yTile - 1 < 0) {
+				return true;
+			}
+		} else if (currXYT[2] >= 225 && currXYT[2] < 315) {// facing WEST
+			if (navigation.xTile - 1 < 0) {
+				return true;
+			}
+		} else {
+			if (navigation.yTile + 1 > Resources.ARENA_Y - 1) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

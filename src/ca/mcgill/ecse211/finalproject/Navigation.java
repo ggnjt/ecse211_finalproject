@@ -179,10 +179,6 @@ public class Navigation {
 		
 		}
 		System.out.println("move succ at end of processNextMove: " + moveSuccessful);
-		if (moveSuccessful) {
-			xTile = (int) (odometer.getXYT()[0] / TILE_SIZE);
-			yTile = (int) (odometer.getXYT()[1] / TILE_SIZE);
-		}
 	}
 
 	/**
@@ -221,6 +217,7 @@ public class Navigation {
 		System.out.println("Finished calculating");
 		UltrasonicPoller.sleep();
 		Resources.colorPoller.sleep();
+		
 		synchronized (Resources.leftMotor) {
 			synchronized (Resources.rightMotor) {
 				setSpeed(Resources.ROTATE_SPEED);
@@ -231,17 +228,23 @@ public class Navigation {
 		}
 		Resources.colorPoller.wake();
 		UltrasonicPoller.wake();
+		//reset to get more accurate reading
+		
+		if (Math.abs(angleDeviation) > 60) {
+			UltrasonicPoller.resetDetection();
+			Main.sleepFor(600);
+		} else {
+			Main.sleepFor(200);
+		}
 		
 		System.out.println("Finished turning");
-		Main.sleepFor(100);
 
-		if (UltrasonicPoller.hasDetected()) {
+		if (!PathFinder.isFacingAWall() && UltrasonicPoller.hasDetected()) {
 			System.out.println("object detected after turning");
 			moveSuccessful = false;
 			interrupted = true;
 			synchronized (navigationMode) {
 				navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
-				UltrasonicPoller.resetDetection();
 				return;
 			}
 		}
@@ -252,12 +255,15 @@ public class Navigation {
 		if (!interrupted) {
 			moveSuccessful = true;
 		}
-		if (UltrasonicPoller.hasDetected()) {
+		if (moveSuccessful) {
+			xTile = (int) (odometer.getXYT()[0] / TILE_SIZE);
+			yTile = (int) (odometer.getXYT()[1] / TILE_SIZE);
+		}
+		if (!PathFinder.isFacingAWall() && UltrasonicPoller.hasDetected()) {
 			System.out.println("object detected after MOVING");
 			System.out.println("int & movsucc: " + interrupted + " , " + moveSuccessful);
 			synchronized (navigationMode) {
 				navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
-				UltrasonicPoller.resetDetection();
 			}
 		}
 		System.out.println("Sleeping & returning");

@@ -40,10 +40,12 @@ public class UltrasonicPoller implements Runnable {
 		while (true) {
 			if (wait) {
 				try {
-					Thread.sleep(100);
+					Thread.sleep(70);
 				} catch (Exception e) {
 				} // Poor man's timed sampling
 			} else {
+				long readingStart, readingEnd;
+				readingStart = System.currentTimeMillis();
 				sampleProvider.fetchSample(usData, 0); // acquire distance data in meters
 				reading = (int) (usData[0] * 100.0); // extract from buffer, convert to cm, cast to int
 				// filling up the median filter and returning -1 as reading
@@ -61,40 +63,26 @@ public class UltrasonicPoller implements Runnable {
 					}
 				} else {
 					distance = reading;
-					boolean facingAWall = false;
-
-					double[] currXYT = odometer.getXYT();
-					if (currXYT[2] >= 45 && currXYT[2] < 135) {// facing EAST
-						if (navigation.xTile + 1 > Resources.ARENA_X - 1) {
-							facingAWall = true;
-						}
-					} else if (currXYT[2] >= 135 && currXYT[2] < 225) {// facing SOUTH
-						if (navigation.yTile - 1 < 0) {
-							facingAWall = true;
-						}
-					} else if (currXYT[2] >= 225 && currXYT[2] < 315) {// facing WEST
-						if (navigation.xTile - 1 < 0) {
-							facingAWall = true;
-						}
-					} else {
-						if (navigation.yTile + 1 > Resources.ARENA_Y - 1) {
-							facingAWall = true;
-						}
-					}
-
-					if (facingAWall) {
-						System.out.println("ZOMFG!!!");
-					}
-					obstacleDetected = !facingAWall
-							&& (obstacleDetected || (distance < Resources.ObstacleDetectionThreashold && distance > 0));
+					obstacleDetected = (obstacleDetected
+							|| (distance < Resources.ObstacleDetectionThreashold && distance > 0));
 				}
-				try {
-					Thread.sleep(50);
-				} catch (Exception e) {
+				readingEnd = System.currentTimeMillis();
+				if (readingEnd - readingStart < 70) {
+					try {
+						Thread.sleep(70 - (readingEnd - readingStart));
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				} else {
+					try {
+						Thread.sleep(20);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
-		 // Poor man's timed sampling
+		// Poor man's timed sampling
 	}
 
 	/**
@@ -131,12 +119,6 @@ public class UltrasonicPoller implements Runnable {
 
 	public static void resetDetection() {
 		obstacleDetected = false;
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	public static boolean hasDetected() {
