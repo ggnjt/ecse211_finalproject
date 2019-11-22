@@ -20,7 +20,7 @@ import lejos.hardware.Sound;
  * The main driver class for the odometry lab.
  */
 public class Main {
-	public static boolean localizationFinished = false;
+	public static boolean localizationFinished = true;
 	public static ArrayList<int[]> moves;
 
 	/**
@@ -30,10 +30,10 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 
-//		Thread USPollerThread = new Thread(Resources.usPoller);
+		Thread USPollerThread = new Thread(Resources.usPoller);
 //		Thread USLocalizerThread = new Thread(Resources.usLocalizer);
 		odometer.start();
-//		USPollerThread.start();
+		USPollerThread.start();
 //		USLocalizerThread.start();
 //		while (!P1finished) {
 //			Main.sleepFor(1000);
@@ -48,19 +48,24 @@ public class Main {
 //		} catch (InterruptedException e) {
 //			System.out.println("Sadness is the ichor of life");
 //		}
-		//Resources.shooterMotor.setSpeed(Resources.SHOOTER_MOTOR_SPEED);
+		// Resources.shooterMotor.setSpeed(Resources.SHOOTER_MOTOR_SPEED);
 		Resources.pathFinder = new PathFinder(redTeam == TEAM_NUMBER);
-		
+
 		Resources.leftMotor.setStallThreshold(10, 10);
 		Resources.rightMotor.setStallThreshold(10, 10);
-		
+
 		Thread cT = new Thread(colorPoller);
 		cT.start();
-		//stressShooterTest();
-		stressTest();
-		// moves = Resources.pathFinder.findPath();
-//
-		
+		// stressShooterTest();
+		// stressTest();
+		moves = Resources.pathFinder.findPath();
+		// Resources.pathFinder.printMap();
+
+		boolean success = run(moves);
+		while (!success) {
+			success = run(moves);
+		}
+
 //		colorPoller.sleep();
 //		navigation.goToLowerLeftCorner();
 //		navigation.turnTo((Resources.targetAngle + 180) % 360);
@@ -70,9 +75,9 @@ public class Main {
 //		Main.sleepFor(500);
 //		Sound.beep();
 //		Resources.shooterMotor.rotate(165);
-//		Button.waitForAnyPress();
+		Button.waitForAnyPress();
 //
-//		System.exit(0);
+		System.exit(0);
 	}
 
 	public static void sleepFor(long duration) {
@@ -107,9 +112,9 @@ public class Main {
 		while (true) {
 			for (int[] move : moves) {
 				System.out.println(Arrays.toString(move));
-				
+
 				navigation.setSpeed(Resources.LOW_FORWARD_SPEED);
-				
+
 				navigation.processNextMove(move);
 
 				while (!navigation.moveSuccessful || Navigation.interrupted) {
@@ -124,7 +129,7 @@ public class Main {
 		}
 
 	}
-	
+
 	public static void stressShooterTest() {
 		while (true) {
 			Resources.shooterMotor.rotate(165);
@@ -133,27 +138,39 @@ public class Main {
 			Button.waitForAnyPress();
 		}
 	}
-	
-	public static boolean run(ArrayList <int[]> moves) {
-		boolean success = true;
-		forloop:
+
+	public static boolean run(ArrayList<int[]> moves) {
+		System.out.println("Running");
 		for (int[] move : moves) {
-			System.out.println(Arrays.toString(move));
+			System.out.println("Current move: " + Arrays.toString(move));
+			UltrasonicPoller.resetDetection();
 			navigation.setSpeed(Resources.LOW_FORWARD_SPEED);
-			UltrasonicPoller.sleep();
 			navigation.processNextMove(move);
 
 			while (!navigation.moveSuccessful || Navigation.interrupted) {
+				UltrasonicPoller.resetDetection();
 				if (navigation.navigationMode == TravelingMode.TRAVELING) {
-					if (!navigation.processNextMove(move)) {
-						success = false;
-						break forloop;
-					}
+					navigation.processNextMove(move);
 				} else {
-					Main.sleepFor(60);
+					Main.sleepFor(70);
 				}
 			}
+			if (navigation.navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
+				if (Resources.pathFinder.setObstacle()) {
+					Resources.pathFinder.printMap();
+					PathFinder.resetMap();
+					Main.moves = Resources.pathFinder.findPath();
+					for (int [] derp : Main.moves) {
+						System.out.println(Arrays.toString(derp));
+					}
+					navigation.navigationMode = TravelingMode.TRAVELING;
+					navigation.moveSuccessful = false;
+					Navigation.interrupted = true;
+				}
+				System.out.println("exiting b/c obstacle..");
+				return false;
+			}
 		}
-		return success;
+		return true;
 	}
 }

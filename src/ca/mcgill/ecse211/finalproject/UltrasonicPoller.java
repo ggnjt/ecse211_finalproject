@@ -1,6 +1,9 @@
 package ca.mcgill.ecse211.finalproject;
 
 import static ca.mcgill.ecse211.finalproject.Resources.US_SENSOR;
+import static ca.mcgill.ecse211.finalproject.Resources.navigation;
+import static ca.mcgill.ecse211.finalproject.Resources.odometer;
+
 import java.util.Arrays;
 
 import lejos.robotics.SampleProvider;
@@ -43,14 +46,9 @@ public class UltrasonicPoller implements Runnable {
 			} else {
 				sampleProvider.fetchSample(usData, 0); // acquire distance data in meters
 				reading = (int) (usData[0] * 100.0); // extract from buffer, convert to cm, cast to int
+				// filling up the median filter and returning -1 as reading
 
-				if (Main.localizationFinished) {
-					distance = reading;
-					if (obstacleDetected || distance < Resources.ObstacleDetectionThreashold) {
-						obstacleDetected = true;
-					}
-				} else {
-					// filling up the median filter and returning -1 as reading
+				if (!Main.localizationFinished) {
 					if (count < BUFFER_SIZE) {
 						filterBuffer[count] = reading;
 						distance = -1;
@@ -61,14 +59,42 @@ public class UltrasonicPoller implements Runnable {
 						Arrays.sort(sample); // cloning and sorting to preseve the buffer array
 						distance = sample[BUFFER_SIZE / 2]; // reading median value
 					}
+				} else {
+					distance = reading;
+					boolean facingAWall = false;
+
+					double[] currXYT = odometer.getXYT();
+					if (currXYT[2] >= 45 && currXYT[2] < 135) {// facing EAST
+						if (navigation.xTile + 1 > Resources.ARENA_X - 1) {
+							facingAWall = true;
+						}
+					} else if (currXYT[2] >= 135 && currXYT[2] < 225) {// facing SOUTH
+						if (navigation.yTile - 1 < 0) {
+							facingAWall = true;
+						}
+					} else if (currXYT[2] >= 225 && currXYT[2] < 315) {// facing WEST
+						if (navigation.xTile - 1 < 0) {
+							facingAWall = true;
+						}
+					} else {
+						if (navigation.yTile + 1 > Resources.ARENA_Y - 1) {
+							facingAWall = true;
+						}
+					}
+
+					if (facingAWall) {
+						System.out.println("ZOMFG!!!");
+					}
+					obstacleDetected = !facingAWall
+							&& (obstacleDetected || (distance < Resources.ObstacleDetectionThreashold && distance > 0));
 				}
 				try {
 					Thread.sleep(50);
 				} catch (Exception e) {
-				} // Poor man's timed sampling
+				}
 			}
-
 		}
+		 // Poor man's timed sampling
 	}
 
 	/**
@@ -101,7 +127,16 @@ public class UltrasonicPoller implements Runnable {
 
 	public static void wake() {
 		wait = false;
+	}
+
+	public static void resetDetection() {
 		obstacleDetected = false;
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static boolean hasDetected() {

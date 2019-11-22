@@ -10,6 +10,9 @@ import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
 import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
+
+import java.util.Arrays;
+
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
 import lejos.hardware.Sound;
 
@@ -160,32 +163,26 @@ public class Navigation {
 	 * 
 	 * @param move a size 2 representing the coordinates of the target tile
 	 */
-	public boolean processNextMove(int[] move) {
-		boolean result = true;
+	public void processNextMove(int[] move) {
 		targetX = move[0];
 		targetY = move[1];
 		switch (navigationMode) {
+		case OBSTACLE_ENCOUNTERED:
+			Main.sleepFor(70);
+			break;
 		case TRAVELING:
 			goTo(targetX, targetY);
 			break;
 		case CORRECTING:
 			Main.sleepFor(70); // maybe?
 			break;
-		case OBSTACLE_ENCOUNTERED:
-			Resources.colorPoller.sleep();
-			Sound.buzz();
-			if (Resources.pathFinder.setObstacle()) {
-				PathFinder.resetMap();
-				Resources.pathFinder.findPath();
-				result = false;
-			}
-			break;
+		
 		}
+		System.out.println("move succ at end of processNextMove: " + moveSuccessful);
 		if (moveSuccessful) {
 			xTile = (int) (odometer.getXYT()[0] / TILE_SIZE);
 			yTile = (int) (odometer.getXYT()[1] / TILE_SIZE);
 		}
-		return result;
 	}
 
 	/**
@@ -195,7 +192,7 @@ public class Navigation {
 	 * @param Y y-coordinates of the target tile
 	 */
 	public void goTo(int X, int Y) {
-		
+		System.out.println("Going to: " + X + "," + Y);
 		interrupted = false;
 		double currentX = odometer.getXYT()[0];
 		double currentY = odometer.getXYT()[1];
@@ -219,15 +216,35 @@ public class Navigation {
 		}
 		double distance2go = Math.sqrt(X2go * X2go + Y2go * Y2go);
 		
+		int speed = Resources.leftMotor.getSpeed();
+		
+		System.out.println("Finished calculating");
+		UltrasonicPoller.sleep();
 		Resources.colorPoller.sleep();
 		synchronized (Resources.leftMotor) {
 			synchronized (Resources.rightMotor) {
+				setSpeed(Resources.ROTATE_SPEED);
 				leftMotor.rotate(convertAngle(angleDeviation), true);
 				rightMotor.rotate(-convertAngle(angleDeviation), false);
+				setSpeed(speed);
 			}
 		}
 		Resources.colorPoller.wake();
-		Main.sleepFor(20);
+		UltrasonicPoller.wake();
+		
+		System.out.println("Finished turning");
+		Main.sleepFor(100);
+
+		if (UltrasonicPoller.hasDetected()) {
+			System.out.println("object detected after turning");
+			moveSuccessful = false;
+			interrupted = true;
+			synchronized (navigationMode) {
+				navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
+				UltrasonicPoller.resetDetection();
+				return;
+			}
+		}
 		
 		leftMotor.rotate(convertDistance(distance2go), true);
 		rightMotor.rotate(convertDistance(distance2go), false);
@@ -236,11 +253,15 @@ public class Navigation {
 			moveSuccessful = true;
 		}
 		if (UltrasonicPoller.hasDetected()) {
+			System.out.println("object detected after MOVING");
+			System.out.println("int & movsucc: " + interrupted + " , " + moveSuccessful);
 			synchronized (navigationMode) {
 				navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
+				UltrasonicPoller.resetDetection();
 			}
 		}
-		Main.sleepFor(120);
+		System.out.println("Sleeping & returning");
+		Main.sleepFor(100);
 	}
 
 	/**

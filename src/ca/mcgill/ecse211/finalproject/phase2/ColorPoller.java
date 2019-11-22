@@ -132,7 +132,7 @@ public class ColorPoller implements Runnable {
 								navigation.setSpeed(Resources.HIGH_FORWARD_SPEED);
 								navigation.navigationMode = TravelingMode.TRAVELING;
 								// synchronized() {
-								UltrasonicPoller.wake();
+								UltrasonicPoller.resetDetection();
 								// }
 							}
 						}
@@ -264,7 +264,6 @@ public class ColorPoller implements Runnable {
 	public void resetLineDetection() {
 		leftLineDetected = false;
 		rightLineDetected = false;
-
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {

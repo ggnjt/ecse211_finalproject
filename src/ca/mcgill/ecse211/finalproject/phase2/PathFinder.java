@@ -276,10 +276,10 @@ public class PathFinder {
 	 */
 	public ArrayList<int[]> findPath() {
 
-		open.add(map[navigation.xTile][navigation.xTile]);
+		open.add(map[navigation.xTile][navigation.yTile]);
 		Square current;
-
 		while (true) {
+			
 			current = open.poll();
 			if (current == null) {
 				System.out.println("Something went horribly wrong, no path found");
@@ -297,12 +297,14 @@ public class PathFinder {
 					ghettoStack.push(current.parent);
 					current = current.parent;
 				}
+				
+				ghettoStack.pop(); //this is the current square I know what I'm doing I think
+				
 				while (!ghettoStack.isEmpty()) {
 					current = ghettoStack.pop();
 					int[] entry = { current.X, current.Y };
 					result.add(entry);
 				}
-				result.remove(0);
 				return result;
 			}
 
@@ -455,32 +457,9 @@ public class PathFinder {
 
 	}
 
-	/**
-	 * Test/debugger method
-	 * 
-	 * @param arenaSizeX
-	 * @param arenaSizeY
-	 * @param tunnelLLX
-	 * @param tunnelLLY
-	 * @param tunnelURX
-	 * @param tunnelURY
-	 * @param baseLLX
-	 * @param baseLLY
-	 * @param baseURX
-	 * @param baseURY
-	 * @param islandLLX
-	 * @param islandLLY
-	 * @param islandURX
-	 * @param islandURY
-	 * @param targetX
-	 * @param targetY
-	 * @return
-	 */
-	public static PathFinder test(boolean isRedTeam, int targetX, int targetY) {
-		PathFinder pf = new PathFinder(isRedTeam);
-		PathFinder.targetX = targetX;
-		PathFinder.targetY = targetY;
-		return pf;
+	public static void setTarget (int x, int y) {
+		targetX = x;
+		targetY = y;
 	}
 
 }

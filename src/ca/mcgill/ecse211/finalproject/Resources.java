@@ -31,8 +31,8 @@ public class Resources {
 	/**
 	 * The dimensions sizes in squares
 	 */
-	public static final int ARENA_X = 8;
-	public static final int ARENA_Y = 8;
+	public static final int ARENA_X = 15;  //14 or 15???
+	public static final int ARENA_Y = 9;
 
 	/**
 	 * The threshold in intensity delta for determining when a line has been
@@ -68,7 +68,7 @@ public class Resources {
 	/**
 	 * The speed at which the robot rotates in degrees per second.
 	 */
-	public static final int ROTATE_SPEED = 2000;
+	public static final int ROTATE_SPEED = 200;
 
 	/**
 	 * Low speed used for more accurate sensor radians
@@ -78,7 +78,7 @@ public class Resources {
 	/**
 	 * The motor acceleration in degrees per second squared.
 	 */
-	public static final int ACCELERATION = 1000;
+	public static final int ACCELERATION = 1500;
 
 	/**
 	 * The tile size in centimeters.
@@ -93,7 +93,7 @@ public class Resources {
 	/**
 	 * obstacle detection threshold
 	 */
-	public static final double ObstacleDetectionThreashold = 12.0;
+	public static final double ObstacleDetectionThreashold = 10.0;
 
 	// ------------------EV3 Components--------------------
 	/**
