@@ -38,7 +38,7 @@ public class Resources {
 	 * The threshold in intensity delta for determining when a line has been
 	 * detected
 	 */
-	public static final double INTENSITY_THRESHOLD = 0.07f;
+	public static final double INTENSITY_THRESHOLD = 0.07f; //this could be tweaked
 
 	/**
 	 * Distance to light sensor from center of rotation in centimeters
@@ -53,25 +53,25 @@ public class Resources {
 	/**
 	 * The robot width in centimeters.
 	 */
-	public static final double TRACK = 12.03; // plis dont touch
+	public static final double TRACK = 12.03; // TODO:OPTIMIZE THIS
 
 	/**
 	 * The lower speed at which the robot moves towards a black line
 	 */
-	public static final int LOW_FORWARD_SPEED = 100; // TODO: optimize this
+	public static final int LOW_FORWARD_SPEED = 100; 
 	
 	/**
 	 * the higher speed at which the robot moves away from a black line
 	 */
-	public static final int HIGH_FORWARD_SPEED = 280;
+	public static final int HIGH_FORWARD_SPEED = 300;
 
 	/**
 	 * The speed at which the robot rotates in degrees per second.
 	 */
-	public static final int ROTATE_SPEED = 150;
+	public static final int ROTATE_SPEED = 180;
 
 	/**
-	 * Low speed used for more accurate sensor radians
+	 * Low speed used for more accurate sensor readings
 	 */
 	public static final int CORRECTION_SPPED = 45;
 
@@ -167,7 +167,7 @@ public class Resources {
 	/**
 	 * Path finder
 	 */
-	public static PathFinder pathFinder; //YP: not final because I want to construct this after localization
+	public static PathFinder pathFinder;
 
 	/**
 	 * The odometer.

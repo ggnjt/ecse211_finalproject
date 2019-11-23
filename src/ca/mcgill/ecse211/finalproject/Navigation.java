@@ -1,22 +1,18 @@
 package ca.mcgill.ecse211.finalproject;
 
 import static ca.mcgill.ecse211.finalproject.Resources.ACCELERATION;
-import static ca.mcgill.ecse211.finalproject.Resources.ARENA_X;
-import static ca.mcgill.ecse211.finalproject.Resources.ARENA_Y;
 import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
 import static ca.mcgill.ecse211.finalproject.Resources.TRACK;
 import static ca.mcgill.ecse211.finalproject.Resources.WHEEL_RAD;
 import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
-import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
+import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
-import lejos.hardware.Sound;
 
 /**
  * Class where all of the navigation of the robot is handled
@@ -33,7 +29,7 @@ public class Navigation {
 	 * @author yp
 	 *
 	 */
-	public enum TravelingMode {
+	public static enum TravelingMode {
 		TRAVELING, CORRECTING, OBSTACLE_ENCOUNTERED
 	}
 
@@ -74,6 +70,7 @@ public class Navigation {
 
 	/**
 	 * Constructor for the Navigation class.
+	 * sets speed and acceleration of motors
 	 */
 	public Navigation() {
 		setSpeed(Resources.LOW_FORWARD_SPEED);
@@ -157,7 +154,8 @@ public class Navigation {
 	 * @param Y y-coordinates of the target tile
 	 */
 	public static void goTo(int X, int Y) {
-		interrupted = false;
+		interrupted = false; // fail safe
+		// calculation for distance & angle
 		double currentX = odometer.getXYT()[0];
 		double currentY = odometer.getXYT()[1];
 		double currentTheta = odometer.getXYT()[2];
@@ -180,11 +178,12 @@ public class Navigation {
 		}
 		double distance2go = Math.sqrt(X2go * X2go + Y2go * Y2go);
 
+		// store current speed to reset after
 		int speed = Resources.leftMotor.getSpeed();
-
+		// turn off pollers to prevent false reading
 		UltrasonicPoller.sleep();
-		Resources.colorPoller.sleep();
-
+		ColorPoller.sleep();
+		// turn to next tile
 		synchronized (Resources.leftMotor) {
 			synchronized (Resources.rightMotor) {
 				setSpeed(Resources.ROTATE_SPEED);
@@ -193,16 +192,22 @@ public class Navigation {
 				setSpeed(speed);
 			}
 		}
-		Resources.colorPoller.wake();
+		// wake the pollers
+		ColorPoller.wake();
 		UltrasonicPoller.wake();
-		// reset to get more accurate reading
 
+		// if the vehicle turned, the US reading will be affected and need to be reset
+		// and needs more time to get a new reading. If the vehicle was moving straight,
+		// then it would have detected the obstacle while moving forward so no need for
+		// reset
+		// SLEEP TO MAKE SURE THAT THE POLLER READING IS ACCURATE
 		if (Math.abs(angleDeviation) > 60) {
 			UltrasonicPoller.resetDetection();
 			Main.sleepFor(800);
 		} else {
 			Main.sleepFor(250);
 		}
+		// obstacle detectingafter turning, so move was interrupted
 		if (!PathFinder.isFacingAWall() && UltrasonicPoller.hasDetected()) {
 			moveSuccessful = false;
 			interrupted = true;
@@ -212,9 +217,13 @@ public class Navigation {
 			}
 		}
 
+		// move the vehicle forward
+		// no synchronized block because the poller should be able to interrupt this
+		// movement upon detection of black line
 		leftMotor.rotate(convertDistance(distance2go), true);
 		rightMotor.rotate(convertDistance(distance2go), false);
 
+		// update the tile if movement successfull
 		if (!interrupted) {
 			moveSuccessful = true;
 		}
@@ -222,11 +231,14 @@ public class Navigation {
 			xTile = (int) (odometer.getXYT()[0] / TILE_SIZE);
 			yTile = (int) (odometer.getXYT()[1] / TILE_SIZE);
 		}
+		// obstacle detection after successfully reaching the center of tile, mark as
+		// success and let the navigationMode catch the need for new path
 		if (!PathFinder.isFacingAWall() && UltrasonicPoller.hasDetected()) {
 			synchronized (navigationMode) {
 				navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
 			}
 		}
+		//prevet threading issue
 		Main.sleepFor(100);
 	}
 
@@ -238,7 +250,6 @@ public class Navigation {
 	public static void turnTo(double theta) {
 		theta = theta % 360;
 		double angleDiff = theta - odometer.getXYT()[2];
-		// Don't correct the angle if it is within a certain threshold
 		synchronized (leftMotor) {
 			synchronized (rightMotor) {
 				leftMotor.setSpeed(Resources.ROTATE_SPEED);
@@ -261,7 +272,7 @@ public class Navigation {
 	 * moves the robot to the lower left corner of a square
 	 */
 	public static void goToLowerLeftCorner() {
-		Resources.colorPoller.sleep();
+		ColorPoller.sleep();
 		turnTo(225);
 		synchronized (leftMotor) {
 			synchronized (rightMotor) {
@@ -270,7 +281,7 @@ public class Navigation {
 			}
 		}
 	}
-	
+
 	/**
 	 * recenters the robot from the lower left corner
 	 */
@@ -286,39 +297,44 @@ public class Navigation {
 		xTile = (int) (odometer.getXYT()[0] / TILE_SIZE);
 		yTile = (int) (odometer.getXYT()[1] / TILE_SIZE);
 		PathFinder.resetMap();
-		Resources.colorPoller.wake();
+		ColorPoller.wake();
 	}
 
 	/**
 	 * makes the robot run along the list of moves
+	 * 
 	 * @param moves List of moves in the format of square coordinates
 	 * @return the list of moves has been successfully achieves in its entirety
 	 */
 	public static boolean run(ArrayList<int[]> moves) {
 		for (int[] move : moves) {
-			System.out.println(Arrays.toString(move));
+			System.out.println(Arrays.toString(move)); // prints the tile it is moving to
 			UltrasonicPoller.resetDetection();
 			setSpeed(Resources.LOW_FORWARD_SPEED);
+			// since a move ends at the center, we are moving towards a line now so lower
+			// the speed
 			processNextMove(move);
-			while (!moveSuccessful || interrupted) {
+			while (!moveSuccessful || interrupted) { // move was interrupted by a line / obstacle
 				UltrasonicPoller.resetDetection();
-				if (navigationMode == TravelingMode.TRAVELING) {
-					if (targetY == 4) {
-						Resources.colorPoller.sleep();
+				if (navigationMode == TravelingMode.TRAVELING) { // after the black line
+					if (targetY == 4) { // avoid the annoying black line in the middle of the arena
+						ColorPoller.sleep(); // this doesn't work too well
 					}
-					processNextMove(move);
+					processNextMove(move); // keeps on moving to the center
 				} else if (navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
 					UltrasonicPoller.resetDetection();
 					break;
 				} else {
-					Main.sleepFor(70);
+					Main.sleepFor(70); // let colorPoller take over
 				}
-				Resources.colorPoller.wake();
+				ColorPoller.wake(); // wake it just in case it finished sleeping for the middle seam
 			}
 			if (navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
-				if (Resources.pathFinder.setObstacle()) {
+				// this catches the case where the list of moves is not complete. Path needs
+				// reset
+				if (PathFinder.setObstacle()) { // if obstacle is in the arena and not a wall
 					PathFinder.resetMap();
-					Main.moves = Resources.pathFinder.findPath();
+					Main.moves = PathFinder.findPath();
 					navigationMode = TravelingMode.TRAVELING;
 					moveSuccessful = false;
 					Navigation.interrupted = true;
@@ -328,9 +344,10 @@ public class Navigation {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * moves the robot by a set distance
+	 * 
 	 * @param distance distance to move by in cm
 	 */
 	public static void moveByDistance(double distance) {
@@ -340,5 +357,23 @@ public class Navigation {
 				Resources.rightMotor.rotate(convertDistance(distance), false);
 			}
 		}
+	}
+
+	/**
+	 * goes to a corner, aims, shoots, resets target to home and re-centers to
+	 * middle of square
+	 */
+	public static void launchManeuver() {
+		goToLowerLeftCorner();
+		turnTo(PathFinder.launchAngle + 180);
+		moveByDistance((-PathFinder.launchAdjustment) * Resources.TILE_SIZE - 0.5 * Resources.TILE_SIZE);
+		Resources.shooterMotor.rotate(165);
+		Resources.shooterMotor.flt(true);
+		// Resources.pathFinder.printMap();
+		PathFinder.letsGoHome();
+		moveByDistance((PathFinder.launchAdjustment) * Resources.TILE_SIZE + 0.5 * Resources.TILE_SIZE);
+		reCenter();
+		Main.sleepFor(100);
+		Main.moves = PathFinder.findPath();
 	}
 }

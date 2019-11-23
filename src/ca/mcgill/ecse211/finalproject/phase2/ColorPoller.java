@@ -19,6 +19,7 @@ import ca.mcgill.ecse211.finalproject.UltrasonicPoller;
  * odometry correction using the color sensors
  * 
  * @author yp
+ * @author holmsi
  *
  */
 public class ColorPoller implements Runnable {
@@ -26,11 +27,11 @@ public class ColorPoller implements Runnable {
 	/**
 	 * whether or not the left sensor is currently detecting a black line
 	 */
-	private boolean leftLineDetected = false;
+	private static boolean leftLineDetected = false;
 	/**
 	 * whether or not the right sensor is currently detecting a black line
 	 */
-	private boolean rightLineDetected = false;
+	private static boolean rightLineDetected = false;
 
 	/**
 	 * boolean to make the thread wait while turning
@@ -60,15 +61,15 @@ public class ColorPoller implements Runnable {
 	/**
 	 * safety net counter for no line detection on the right
 	 */
-	private int rightCounter = 0;
+	private static int rightCounter = 0;
 
 	/**
 	 * safety net counter for no line detection on the left
 	 */
-	private int leftCounter = 0;
+	private static int leftCounter = 0;
 
 	/**
-	 * constructor
+	 * constructor, starts both left and right threads
 	 */
 	public ColorPoller() {
 		super();
@@ -88,6 +89,7 @@ public class ColorPoller implements Runnable {
 	@Override
 	public void run() {
 		while (true) {
+			// sleep
 			if (wait) {
 				try {
 					Thread.sleep(60);
@@ -99,9 +101,11 @@ public class ColorPoller implements Runnable {
 				readingStart = System.currentTimeMillis();
 				switch (Navigation.navigationMode) {
 				case TRAVELING:
+					// continuously detect line
 					leftLineDetected = leftSampler.getBlackLine();
 					rightLineDetected = rightSampler.getBlackLine();
 					if (leftLineDetected || rightLineDetected) {
+						// line detection during traveling, state change and slow the robot down
 						Navigation.stopTheRobot();
 						Main.sleepFor(50);
 						Navigation.navigationMode = TravelingMode.CORRECTING;
@@ -114,13 +118,21 @@ public class ColorPoller implements Runnable {
 					}
 					break;
 				case OBSTACLE_ENCOUNTERED:
+					// not sure if anything should be done when encountered an obstacle, but either
+					// way it should not detect anything since the detection only happens within
+					// the middle of the square
 					break;
 				case CORRECTING:
+					// probe for the other line detection
 					leftLineDetected = leftLineDetected || leftSampler.getBlackLine();
 					rightLineDetected = rightLineDetected || rightSampler.getBlackLine();
 					boolean stopped = !leftMotor.isMoving() && !rightMotor.isMoving();
+
+					// first fail safe: if both lines present similar reading then they both are on
+					// the line
 					if (leftLineDetected && rightLineDetected
-							|| Math.abs(leftSampler.currentSample - rightSampler.currentSample) < 0.030) { // tweak moi
+							|| Math.abs(leftSampler.currentSample - rightSampler.currentSample) < 0.030) {
+						// tweak the number to get better line detection
 						// Correct
 						correctXYT();
 						synchronized (Resources.leftMotor) {
@@ -141,7 +153,10 @@ public class ColorPoller implements Runnable {
 							}
 						}
 						rightCounter++;
-						if (rightCounter > 20) { // fail safe //if miss line reading move this many cycles
+						// second fail safe: if miss line reading move this many cycles
+						// tweak the number if the robot turns too much if it does not detect a black
+						// line or does not correct enough for some reason
+						if (rightCounter > 20) {
 							synchronized (leftMotor) {
 								synchronized (rightMotor) {
 									Navigation.stopTheRobot();
@@ -180,6 +195,7 @@ public class ColorPoller implements Runnable {
 						e.printStackTrace();
 					}
 				} else {
+					// always sleep because sleep deprivation make threads unhappy
 					try {
 						Thread.sleep(20);
 					} catch (InterruptedException e) {
@@ -256,7 +272,7 @@ public class ColorPoller implements Runnable {
 	/**
 	 * reset the line detect booleans to false
 	 */
-	public void resetLineDetection() {
+	public static void resetLineDetection() {
 		leftLineDetected = false;
 		rightLineDetected = false;
 		try {
@@ -268,16 +284,16 @@ public class ColorPoller implements Runnable {
 	/**
 	 * makes the color poller thread sleep while turning
 	 */
-	public void sleep() {
+	public static void sleep() {
 		wait = true;
 	}
 
 	/**
 	 * wake the thread up after sleeping
 	 */
-	public void wake() {
+	public static void wake() {
 		try {
-			Thread.sleep(200);
+			Thread.sleep(50);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

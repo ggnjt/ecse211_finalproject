@@ -186,9 +186,10 @@ public class PathFinder {
 			break;
 		}
 
+		//search for suitable launch points
 		launchPoints = findLaunchPointToTarget((int) bin.x, (int) bin.y);
 
-		// ====subject to change====//
+		//initialize first launch point
 		targetX = (int) launchPoints.get(launchIndex)[0];
 		targetY = (int) launchPoints.get(launchIndex)[1];
 		launchAngle = launchPoints.get(launchIndex)[2];
@@ -213,17 +214,16 @@ public class PathFinder {
 	/**
 	 * set the target square in front of the robot as an obstacle
 	 * 
-	 * @param x x coordinate of square
-	 * @param y y coordinate of square
 	 */
-	public boolean setObstacle() {
-		if (!isFacingAWall()) {
+	public static boolean setObstacle() {
+		if (!isFacingAWall()) { //if facing a wall then it would be OOB
 			double[] currXYT = odometer.getXYT();
 			if (currXYT[2] >= 45 && currXYT[2] < 135) {// facing EAST
 				map[Navigation.xTile + 1][Navigation.yTile].setStatus(tileType.OBSTACLE);
-				if (!goingHome && map[Navigation.xTile + 1][Navigation.yTile].X == targetX
+				//if the obstacle is on launch point, we need to reset it
+				if (!goingHome && map[Navigation.xTile + 1][Navigation.yTile].X == targetX 
 						&& map[Navigation.xTile + 1][Navigation.yTile].Y == targetY) {
-					resetLaunchPoint();
+					resetLaunchPoint(); //this takes care of adjacent tiles
 				}
 				return true;
 			} else if (currXYT[2] >= 135 && currXYT[2] < 225) {// facing SOUTH
@@ -261,7 +261,7 @@ public class PathFinder {
 	 * @param target  square being probed
 	 * @param cost    cost increment of the target
 	 */
-	public void checkAndUpdateCost(Square current, Square target, double cost) {
+	public static void checkAndUpdateCost(Square current, Square target, double cost) {
 		if (target.status == tileType.RIVER || target.status == tileType.OBSTACLE || closed[target.X][target.Y]) {
 			return;
 		}
@@ -309,7 +309,7 @@ public class PathFinder {
 	 * @return a list of int[] of size 2, which represents the list of squares the
 	 *         robot should move to in order to reach to the target
 	 */
-	public ArrayList<int[]> findPath() {
+	public static ArrayList<int[]> findPath() {
 
 		open.add(map[Navigation.xTile][Navigation.yTile]);
 		Square current;
@@ -331,8 +331,9 @@ public class PathFinder {
 					ghettoStack.push(current.parent);
 					current = current.parent;
 				}
-
-				ghettoStack.pop(); // this is the current square I know what I'm doing I think
+				// this is the current square so we don't want it in the list of moves
+				//I know what I'm doing I think
+				ghettoStack.pop(); 
 
 				while (!ghettoStack.isEmpty()) {
 					current = ghettoStack.pop();
@@ -341,7 +342,7 @@ public class PathFinder {
 				}
 				return result;
 			}
-
+			//probe adjacent squares and update cost in queue
 			Square targetSquare;
 			if (current.X - 1 >= 0) {
 				targetSquare = map[current.X - 1][current.Y]; // WEST
@@ -382,25 +383,28 @@ public class PathFinder {
 	private static ArrayList<double[]> findLaunchPointToTarget(int targetX, int targetY) {
 		ArrayList<double[]> listOfTargets = new ArrayList<double[]>();
 		double shortest_dist = Double.MAX_VALUE;
+		//24 sqaure where it can shoot from
 		double[][] notableSquares = { { 0, 6 }, { 1, 6 }, { 3, 5 }, { 4, 4 }, { 5, 3 }, { 6, 1 }, { 6, 0 }, { 6, -1 },
 				{ 5, -3 }, { 4, -4 }, { 3, -5 }, { 1, -6 }, { 0, 6 }, { -1, -6 }, { -3, -5 }, { -4, -4 }, { -5, -3 },
 				{ -6, -1 }, { -6, 0 }, { -6, 1 }, { -5, 3 }, { -4, 4 }, { -3, 5 }, { -1, 6 } };
+		//lauch angle of the corresponding square
 		double[] thetaOptions = { 180, 189.5, 211, 225, 239, 260.5, 270, 279.5, 301, 315, 329, 350.5, 0, 9.5, 31, 45,
 				59, 80.5, 90, 99.5, 121, 135, 149, 170.5 };
+		//distance needs to be adjusted by this amount * TILE_SIZE
 		double[] distanceAdjustment = { 0, 0.083, -0.169, -0.344, -0.169, 0.083, 0, 0.083, -0.169, -0.344, -0.169,
 				0.083, 0, 0.083, -0.169, -0.344, -0.169, 0.083, 0, 0.083, -0.169, -0.344, -0.169, 0.083 };
 		for (int i = 0; i < notableSquares.length; i++) {
 			double[] pair = notableSquares[i];
-			boolean ooX = pair[0] + targetX >= ARENA_X || pair[0] + targetX - 1 <= 0; // -1 to prevent running into
-																						// wall,
+			boolean ooX = pair[0] + targetX >= ARENA_X || pair[0] + targetX - 1 <= 0; 
 			boolean ooY = pair[1] + targetY >= ARENA_Y || pair[1] + targetY - 1 <= 0;
+			// -1 at the end to prevent running into wall
 			boolean invalid;
-			if (!ooX && !ooY) {
-				invalid = map[(int) pair[0] + targetX][(int) pair[1] + targetY].status != tileType.ISLAND;
+			if (!ooX && !ooY) { //OOB
+				invalid = map[(int) pair[0] + targetX][(int) pair[1] + targetY].status != tileType.ISLAND; 
+				//not on island
 			} else {
 				invalid = true;
 			}
-
 			if (ooX || ooY || invalid) {
 				continue;
 			} else {

@@ -27,57 +27,45 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
+		//--===[PHASE 1: LOCALOZATION]===--//
 		Thread USPollerThread = new Thread(Resources.usPoller);
 		Thread USLocalizerThread = new Thread(Resources.usLocalizer);
 		odometer.start();
 		USPollerThread.start();
 		USLocalizerThread.start();
 		while (!localizationFinished) {
-			Main.sleepFor(1000);
+			Main.sleepFor(500);
 		}
 		
+		//beep after localization
 		Sound.beepSequence();
 
-		UltrasonicPoller.sleep();// this should be removed after demo
-
 		try {
-			USLocalizerThread.join(5000);
+			USLocalizerThread.join(1000);
 		} catch (InterruptedException e) {
 			System.out.println("Sadness is the ichor of life");
 		}
 		
 		Resources.shooterMotor.setSpeed(Resources.SHOOTER_MOTOR_SPEED);
 		Resources.pathFinder = new PathFinder(redTeam == TEAM_NUMBER);
-
+		//low error threshold to prevent large thread fuck-ups
 		Resources.leftMotor.setStallThreshold(10, 10);
 		Resources.rightMotor.setStallThreshold(10, 10);
 
+		//--===[PHASE 2: TRAVEL TO A LAUNCH POINT]===--//
 		Thread cT = new Thread(colorPoller);
 		cT.start();
 		// stressShooterTest();
 		// stressTest();
-		moves = Resources.pathFinder.findPath();
 		// Resources.pathFinder.printMap();
-
+		moves = PathFinder.findPath();
 		boolean success = Navigation.run(moves);
 		while (!success) {
 			success = Navigation.run(moves);
 		}
-
-		Navigation.goToLowerLeftCorner();
-		Navigation.turnTo(PathFinder.launchAngle + 180);
-		Navigation.moveByDistance((-PathFinder.launchAdjustment)*Resources.TILE_SIZE - 0.5 * Resources.TILE_SIZE);
-		System.out.println("tile: " + Navigation.xTile +"==" + Navigation.yTile);
-		System.out.println("Angle: " + PathFinder.launchAngle);
-		Resources.shooterMotor.rotate(165);
-		Resources.shooterMotor.flt(true);
-		Resources.pathFinder.printMap();
-		PathFinder.letsGoHome();
-		Navigation.moveByDistance((PathFinder.launchAdjustment)*Resources.TILE_SIZE + 0.5 * Resources.TILE_SIZE);
-		Navigation.reCenter();
-		Main.sleepFor(100);
-		moves = Resources.pathFinder.findPath();
+		//--===[PHASE 3: LAUNCH THE BALL]===--//
+		Navigation.launchManeuver();
+		//--===[PHASE 4: GO HOME]===--//
 		success = Navigation.run(moves);
 		while (!success) {
 			success = Navigation.run(moves);
@@ -92,7 +80,6 @@ public class Main {
 //		Sound.beep();
 //		Resources.shooterMotor.rotate(165);
 		Button.waitForAnyPress();
-
 		System.exit(0);
 	}
 
