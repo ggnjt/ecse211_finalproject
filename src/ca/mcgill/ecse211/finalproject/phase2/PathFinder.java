@@ -30,11 +30,13 @@ import ca.mcgill.ecse211.finalproject.Resources.Region;
 public class PathFinder {
 
 	/**
-	 * orientation of the robot
-	 * 
+	 * type of the tile
 	 * @author yp
 	 *
 	 */
+	public enum tileType {
+		BASE, TUNNEL, RIVER, OBSTACLE, ISLAND;
+	}
 
 	/**
 	 * a 2-D array used to represent the map
@@ -93,27 +95,27 @@ public class PathFinder {
 			for (int j = 0; j < ARENA_Y; j++) {
 				Square sq = new Square(i, j);
 				map[i][j] = sq;
-				sq.setStatus(0);
+				sq.setStatus(tileType.RIVER);
 			}
 		}
 
 		// set base
 		for (int i = (int) green.ll.x; i < (int) green.ur.x; i++) {
 			for (int j = (int) green.ll.y; j < (int) green.ur.y; j++) {
-				map[i][j].setStatus(1);
+				map[i][j].setStatus(tileType.BASE);
 			}
 		}
 
 		// set island
 		for (int i = (int) island.ll.x; i < (int) island.ur.x; i++) {
 			for (int j = (int) island.ll.y; j < (int) island.ur.y; j++) {
-				map[i][j].setStatus(3);
+				map[i][j].setStatus(tileType.ISLAND);
 			}
 		}
 		// set tunnel
 		for (int i = (int) tng.ll.x; i < (int) tng.ur.x; i++) {
 			for (int j = (int) tng.ll.y; j < (int) tng.ur.y; j++) {
-				map[i][j].setStatus(2);
+				map[i][j].setStatus(tileType.TUNNEL);
 			}
 		}
 
@@ -121,30 +123,30 @@ public class PathFinder {
 		if ((int) tng.ur.x - (int) tng.ll.x > 1) { // long tunnel is horizontal
 			int[] llCoord = { (int) tng.ll.x, (int) tng.ll.y };
 			if (llCoord[1] - 1 >= 0 && llCoord[1] + 1 < ARENA_Y) {
-				map[llCoord[0]][llCoord[1] - 1].setStatus(0);
-				map[llCoord[0] + 1][llCoord[1] - 1].setStatus(0);
-				map[llCoord[0]][llCoord[1] + 1].setStatus(0);
-				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
+				map[llCoord[0]][llCoord[1] - 1].setStatus(tileType.RIVER);
+				map[llCoord[0] + 1][llCoord[1] - 1].setStatus(tileType.RIVER);
+				map[llCoord[0]][llCoord[1] + 1].setStatus(tileType.RIVER);
+				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(tileType.RIVER);
 			} else if (llCoord[1] - 1 >= 0) {
-				map[llCoord[0]][llCoord[1] - 1].setStatus(0);
-				map[llCoord[0] + 1][llCoord[1] - 1].setStatus(0);
+				map[llCoord[0]][llCoord[1] - 1].setStatus(tileType.RIVER);
+				map[llCoord[0] + 1][llCoord[1] - 1].setStatus(tileType.RIVER);
 			} else {
-				map[llCoord[0]][llCoord[1] + 1].setStatus(0);
-				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
+				map[llCoord[0]][llCoord[1] + 1].setStatus(tileType.RIVER);
+				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(tileType.RIVER);
 			}
 		} else if ((int) tng.ur.y - (int) tng.ll.y > 1) { // long tunnel is vertical
 			int[] llCoord = { (int) tng.ll.x, (int) tng.ll.y };
 			if (llCoord[0] - 1 >= 0 && llCoord[0] + 1 < ARENA_X) {
-				map[llCoord[0] - 1][llCoord[1]].setStatus(0);
-				map[llCoord[0] - 1][llCoord[1] + 1].setStatus(0);
-				map[llCoord[0] + 1][llCoord[1]].setStatus(0);
-				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
+				map[llCoord[0] - 1][llCoord[1]].setStatus(tileType.RIVER);
+				map[llCoord[0] - 1][llCoord[1] + 1].setStatus(tileType.RIVER);
+				map[llCoord[0] + 1][llCoord[1]].setStatus(tileType.RIVER);
+				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(tileType.RIVER);
 			} else if (llCoord[1] - 1 >= 0) {
-				map[llCoord[0] - 1][llCoord[1]].setStatus(0);
-				map[llCoord[0] - 1][llCoord[1] + 1].setStatus(0);
+				map[llCoord[0] - 1][llCoord[1]].setStatus(tileType.RIVER);
+				map[llCoord[0] - 1][llCoord[1] + 1].setStatus(tileType.RIVER);
 			} else {
-				map[llCoord[0] + 1][llCoord[1]].setStatus(0);
-				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
+				map[llCoord[0] + 1][llCoord[1]].setStatus(tileType.RIVER);
+				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(tileType.RIVER);
 			}
 		}
 
@@ -206,28 +208,28 @@ public class PathFinder {
 		if (!isFacingAWall()) {
 			double[] currXYT = odometer.getXYT();
 			if (currXYT[2] >= 45 && currXYT[2] < 135) {// facing EAST
-				map[Navigation.xTile + 1][Navigation.yTile].setStatus(-2);
+				map[Navigation.xTile + 1][Navigation.yTile].setStatus(tileType.OBSTACLE);
 				if (!goingHome && map[Navigation.xTile + 1][Navigation.yTile].X == targetX
 						&& map[Navigation.xTile + 1][Navigation.yTile].Y == targetY) {
 					resetLaunchPoint();
 				}
 				return true;
 			} else if (currXYT[2] >= 135 && currXYT[2] < 225) {// facing SOUTH
-				map[Navigation.xTile][Navigation.yTile - 1].setStatus(-2);
+				map[Navigation.xTile][Navigation.yTile - 1].setStatus(tileType.OBSTACLE);
 				if (!goingHome && map[Navigation.xTile][Navigation.yTile - 1].X == targetX
 						&& map[Navigation.xTile][Navigation.yTile - 1].Y == targetY) {
 					resetLaunchPoint();
 				}
 				return true;
 			} else if (currXYT[2] >= 225 && currXYT[2] < 315) {// facing WEST
-				map[Navigation.xTile - 1][Navigation.yTile].setStatus(-2);
+				map[Navigation.xTile - 1][Navigation.yTile].setStatus(tileType.OBSTACLE);
 				if (!goingHome && map[Navigation.xTile - 1][Navigation.yTile].X == targetX
 						&& map[Navigation.xTile - 1][Navigation.yTile].Y == targetY) {
 					resetLaunchPoint();
 				}
 				return true;
 			} else {
-				map[Navigation.xTile][Navigation.yTile + 1].setStatus(-2);
+				map[Navigation.xTile][Navigation.yTile + 1].setStatus(tileType.OBSTACLE);
 				if (!goingHome && map[Navigation.xTile][Navigation.yTile + 1].X == targetX
 						&& map[Navigation.xTile][Navigation.yTile + 1].Y == targetY) {
 					resetLaunchPoint();
@@ -248,7 +250,7 @@ public class PathFinder {
 	 * @param cost    cost increment of the target
 	 */
 	public void checkAndUpdateCost(Square current, Square target, double cost) {
-		if (target.status <= 0 || closed[target.X][target.Y]) {
+		if (target.status == tileType.RIVER || target.status == tileType.OBSTACLE || closed[target.X][target.Y]) {
 			return;
 		}
 		double t_final_cost = target.hCost + cost;
@@ -268,15 +270,15 @@ public class PathFinder {
 		char[][] image = new char[map.length][map[0].length];
 		for (Square[] row : map) {
 			for (Square sq : row) {
-				if (sq.status == 0) {
+				if (sq.status == tileType.RIVER) {
 					image[sq.X][sq.Y] = '~';
-				} else if (sq.status == 1) {
+				} else if (sq.status == tileType.BASE) {
 					image[sq.X][sq.Y] = 'B';
-				} else if (sq.status == 2) {
+				} else if (sq.status == tileType.TUNNEL) {
 					image[sq.X][sq.Y] = 'U';
-				} else if (sq.status == -2) {
+				} else if (sq.status == tileType.OBSTACLE) {
 					image[sq.X][sq.Y] = 'X';
-				} else if (sq.status == 3) {
+				} else if (sq.status == tileType.ISLAND) {
 					image[sq.X][sq.Y] = 'O';
 				}
 			}
@@ -357,10 +359,13 @@ public class PathFinder {
 	}
 
 	/**
+	 * find a list of launch points, out of 24 possible ones in total, which can aim
+	 * at the launch point
 	 * 
-	 * @param targetX
-	 * @param targetY
-	 * @return
+	 * @param targetX bin x
+	 * @param targetY bin y
+	 * @return list of coordinates [0], [1], its corresponding angle [2] and
+	 *         distance adjustment in terms of TILE_SIZE[3]
 	 */
 	private static ArrayList<double[]> findLaunchPointToTarget(int targetX, int targetY) {
 		ArrayList<double[]> listOfTargets = new ArrayList<double[]>();
@@ -379,7 +384,7 @@ public class PathFinder {
 			boolean ooY = pair[1] + targetY >= ARENA_Y || pair[1] + targetY - 1 <= 0;
 			boolean invalid;
 			if (!ooX && !ooY) {
-				invalid = map[(int) pair[0] + targetX][(int) pair[1] + targetY].status != 3;
+				invalid = map[(int) pair[0] + targetX][(int) pair[1] + targetY].status != tileType.ISLAND;
 			} else {
 				invalid = true;
 			}
@@ -434,7 +439,7 @@ public class PathFinder {
 		 * number represents the type of terrain of the sqaure 0 => river or enemy
 		 * base/tunnel 3 => central island 2 => tunnel 1 => base -2=> obstacle
 		 */
-		int status;
+		tileType status;
 		/**
 		 * previous square on the path when searching
 		 */
@@ -449,7 +454,7 @@ public class PathFinder {
 		Square(int x, int y) {
 			this.X = x;
 			this.Y = y;
-			this.status = 0;
+			this.status = tileType.RIVER;
 		}
 
 		/**
@@ -468,7 +473,7 @@ public class PathFinder {
 		 * of terrain 0 => river or enemy base/tunnel 3 => central island 2 => tunnel 1
 		 * => base -2=> obstacle
 		 */
-		void setStatus(int status) {
+		void setStatus(tileType status) {
 			this.status = status;
 		}
 
@@ -490,11 +495,20 @@ public class PathFinder {
 
 	}
 
+	/**
+	 * reset the target tile of PATHFINDER (differs from the navigation target, which is the next tile)
+	 * @param x
+	 * @param y
+	 */
 	public static void setTarget(int x, int y) {
 		targetX = x;
 		targetY = y;
 	}
 
+	/**
+	 * whether the robot is directly facing a wall
+	 * @return true if yes
+	 */
 	public static boolean isFacingAWall() {
 
 		double[] currXYT = odometer.getXYT();
@@ -518,11 +532,14 @@ public class PathFinder {
 		return false;
 	}
 
+	/**
+	 * resets the launch point to another which is not adjacent (lower left) to an obstacle
+	 */
 	public static void resetLaunchPoint() {
 		launchIndex++;
 		targetX = (int) launchPoints.get(launchIndex)[0];
 		targetY = (int) launchPoints.get(launchIndex)[1];
-		while (isAdjacentToObstacle (targetX,targetY)) {
+		while (isAdjacentToObstacle(targetX, targetY)) {
 			launchIndex++;
 			targetX = (int) launchPoints.get(launchIndex)[0];
 			targetY = (int) launchPoints.get(launchIndex)[1];
@@ -531,6 +548,9 @@ public class PathFinder {
 		launchAdjustment = launchPoints.get(launchIndex)[3];
 	}
 
+	/**
+	 * 
+	 */
 	public static void letsGoHome() {
 		switch (greenCorner) {
 		case 0: // face north
@@ -552,14 +572,14 @@ public class PathFinder {
 		}
 
 	}
-	
-	public static boolean isAdjacentToObstacle (int x, int y) {
+
+	public static boolean isAdjacentToObstacle(int x, int y) {
 		if (x == 0 || y == 0) {
 			return true;
-		}
-		else {
-			return ((map[x-1][y].status == -2)||(map[x][y-1].status == -2)||(map[x-1][y-1].status == -2));
+		} else {
+			return ((map[x - 1][y].status == tileType.OBSTACLE) || (map[x][y - 1].status == tileType.OBSTACLE)
+					|| (map[x - 1][y - 1].status == tileType.OBSTACLE));
 		}
 	}
-	
+
 }

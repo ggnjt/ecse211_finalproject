@@ -104,7 +104,7 @@ public class Navigation {
 	}
 
 	/**
-	 * set Speed
+	 * set for both wheels
 	 */
 	public static void setSpeed(int speed) {
 		synchronized (Resources.leftMotor) {
@@ -257,6 +257,9 @@ public class Navigation {
 
 	}
 
+	/**
+	 * moves the robot to the lower left corner of a square
+	 */
 	public static void goToLowerLeftCorner() {
 		Resources.colorPoller.sleep();
 		turnTo(225);
@@ -268,6 +271,9 @@ public class Navigation {
 		}
 	}
 	
+	/**
+	 * recenters the robot from the lower left corner
+	 */
 	public static void reCenter() {
 		turnTo(45);
 		synchronized (leftMotor) {
@@ -283,6 +289,11 @@ public class Navigation {
 		Resources.colorPoller.wake();
 	}
 
+	/**
+	 * makes the robot run along the list of moves
+	 * @param moves List of moves in the format of square coordinates
+	 * @return the list of moves has been successfully achieves in its entirety
+	 */
 	public static boolean run(ArrayList<int[]> moves) {
 		for (int[] move : moves) {
 			System.out.println(Arrays.toString(move));
@@ -318,6 +329,10 @@ public class Navigation {
 		return true;
 	}
 	
+	/**
+	 * moves the robot by a set distance
+	 * @param distance distance to move by in cm
+	 */
 	public static void moveByDistance(double distance) {
 		synchronized (leftMotor) {
 			synchronized (rightMotor) {
