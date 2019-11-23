@@ -165,6 +165,11 @@ public class Resources {
 	public static final Navigation navigation = new Navigation();
 
 	/**
+	 * Path finder
+	 */
+	public static PathFinder pathFinder; //YP: not final because I want to construct this after localization
+
+	/**
 	 * The odometer.
 	 */
 	public static Odometer odometer = Odometer.getOdometer();
@@ -262,9 +267,7 @@ public class Resources {
 	/**
 	 * The red tunnel footprint.
 	 */
-	// public static Region tnr = new Region("TNR_LL_x", "TNR_LL_y", "TNR_UR_x",
-	// "TNR_UR_y");
-	public static double targetAngle = Math.max(get("TNR_LL_x"), get("TNR_UR_x"));
+	public static Region tnr = new Region("TNR_LL_x", "TNR_LL_y", "TNR_UR_x", "TNR_UR_y");
 
 	/**
 	 * The green tunnel footprint.
@@ -272,9 +275,14 @@ public class Resources {
 	public static Region tng = new Region("TNG_LL_x", "TNG_LL_y", "TNG_UR_x", "TNG_UR_y");
 
 	/**
-	 * The location of the target bin.
+	 * The location of the red team's target bin.
 	 */
-	public static Point bin = new Point(get("BIN_x"), get("BIN_y"));
+	public static Point redBin = new Point(get("Red_BIN_x"), get("Red_BIN_y"));
+	
+	/**
+	 * The location of the green team's target bin.
+	 */
+	public static Point greenBin = new Point(get("Green_BIN_x"), get("Green_BIN_y"));
 
 	/**
 	 * Receives Wi-Fi parameters from the server program.
@@ -306,12 +314,6 @@ public class Resources {
 			System.err.println("Error: " + e.getMessage());
 		}
 	}
-
-	/**
-	 * Test path finder TODO: the way the path finder is initialized is subject to
-	 * change
-	 */
-	public static PathFinder pathFinder; //YP: not final because I want to construct this after localization
 
 	/**
 	 * Returns the Wi-Fi parameter int value associated with the given key.
