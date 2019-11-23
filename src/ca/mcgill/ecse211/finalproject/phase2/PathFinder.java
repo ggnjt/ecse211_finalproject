@@ -1,15 +1,14 @@
 package ca.mcgill.ecse211.finalproject.phase2;
 
-import static ca.mcgill.ecse211.finalproject.Resources.ARENA_X;
-import static ca.mcgill.ecse211.finalproject.Resources.ARENA_Y;
-import static ca.mcgill.ecse211.finalproject.Resources.bin;
-//TODO Remove after beta
-//import static ca.mcgill.ecse211.finalproject.Resources.tnr;
-import static ca.mcgill.ecse211.finalproject.Resources.green;
-import static ca.mcgill.ecse211.finalproject.Resources.greenCorner;
-import static ca.mcgill.ecse211.finalproject.Resources.island;
-import static ca.mcgill.ecse211.finalproject.Resources.odometer;
-import static ca.mcgill.ecse211.finalproject.Resources.tng;
+//import static ca.mcgill.ecse211.finalproject.Resources.ARENA_X;
+//import static ca.mcgill.ecse211.finalproject.Resources.ARENA_Y;
+//import static ca.mcgill.ecse211.finalproject.Resources.bin;
+import static ca.mcgill.ecse211.finalproject.Resources.*;
+//import static ca.mcgill.ecse211.finalproject.Resources.green;
+//import static ca.mcgill.ecse211.finalproject.Resources.greenCorner;
+//import static ca.mcgill.ecse211.finalproject.Resources.island;
+//import static ca.mcgill.ecse211.finalproject.Resources.odometer;
+//import static ca.mcgill.ecse211.finalproject.Resources.tng;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,10 +73,10 @@ public class PathFinder {
 	 * @param isRedTeam whether your team is the red team
 	 */
 	public PathFinder(boolean isRedTeam) {
-// TODO Uncomment after beta
-//		int corner = isRedTeam ? redCorner : greenCorner;
-//		Region base = isRedTeam ? red : green;
-//		Region tn = isRedTeam ? tnr : tng;
+		int corner = isRedTeam ? redCorner : greenCorner;
+		Region base = isRedTeam ? red : green;
+		Region tn = isRedTeam ? tnr : tng;
+		Point bin = isRedTeam ? redBin : greenBin;
 
 //		System.out.println("Corner: " + greenCorner);
 //		System.out.println("Base: " + green.toString());
@@ -98,8 +97,8 @@ public class PathFinder {
 		}
 
 		// set base
-		for (int i = (int) green.ll.x; i < (int) green.ur.x; i++) {
-			for (int j = (int) green.ll.y; j < (int) green.ur.y; j++) {
+		for (int i = (int) base.ll.x; i < (int) base.ur.x; i++) {
+			for (int j = (int) base.ll.y; j < (int) base.ur.y; j++) {
 				map[i][j].setStatus(1);
 			}
 		}
@@ -111,15 +110,15 @@ public class PathFinder {
 			}
 		}
 		// set tunnel
-		for (int i = (int) tng.ll.x; i < (int) tng.ur.x; i++) {
-			for (int j = (int) tng.ll.y; j < (int) tng.ur.y; j++) {
+		for (int i = (int) tn.ll.x; i < (int) tn.ur.x; i++) {
+			for (int j = (int) tn.ll.y; j < (int) tn.ur.y; j++) {
 				map[i][j].setStatus(2);
 			}
 		}
 
 		// set safeguard for tunnel, setting all tiles beside the tunnel to be river
-		if ((int) tng.ur.x - (int) tng.ll.x > 1) { // long tunnel is horizontal
-			int[] llCoord = { (int) tng.ll.x, (int) tng.ll.y };
+		if ((int) tn.ur.x - (int) tn.ll.x > 1) { // long tunnel is horizontal
+			int[] llCoord = { (int) tn.ll.x, (int) tn.ll.y };
 			if (llCoord[1] - 1 >= 0 && llCoord[1] + 1 < ARENA_Y) {
 				map[llCoord[0]][llCoord[1] - 1].setStatus(0);
 				map[llCoord[0] + 1][llCoord[1] - 1].setStatus(0);
@@ -132,8 +131,8 @@ public class PathFinder {
 				map[llCoord[0]][llCoord[1] + 1].setStatus(0);
 				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
 			}
-		} else if ((int) tng.ur.y - (int) tng.ll.y > 1) { // long tunnel is vertical
-			int[] llCoord = { (int) tng.ll.x, (int) tng.ll.y };
+		} else if ((int) tn.ur.y - (int) tn.ll.y > 1) { // long tunnel is vertical
+			int[] llCoord = { (int) tn.ll.x, (int) tn.ll.y };
 			if (llCoord[0] - 1 >= 0 && llCoord[0] + 1 < ARENA_X) {
 				map[llCoord[0] - 1][llCoord[1]].setStatus(0);
 				map[llCoord[0] - 1][llCoord[1] + 1].setStatus(0);
@@ -148,7 +147,7 @@ public class PathFinder {
 			}
 		}
 
-		switch (greenCorner) {
+		switch (corner) {
 		case 0: // face north
 			Navigation.xTile = 0;
 			Navigation.yTile = 0;
@@ -532,7 +531,8 @@ public class PathFinder {
 	}
 
 	public static void letsGoHome() {
-		switch (greenCorner) {
+		// Picks corner based on which team we are
+		switch (Resources.TEAM_NUMBER == Resources.redTeam ? redCorner : greenCorner) {
 		case 0: // face north
 			targetX = 0;
 			targetY = 0;
