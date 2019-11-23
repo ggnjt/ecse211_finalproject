@@ -97,16 +97,16 @@ public class ColorPoller implements Runnable {
 			} else {
 				long readingStart, readingEnd;
 				readingStart = System.currentTimeMillis();
-				switch (navigation.navigationMode) {
+				switch (Navigation.navigationMode) {
 				case TRAVELING:
 					leftLineDetected = leftSampler.getBlackLine();
 					rightLineDetected = rightSampler.getBlackLine();
 					if (leftLineDetected || rightLineDetected) {
-						navigation.stopTheRobot();
+						Navigation.stopTheRobot();
 						Main.sleepFor(50);
-						navigation.navigationMode = TravelingMode.CORRECTING;
-						navigation.setSpeed(Resources.CORRECTION_SPPED);
-						navigation.moveSuccessful = false;
+						Navigation.navigationMode = TravelingMode.CORRECTING;
+						Navigation.setSpeed(Resources.CORRECTION_SPPED);
+						Navigation.moveSuccessful = false;
 						Navigation.interrupted = true;
 					} else {
 						rightCounter = 0;
@@ -125,15 +125,10 @@ public class ColorPoller implements Runnable {
 						correctXYT();
 						synchronized (Resources.leftMotor) {
 							synchronized (Resources.rightMotor) {
-								// clear the line
-								// leftMotor.rotate(40, true); // how far you clear the black line
-								// rightMotor.rotate(40, false);
-								navigation.stopTheRobot();
-								navigation.setSpeed(Resources.HIGH_FORWARD_SPEED);
-								navigation.navigationMode = TravelingMode.TRAVELING;
-								// synchronized() {
+								Navigation.stopTheRobot();
+								Navigation.setSpeed(Resources.HIGH_FORWARD_SPEED);
+								Navigation.navigationMode = TravelingMode.TRAVELING;
 								UltrasonicPoller.resetDetection();
-								// }
 							}
 						}
 						resetLineDetection();
@@ -146,10 +141,10 @@ public class ColorPoller implements Runnable {
 							}
 						}
 						rightCounter++;
-						if (rightCounter > 25) { // fail safe //if miss line reading move this many cycles
+						if (rightCounter > 20) { // fail safe //if miss line reading move this many cycles
 							synchronized (leftMotor) {
 								synchronized (rightMotor) {
-									navigation.stopTheRobot();
+									Navigation.stopTheRobot();
 								}
 							}
 							rightLineDetected = true;
@@ -164,10 +159,10 @@ public class ColorPoller implements Runnable {
 							}
 						}
 						leftCounter++;
-						if (leftCounter > 25) {
+						if (leftCounter > 20) {
 							synchronized (leftMotor) {
 								synchronized (rightMotor) {
-									navigation.stopTheRobot();
+									Navigation.stopTheRobot();
 								}
 							}
 							leftLineDetected = true;
@@ -281,6 +276,12 @@ public class ColorPoller implements Runnable {
 	 * wake the thread up after sleeping
 	 */
 	public void wake() {
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		wait = false;
 	}
 }

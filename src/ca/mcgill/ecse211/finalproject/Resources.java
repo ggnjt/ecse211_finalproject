@@ -53,7 +53,7 @@ public class Resources {
 	/**
 	 * The robot width in centimeters.
 	 */
-	public static final double TRACK = 11.88; // plis dont touch
+	public static final double TRACK = 12.03; // plis dont touch
 
 	/**
 	 * The lower speed at which the robot moves towards a black line
@@ -68,7 +68,7 @@ public class Resources {
 	/**
 	 * The speed at which the robot rotates in degrees per second.
 	 */
-	public static final int ROTATE_SPEED = 200;
+	public static final int ROTATE_SPEED = 150;
 
 	/**
 	 * Low speed used for more accurate sensor radians
@@ -93,7 +93,7 @@ public class Resources {
 	/**
 	 * obstacle detection threshold
 	 */
-	public static final double ObstacleDetectionThreashold = 13.0;
+	public static final double ObstacleDetectionThreashold = 15.0;
 
 	// ------------------EV3 Components--------------------
 	/**

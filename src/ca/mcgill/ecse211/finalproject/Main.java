@@ -2,7 +2,6 @@ package ca.mcgill.ecse211.finalproject;
 
 import static ca.mcgill.ecse211.finalproject.Resources.TEAM_NUMBER;
 import static ca.mcgill.ecse211.finalproject.Resources.colorPoller;
-import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.redTeam;
 
@@ -10,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
-import ca.mcgill.ecse211.finalproject.phase2.ColorSampler;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
 //import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizer;
 import lejos.hardware.Button;
@@ -20,7 +18,7 @@ import lejos.hardware.Sound;
  * The main driver class for the odometry lab.
  */
 public class Main {
-	public static boolean localizationFinished = true;
+	public static boolean localizationFinished = false;
 	public static ArrayList<int[]> moves;
 
 	/**
@@ -31,24 +29,25 @@ public class Main {
 	public static void main(String[] args) {
 
 		Thread USPollerThread = new Thread(Resources.usPoller);
-//		Thread USLocalizerThread = new Thread(Resources.usLocalizer);
+		Thread USLocalizerThread = new Thread(Resources.usLocalizer);
 		odometer.start();
 		USPollerThread.start();
-//		USLocalizerThread.start();
-//		while (!P1finished) {
-//			Main.sleepFor(1000);
-//		}
-//		Sound.beepSequence();
-//
-//		UltrasonicPoller.sleep();// this should be removed after demo
-//
-//		try {
-//			USPollerThread.join(5000); // this should be removed after demo
-//			USLocalizerThread.join(5000);
-//		} catch (InterruptedException e) {
-//			System.out.println("Sadness is the ichor of life");
-//		}
-		// Resources.shooterMotor.setSpeed(Resources.SHOOTER_MOTOR_SPEED);
+		USLocalizerThread.start();
+		while (!localizationFinished) {
+			Main.sleepFor(1000);
+		}
+		
+		Sound.beepSequence();
+
+		UltrasonicPoller.sleep();// this should be removed after demo
+
+		try {
+			USLocalizerThread.join(5000);
+		} catch (InterruptedException e) {
+			System.out.println("Sadness is the ichor of life");
+		}
+		
+		Resources.shooterMotor.setSpeed(Resources.SHOOTER_MOTOR_SPEED);
 		Resources.pathFinder = new PathFinder(redTeam == TEAM_NUMBER);
 
 		Resources.leftMotor.setStallThreshold(10, 10);
@@ -61,14 +60,31 @@ public class Main {
 		moves = Resources.pathFinder.findPath();
 		// Resources.pathFinder.printMap();
 
-		boolean success = run(moves);
+		boolean success = Navigation.run(moves);
 		while (!success) {
-			success = run(moves);
+			success = Navigation.run(moves);
 		}
 
+		Navigation.goToLowerLeftCorner();
+		Navigation.turnTo(PathFinder.launchAngle + 180);
+		Navigation.moveByDistance((-PathFinder.launchAdjustment)*Resources.TILE_SIZE - 0.5 * Resources.TILE_SIZE);
+		System.out.println("tile: " + Navigation.xTile +"==" + Navigation.yTile);
+		System.out.println("Angle: " + PathFinder.launchAngle);
+		Resources.shooterMotor.rotate(165);
+		Resources.shooterMotor.flt(true);
+		Resources.pathFinder.printMap();
+		PathFinder.letsGoHome();
+		Navigation.moveByDistance((PathFinder.launchAdjustment)*Resources.TILE_SIZE + 0.5 * Resources.TILE_SIZE);
+		Navigation.reCenter();
+		Main.sleepFor(100);
+		moves = Resources.pathFinder.findPath();
+		success = Navigation.run(moves);
+		while (!success) {
+			success = Navigation.run(moves);
+		}
 //		colorPoller.sleep();
 //		navigation.goToLowerLeftCorner();
-//		navigation.turnTo((Resources.targetAngle + 180) % 360);
+//		navigation.turnTo(Resources.targetAngle);
 //		Sound.beep();
 //		Main.sleepFor(500);
 //		Sound.beep();
@@ -76,7 +92,7 @@ public class Main {
 //		Sound.beep();
 //		Resources.shooterMotor.rotate(165);
 		Button.waitForAnyPress();
-//
+
 		System.exit(0);
 	}
 
@@ -88,7 +104,7 @@ public class Main {
 		}
 	}
 
-	public static void stressTest() {
+	public static void navigationStressTest() {
 		ArrayList<int[]> moves = new ArrayList<int[]>();
 		moves.add(new int[] { 0, 1 });
 		moves.add(new int[] { 0, 2 });
@@ -112,14 +128,11 @@ public class Main {
 		while (true) {
 			for (int[] move : moves) {
 				System.out.println(Arrays.toString(move));
-
-				navigation.setSpeed(Resources.LOW_FORWARD_SPEED);
-
-				navigation.processNextMove(move);
-
-				while (!navigation.moveSuccessful || Navigation.interrupted) {
-					if (navigation.navigationMode == TravelingMode.TRAVELING) {
-						navigation.processNextMove(move);
+				Navigation.setSpeed(Resources.LOW_FORWARD_SPEED);
+				Navigation.processNextMove(move);
+				while (!Navigation.moveSuccessful || Navigation.interrupted) {
+					if (Navigation.navigationMode == TravelingMode.TRAVELING) {
+						Navigation.processNextMove(move);
 						Main.sleepFor(20);
 					} else {
 						Main.sleepFor(70);
@@ -137,46 +150,5 @@ public class Main {
 			Resources.shooterMotor.rotate(-165);
 			Button.waitForAnyPress();
 		}
-	}
-
-	public static boolean run(ArrayList<int[]> moves) {
-		System.out.println("Running");
-		Resources.pathFinder.printMap();
-		for (int[] derp : moves) {
-			System.out.println(Arrays.toString(derp));
-		}
-		for (int[] move : moves) {
-			System.out.println("Current move: " + Arrays.toString(move));
-			UltrasonicPoller.resetDetection();
-			navigation.setSpeed(Resources.LOW_FORWARD_SPEED);
-			navigation.processNextMove(move);
-
-			while (!navigation.moveSuccessful || Navigation.interrupted) {
-				UltrasonicPoller.resetDetection();
-				if (navigation.navigationMode == TravelingMode.TRAVELING) {
-					navigation.processNextMove(move);
-				} else if (navigation.navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED){
-					UltrasonicPoller.resetDetection();
-					System.out.println("I am here... breaking the loop");
-					break;
-				} else {
-					System.out.println("I am here but " + navigation.navigationMode.toString() + navigation.moveSuccessful + "&" + Navigation.interrupted);
-					Main.sleepFor(70);
-				}
-			}
-			if (navigation.navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
-				if (Resources.pathFinder.setObstacle()) {
-					Resources.pathFinder.printMap();
-					PathFinder.resetMap();
-					Main.moves = Resources.pathFinder.findPath();
-					navigation.navigationMode = TravelingMode.TRAVELING;
-					navigation.moveSuccessful = false;
-					Navigation.interrupted = true;
-					System.out.println("exiting b/c obstacle..");
-					return false;
-				}
-			}
-		}
-		return true;
 	}
 }

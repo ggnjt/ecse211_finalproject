@@ -11,8 +11,10 @@ import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
+import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
 import lejos.hardware.Sound;
 
@@ -38,33 +40,36 @@ public class Navigation {
 	/**
 	 * current moving state of the robot
 	 */
-	public TravelingMode navigationMode = TravelingMode.TRAVELING;
+	public static TravelingMode navigationMode = TravelingMode.TRAVELING;
 
 	/**
 	 * current x tile coordinate of the robot
 	 */
-	public int xTile = 0;
+	public static int xTile = 0;
 
 	/**
 	 * current x tile coordinate of the robot
 	 */
-	public int yTile = 0;
+	public static int yTile = 0;
 
 	/**
 	 * target x coordinate of the current move being processed
 	 */
-	public int targetX = 0;
+	public static int targetX = 0;
 
 	/**
 	 * target y coordinate of the current move being processed
 	 */
-	public int targetY = 0;
+	public static int targetY = 0;
 
 	/**
 	 * whether the current move being processed in sucessful
 	 */
-	public boolean moveSuccessful = false;
+	public static boolean moveSuccessful = false;
 
+	/**
+	 * whether a move has been interrupted by a thread
+	 */
 	public static boolean interrupted = false;
 
 	/**
@@ -83,7 +88,7 @@ public class Navigation {
 	 * @param distance
 	 * @return the wheel rotations necessary to cover the distance
 	 */
-	public int convertDistance(double distance) {
+	public static int convertDistance(double distance) {
 		return (int) ((180 * distance) / (Math.PI * WHEEL_RAD));
 	}
 
@@ -94,14 +99,14 @@ public class Navigation {
 	 * @param angle
 	 * @return the wheel rotations necessary to rotate the robot by the angle
 	 */
-	public int convertAngle(double angle) {
+	public static int convertAngle(double angle) {
 		return convertDistance((Math.PI * TRACK * angle) / 360.0);
 	}
 
 	/**
 	 * set Speed
 	 */
-	public void setSpeed(int speed) {
+	public static void setSpeed(int speed) {
 		synchronized (Resources.leftMotor) {
 			synchronized (Resources.rightMotor) {
 				leftMotor.setSpeed(speed);
@@ -111,44 +116,9 @@ public class Navigation {
 	}
 
 	/**
-	 * returns the nearest available square to shoot from which is N square away
-	 * form the target
-	 * 
-	 * @param targetX x coordinates of the target square, starting from 0
-	 * @param targetY y coordinates of the target square, starting from 0
-	 * @return the target square coordinates and the angle needed in an int array of
-	 *         size [3]
-	 */
-	public int[] findTarget(int targetX, int targetY) {
-		int[] result = new int[3];
-		double shortest_dist = 100;
-		int[][] notableSquares = { { 0, 5 }, { 4, 4 }, { 5, 0 }, { 4, -4 }, { 0, -5 }, { -4, -4 }, { -5, 0 },
-				{ -4, 4 } };
-		int[] thetaOptions = { 180, 225, 270, 315, 0, 45, 90, 135 };
-		for (int i = 0; i < notableSquares.length; i++) {
-			int[] pair = notableSquares[i];
-			boolean ooX = pair[0] + targetX > ARENA_X || pair[0] + targetX < 0;
-			boolean ooY = pair[1] + targetY > ARENA_Y || pair[1] + targetY < 0;
-			if (ooX || ooY) {
-				continue;
-			} else {
-				double dist = Math
-						.sqrt((pair[0] + targetX) * (pair[0] + targetX) + (pair[1] + targetY) * (pair[1] + targetY));
-				if (dist < shortest_dist) {
-					result[0] = pair[0] + targetX;
-					result[1] = pair[1] + targetY;
-					shortest_dist = dist;
-					result[2] = (thetaOptions[i] - 90 + 360) % 360;
-				}
-			}
-		}
-		return result;
-	}
-
-	/**
 	 * stops the robot in place
 	 */
-	public void stopTheRobot() {
+	public static void stopTheRobot() {
 		synchronized (Resources.leftMotor) {
 			synchronized (Resources.rightMotor) {
 				leftMotor.stop(true);
@@ -163,7 +133,7 @@ public class Navigation {
 	 * 
 	 * @param move a size 2 representing the coordinates of the target tile
 	 */
-	public void processNextMove(int[] move) {
+	public static void processNextMove(int[] move) {
 		targetX = move[0];
 		targetY = move[1];
 		switch (navigationMode) {
@@ -176,9 +146,8 @@ public class Navigation {
 		case CORRECTING:
 			Main.sleepFor(70); // maybe?
 			break;
-		
+
 		}
-		System.out.println("move succ at end of processNextMove: " + moveSuccessful);
 	}
 
 	/**
@@ -187,8 +156,7 @@ public class Navigation {
 	 * @param X x-coordinates of the target tile
 	 * @param Y y-coordinates of the target tile
 	 */
-	public void goTo(int X, int Y) {
-		System.out.println("Going to: " + X + "," + Y);
+	public static void goTo(int X, int Y) {
 		interrupted = false;
 		double currentX = odometer.getXYT()[0];
 		double currentY = odometer.getXYT()[1];
@@ -211,13 +179,12 @@ public class Navigation {
 			angleDeviation += 360;
 		}
 		double distance2go = Math.sqrt(X2go * X2go + Y2go * Y2go);
-		
+
 		int speed = Resources.leftMotor.getSpeed();
-		
-		System.out.println("Finished calculating");
+
 		UltrasonicPoller.sleep();
 		Resources.colorPoller.sleep();
-		
+
 		synchronized (Resources.leftMotor) {
 			synchronized (Resources.rightMotor) {
 				setSpeed(Resources.ROTATE_SPEED);
@@ -228,19 +195,15 @@ public class Navigation {
 		}
 		Resources.colorPoller.wake();
 		UltrasonicPoller.wake();
-		//reset to get more accurate reading
-		
+		// reset to get more accurate reading
+
 		if (Math.abs(angleDeviation) > 60) {
 			UltrasonicPoller.resetDetection();
-			Main.sleepFor(600);
+			Main.sleepFor(800);
 		} else {
-			Main.sleepFor(200);
+			Main.sleepFor(250);
 		}
-		
-		System.out.println("Finished turning");
-
 		if (!PathFinder.isFacingAWall() && UltrasonicPoller.hasDetected()) {
-			System.out.println("object detected after turning");
 			moveSuccessful = false;
 			interrupted = true;
 			synchronized (navigationMode) {
@@ -248,7 +211,7 @@ public class Navigation {
 				return;
 			}
 		}
-		
+
 		leftMotor.rotate(convertDistance(distance2go), true);
 		rightMotor.rotate(convertDistance(distance2go), false);
 
@@ -260,13 +223,10 @@ public class Navigation {
 			yTile = (int) (odometer.getXYT()[1] / TILE_SIZE);
 		}
 		if (!PathFinder.isFacingAWall() && UltrasonicPoller.hasDetected()) {
-			System.out.println("object detected after MOVING");
-			System.out.println("int & movsucc: " + interrupted + " , " + moveSuccessful);
 			synchronized (navigationMode) {
 				navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
 			}
 		}
-		System.out.println("Sleeping & returning");
 		Main.sleepFor(100);
 	}
 
@@ -275,30 +235,95 @@ public class Navigation {
 	 * 
 	 * @param theta target angle to turn towards, 0 being facing North
 	 */
-	public void turnTo(double theta) {
-
+	public static void turnTo(double theta) {
+		theta = theta % 360;
 		double angleDiff = theta - odometer.getXYT()[2];
 		// Don't correct the angle if it is within a certain threshold
-		if (Math.abs(angleDiff) < 3.0 || Math.abs(angleDiff) > 357.0) {
-			return;
-		}
-		leftMotor.setSpeed(Resources.ROTATE_SPEED);
-		rightMotor.setSpeed(Resources.ROTATE_SPEED);
-		// This ensures the robot uses the minimal angle when turning to theta
-		if (Math.abs(angleDiff) > 180.0) {
-			angleDiff = Math.signum(angleDiff) * 360.0 - angleDiff;
-			leftMotor.rotate(convertAngle(-angleDiff), true);
-			rightMotor.rotate(convertAngle(angleDiff), false);
-		} else {
-			leftMotor.rotate(convertAngle(angleDiff), true);
-			rightMotor.rotate(convertAngle(-angleDiff), false);
+		synchronized (leftMotor) {
+			synchronized (rightMotor) {
+				leftMotor.setSpeed(Resources.ROTATE_SPEED);
+				rightMotor.setSpeed(Resources.ROTATE_SPEED);
+				// This ensures the robot uses the minimal angle when turning to theta
+				if (Math.abs(angleDiff) > 180.0) {
+					angleDiff = Math.signum(angleDiff) * 360.0 - angleDiff;
+					leftMotor.rotate(convertAngle(-angleDiff), true);
+					rightMotor.rotate(convertAngle(angleDiff), false);
+				} else {
+					leftMotor.rotate(convertAngle(angleDiff), true);
+					rightMotor.rotate(convertAngle(-angleDiff), false);
+				}
+			}
 		}
 
 	}
 
-	public void goToLowerLeftCorner() {
+	public static void goToLowerLeftCorner() {
+		Resources.colorPoller.sleep();
 		turnTo(225);
-		Resources.leftMotor.rotate(convertDistance(0.73 * TILE_SIZE), true);
-		Resources.rightMotor.rotate(convertDistance(0.73 * TILE_SIZE), false);
+		synchronized (leftMotor) {
+			synchronized (rightMotor) {
+				Resources.leftMotor.rotate(convertDistance(0.73 * TILE_SIZE), true);
+				Resources.rightMotor.rotate(convertDistance(0.73 * TILE_SIZE), false);
+			}
+		}
+	}
+	
+	public static void reCenter() {
+		turnTo(45);
+		synchronized (leftMotor) {
+			synchronized (rightMotor) {
+				Resources.leftMotor.rotate(convertDistance(0.73 * TILE_SIZE), true);
+				Resources.rightMotor.rotate(convertDistance(0.73 * TILE_SIZE), false);
+			}
+		}
+		odometer.setTheta(45);
+		xTile = (int) (odometer.getXYT()[0] / TILE_SIZE);
+		yTile = (int) (odometer.getXYT()[1] / TILE_SIZE);
+		PathFinder.resetMap();
+		Resources.colorPoller.wake();
+	}
+
+	public static boolean run(ArrayList<int[]> moves) {
+		for (int[] move : moves) {
+			System.out.println(Arrays.toString(move));
+			UltrasonicPoller.resetDetection();
+			setSpeed(Resources.LOW_FORWARD_SPEED);
+			processNextMove(move);
+			while (!moveSuccessful || interrupted) {
+				UltrasonicPoller.resetDetection();
+				if (navigationMode == TravelingMode.TRAVELING) {
+					if (targetY == 4) {
+						Resources.colorPoller.sleep();
+					}
+					processNextMove(move);
+				} else if (navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
+					UltrasonicPoller.resetDetection();
+					break;
+				} else {
+					Main.sleepFor(70);
+				}
+				Resources.colorPoller.wake();
+			}
+			if (navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
+				if (Resources.pathFinder.setObstacle()) {
+					PathFinder.resetMap();
+					Main.moves = Resources.pathFinder.findPath();
+					navigationMode = TravelingMode.TRAVELING;
+					moveSuccessful = false;
+					Navigation.interrupted = true;
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	public static void moveByDistance(double distance) {
+		synchronized (leftMotor) {
+			synchronized (rightMotor) {
+				Resources.leftMotor.rotate(convertDistance(distance), true);
+				Resources.rightMotor.rotate(convertDistance(distance), false);
+			}
+		}
 	}
 }

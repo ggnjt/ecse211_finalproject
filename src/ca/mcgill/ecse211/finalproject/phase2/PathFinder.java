@@ -8,7 +8,6 @@ import static ca.mcgill.ecse211.finalproject.Resources.bin;
 import static ca.mcgill.ecse211.finalproject.Resources.green;
 import static ca.mcgill.ecse211.finalproject.Resources.greenCorner;
 import static ca.mcgill.ecse211.finalproject.Resources.island;
-import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.tng;
 
@@ -17,6 +16,7 @@ import java.util.Arrays;
 import java.util.PriorityQueue;
 import java.util.Stack;
 
+import ca.mcgill.ecse211.finalproject.Navigation;
 import ca.mcgill.ecse211.finalproject.Resources;
 import ca.mcgill.ecse211.finalproject.Resources.Region;
 
@@ -57,6 +57,16 @@ public class PathFinder {
 	 * target Y coordinate
 	 */
 	private static int targetY;
+	/**
+	 * list of at most 3 possible launch points
+	 */
+	public static ArrayList<double[]> launchPoints;
+
+	private static int launchIndex = 0;
+
+	public static double launchAngle;
+	public static double launchAdjustment;
+	private static boolean goingHome = false;
 
 	/**
 	 * Contructor of the FathFinder
@@ -69,15 +79,11 @@ public class PathFinder {
 //		Region base = isRedTeam ? red : green;
 //		Region tn = isRedTeam ? tnr : tng;
 
-		int corner = greenCorner;
-		Region base = green;
-		Region tn = tng;
-
-		System.out.println("Corner: " + corner);
-		System.out.println("Base: " + base.toString());
-		System.out.println("Tn: " + tn.toString());
-		System.out.println("Island: " + island.toString());
-		System.out.println("Arena X: " + ARENA_X + " Arena Y: " + ARENA_Y);
+//		System.out.println("Corner: " + greenCorner);
+//		System.out.println("Base: " + green.toString());
+//		System.out.println("Tn: " + tng.toString());
+//		System.out.println("Island: " + island.toString());
+//		System.out.println("Arena X: " + ARENA_X + " Arena Y: " + ARENA_Y);
 
 		PathFinder.map = new Square[ARENA_X][ARENA_Y];
 		PathFinder.closed = new boolean[ARENA_X][ARENA_Y];
@@ -92,8 +98,8 @@ public class PathFinder {
 		}
 
 		// set base
-		for (int i = (int) base.ll.x; i < (int) base.ur.x; i++) {
-			for (int j = (int) base.ll.y; j < (int) base.ur.y; j++) {
+		for (int i = (int) green.ll.x; i < (int) green.ur.x; i++) {
+			for (int j = (int) green.ll.y; j < (int) green.ur.y; j++) {
 				map[i][j].setStatus(1);
 			}
 		}
@@ -105,15 +111,15 @@ public class PathFinder {
 			}
 		}
 		// set tunnel
-		for (int i = (int) tn.ll.x; i < (int) tn.ur.x; i++) {
-			for (int j = (int) tn.ll.y; j < (int) tn.ur.y; j++) {
+		for (int i = (int) tng.ll.x; i < (int) tng.ur.x; i++) {
+			for (int j = (int) tng.ll.y; j < (int) tng.ur.y; j++) {
 				map[i][j].setStatus(2);
 			}
 		}
 
 		// set safeguard for tunnel, setting all tiles beside the tunnel to be river
-		if ((int) tn.ur.x - (int) tn.ll.x > 1) { // long tunnel is horizontal
-			int[] llCoord = { (int) tn.ll.x, (int) tn.ll.y };
+		if ((int) tng.ur.x - (int) tng.ll.x > 1) { // long tunnel is horizontal
+			int[] llCoord = { (int) tng.ll.x, (int) tng.ll.y };
 			if (llCoord[1] - 1 >= 0 && llCoord[1] + 1 < ARENA_Y) {
 				map[llCoord[0]][llCoord[1] - 1].setStatus(0);
 				map[llCoord[0] + 1][llCoord[1] - 1].setStatus(0);
@@ -126,8 +132,8 @@ public class PathFinder {
 				map[llCoord[0]][llCoord[1] + 1].setStatus(0);
 				map[llCoord[0] + 1][llCoord[1] + 1].setStatus(0);
 			}
-		} else if ((int) tn.ur.y - (int) tn.ll.y > 1) { // long tunnel is vertical
-			int[] llCoord = { (int) tn.ll.x, (int) tn.ll.y };
+		} else if ((int) tng.ur.y - (int) tng.ll.y > 1) { // long tunnel is vertical
+			int[] llCoord = { (int) tng.ll.x, (int) tng.ll.y };
 			if (llCoord[0] - 1 >= 0 && llCoord[0] + 1 < ARENA_X) {
 				map[llCoord[0] - 1][llCoord[1]].setStatus(0);
 				map[llCoord[0] - 1][llCoord[1] + 1].setStatus(0);
@@ -142,33 +148,37 @@ public class PathFinder {
 			}
 		}
 
-		switch (corner) {
+		switch (greenCorner) {
 		case 0: // face north
-			navigation.xTile = 0;
-			navigation.yTile = 0;
+			Navigation.xTile = 0;
+			Navigation.yTile = 0;
 			Resources.odometer.setXYT(Resources.TILE_SIZE / 2d, Resources.TILE_SIZE / 2d, 0);
 			break;
 		case 1: // face west
-			navigation.xTile = ARENA_X - 1;
-			navigation.yTile = 0;
+			Navigation.xTile = ARENA_X - 1;
+			Navigation.yTile = 0;
 			Resources.odometer.setXYT(Resources.TILE_SIZE * (ARENA_X - 1 + 0.5), Resources.TILE_SIZE / 2d, 270);
 			break;
 		case 2: // face south
-			navigation.xTile = ARENA_X - 1;
-			navigation.yTile = ARENA_Y - 1;
+			Navigation.xTile = ARENA_X - 1;
+			Navigation.yTile = ARENA_Y - 1;
 			Resources.odometer.setXYT(Resources.TILE_SIZE * (ARENA_X - 1 + 0.5),
 					Resources.TILE_SIZE * (ARENA_Y - 1 + 0.5), 180);
 			break;
 		case 3: // face east
-			navigation.xTile = 0;
-			navigation.yTile = ARENA_Y - 1;
+			Navigation.xTile = 0;
+			Navigation.yTile = ARENA_Y - 1;
 			Resources.odometer.setXYT(Resources.TILE_SIZE / 2d, Resources.TILE_SIZE * (ARENA_Y - 1 + 0.5), 180);
 			break;
 		}
 
+		launchPoints = findLaunchPointToTarget((int) bin.x, (int) bin.y);
+
 		// ====subject to change====//
-		PathFinder.targetX = (int) bin.x;
-		PathFinder.targetY = (int) bin.y;
+		targetX = (int) launchPoints.get(launchIndex)[0];
+		targetY = (int) launchPoints.get(launchIndex)[1];
+		launchAngle = launchPoints.get(launchIndex)[2];
+		launchAdjustment = launchPoints.get(launchIndex)[3];
 	}
 
 	/**
@@ -196,16 +206,32 @@ public class PathFinder {
 		if (!isFacingAWall()) {
 			double[] currXYT = odometer.getXYT();
 			if (currXYT[2] >= 45 && currXYT[2] < 135) {// facing EAST
-				map[navigation.xTile + 1][navigation.yTile].setStatus(-2);
+				map[Navigation.xTile + 1][Navigation.yTile].setStatus(-2);
+				if (!goingHome && map[Navigation.xTile + 1][Navigation.yTile].X == targetX
+						&& map[Navigation.xTile + 1][Navigation.yTile].Y == targetY) {
+					resetLaunchPoint();
+				}
 				return true;
 			} else if (currXYT[2] >= 135 && currXYT[2] < 225) {// facing SOUTH
-				map[navigation.xTile][navigation.yTile - 1].setStatus(-2);
+				map[Navigation.xTile][Navigation.yTile - 1].setStatus(-2);
+				if (!goingHome && map[Navigation.xTile][Navigation.yTile - 1].X == targetX
+						&& map[Navigation.xTile][Navigation.yTile - 1].Y == targetY) {
+					resetLaunchPoint();
+				}
 				return true;
 			} else if (currXYT[2] >= 225 && currXYT[2] < 315) {// facing WEST
-				map[navigation.xTile - 1][navigation.yTile].setStatus(-2);
+				map[Navigation.xTile - 1][Navigation.yTile].setStatus(-2);
+				if (!goingHome && map[Navigation.xTile - 1][Navigation.yTile].X == targetX
+						&& map[Navigation.xTile - 1][Navigation.yTile].Y == targetY) {
+					resetLaunchPoint();
+				}
 				return true;
 			} else {
-				map[navigation.xTile][navigation.yTile + 1].setStatus(-2);
+				map[Navigation.xTile][Navigation.yTile + 1].setStatus(-2);
+				if (!goingHome && map[Navigation.xTile][Navigation.yTile + 1].X == targetX
+						&& map[Navigation.xTile][Navigation.yTile + 1].Y == targetY) {
+					resetLaunchPoint();
+				}
 				return true;
 			}
 		}
@@ -255,7 +281,7 @@ public class PathFinder {
 				}
 			}
 		}
-		image[navigation.xTile][navigation.yTile] = 'C';
+		image[Navigation.xTile][Navigation.yTile] = 'C';
 		image[targetX][targetY] = 'T';
 		for (char[] row : image) {
 			System.out.println(Arrays.toString(row));
@@ -271,10 +297,9 @@ public class PathFinder {
 	 */
 	public ArrayList<int[]> findPath() {
 
-		open.add(map[navigation.xTile][navigation.yTile]);
+		open.add(map[Navigation.xTile][Navigation.yTile]);
 		Square current;
 		while (true) {
-
 			current = open.poll();
 			if (current == null) {
 				System.out.println("Something went horribly wrong, no path found");
@@ -332,39 +357,52 @@ public class PathFinder {
 	}
 
 	/**
-	 * ***** code copied over from lab 5 **** finds the square which the robot can
-	 * launch from 5 squares away from the target
 	 * 
-	 * @param targetX x-coordinate of the target of the ball
-	 * @param targetY y-coordinate of the target of the ball
-	 * @return an int array of size 2, which represents the coordinates of the ideal
-	 *         launch point
+	 * @param targetX
+	 * @param targetY
+	 * @return
 	 */
-	private static int[] findLaunchPointToTarget(int targetX, int targetY) {
-		int[] result = new int[3];
-		double shortest_dist = 100;
-		int[][] notableSquares = { { 0, 6 }, { 4, 4 }, { 6, 0 }, { 4, -4 }, { 0, -6 }, { -4, -4 }, { -6, 0 },
-				{ -4, 4 } };
-		int[] thetaOptions = { 180, 225, 270, 315, 0, 45, 90, 135 };
+	private static ArrayList<double[]> findLaunchPointToTarget(int targetX, int targetY) {
+		ArrayList<double[]> listOfTargets = new ArrayList<double[]>();
+		double shortest_dist = Double.MAX_VALUE;
+		double[][] notableSquares = { { 0, 6 }, { 1, 6 }, { 3, 5 }, { 4, 4 }, { 5, 3 }, { 6, 1 }, { 6, 0 }, { 6, -1 },
+				{ 5, -3 }, { 4, -4 }, { 3, -5 }, { 1, -6 }, { 0, 6 }, { -1, -6 }, { -3, -5 }, { -4, -4 }, { -5, -3 },
+				{ -6, -1 }, { -6, 0 }, { -6, 1 }, { -5, 3 }, { -4, 4 }, { -3, 5 }, { -1, 6 } };
+		double[] thetaOptions = { 180, 189.5, 211, 225, 239, 260.5, 270, 279.5, 301, 315, 329, 350.5, 0, 9.5, 31, 45,
+				59, 80.5, 90, 99.5, 121, 135, 149, 170.5 };
+		double[] distanceAdjustment = { 0, 0.083, -0.169, -0.344, -0.169, 0.083, 0, 0.083, -0.169, -0.344, -0.169,
+				0.083, 0, 0.083, -0.169, -0.344, -0.169, 0.083, 0, 0.083, -0.169, -0.344, -0.169, 0.083 };
 		for (int i = 0; i < notableSquares.length; i++) {
-			int[] pair = notableSquares[i];
-			boolean ooX = pair[0] + targetX > ARENA_X || pair[0] + targetX < 0;
-			boolean ooY = pair[1] + targetY > ARENA_Y || pair[1] + targetY < 0;
-			boolean invalid = map[pair[0]][pair[1]].status != 3;
+			double[] pair = notableSquares[i];
+			boolean ooX = pair[0] + targetX >= ARENA_X || pair[0] + targetX - 1 <= 0; // -1 to prevent running into
+																						// wall,
+			boolean ooY = pair[1] + targetY >= ARENA_Y || pair[1] + targetY - 1 <= 0;
+			boolean invalid;
+			if (!ooX && !ooY) {
+				invalid = map[(int) pair[0] + targetX][(int) pair[1] + targetY].status != 3;
+			} else {
+				invalid = true;
+			}
+
 			if (ooX || ooY || invalid) {
 				continue;
 			} else {
+				double[] result = new double[4];
 				double dist = Math
 						.sqrt((pair[0] + targetX) * (pair[0] + targetX) + (pair[1] + targetY) * (pair[1] + targetY));
+				result[0] = pair[0] + targetX;
+				result[1] = pair[1] + targetY;
+				shortest_dist = dist;
+				result[2] = thetaOptions[i];
+				result[3] = distanceAdjustment[i];
 				if (dist < shortest_dist) {
-					result[0] = pair[0] + targetX;
-					result[1] = pair[1] + targetY;
-					shortest_dist = dist;
-					result[2] = (thetaOptions[i] - 90 + 360) % 360;
+					listOfTargets.add(0, result);
+				} else {
+					listOfTargets.add(result);
 				}
 			}
 		}
-		return result;
+		return listOfTargets;
 	}
 
 	/**
@@ -461,23 +499,67 @@ public class PathFinder {
 
 		double[] currXYT = odometer.getXYT();
 		if (currXYT[2] >= 45 && currXYT[2] < 135) {// facing EAST
-			if (navigation.xTile + 1 > Resources.ARENA_X - 1) {
+			if (Navigation.xTile + 1 > Resources.ARENA_X - 1) {
 				return true;
 			}
 		} else if (currXYT[2] >= 135 && currXYT[2] < 225) {// facing SOUTH
-			if (navigation.yTile - 1 < 0) {
+			if (Navigation.yTile - 1 < 0) {
 				return true;
 			}
 		} else if (currXYT[2] >= 225 && currXYT[2] < 315) {// facing WEST
-			if (navigation.xTile - 1 < 0) {
+			if (Navigation.xTile - 1 < 0) {
 				return true;
 			}
 		} else {
-			if (navigation.yTile + 1 > Resources.ARENA_Y - 1) {
+			if (Navigation.yTile + 1 > Resources.ARENA_Y - 1) {
 				return true;
 			}
 		}
 		return false;
 	}
 
+	public static void resetLaunchPoint() {
+		launchIndex++;
+		targetX = (int) launchPoints.get(launchIndex)[0];
+		targetY = (int) launchPoints.get(launchIndex)[1];
+		while (isAdjacentToObstacle (targetX,targetY)) {
+			launchIndex++;
+			targetX = (int) launchPoints.get(launchIndex)[0];
+			targetY = (int) launchPoints.get(launchIndex)[1];
+		}
+		launchAngle = launchPoints.get(launchIndex)[2];
+		launchAdjustment = launchPoints.get(launchIndex)[3];
+	}
+
+	public static void letsGoHome() {
+		switch (greenCorner) {
+		case 0: // face north
+			targetX = 0;
+			targetY = 0;
+			break;
+		case 1: // face west
+			targetX = ARENA_X - 1;
+			targetY = 0;
+			break;
+		case 2: // face south
+			targetX = ARENA_X - 1;
+			targetY = ARENA_Y - 1;
+			break;
+		case 3: // face east
+			targetX = 0;
+			targetY = ARENA_Y - 1;
+			break;
+		}
+
+	}
+	
+	public static boolean isAdjacentToObstacle (int x, int y) {
+		if (x == 0 || y == 0) {
+			return true;
+		}
+		else {
+			return ((map[x-1][y].status == -2)||(map[x][y-1].status == -2)||(map[x-1][y-1].status == -2));
+		}
+	}
+	
 }
