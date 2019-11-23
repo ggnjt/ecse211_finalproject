@@ -3,11 +3,9 @@ package ca.mcgill.ecse211.finalproject.phase2;
 import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
 import static ca.mcgill.ecse211.finalproject.Resources.leftColorSensor;
 import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
-import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.rightColorSensor;
 import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
-
 import ca.mcgill.ecse211.finalproject.Main;
 import ca.mcgill.ecse211.finalproject.Navigation;
 import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;

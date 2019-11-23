@@ -203,9 +203,9 @@ public class Navigation {
 		// SLEEP TO MAKE SURE THAT THE POLLER READING IS ACCURATE
 		if (Math.abs(angleDeviation) > 60) {
 			UltrasonicPoller.resetDetection();
-			Main.sleepFor(800);
+			Main.sleepFor(1000);
 		} else {
-			Main.sleepFor(250);
+			Main.sleepFor(400);
 		}
 		// obstacle detectingafter turning, so move was interrupted
 		if (!PathFinder.isFacingAWall() && UltrasonicPoller.hasDetected()) {
@@ -316,10 +316,10 @@ public class Navigation {
 			processNextMove(move);
 			while (!moveSuccessful || interrupted) { // move was interrupted by a line / obstacle
 				UltrasonicPoller.resetDetection();
-				if (navigationMode == TravelingMode.TRAVELING) { // after the black line
-					if (targetY == 4) { // avoid the annoying black line in the middle of the arena
-						ColorPoller.sleep(); // this doesn't work too well
-					}
+				if (navigationMode == TravelingMode.TRAVELING) { // after the black line TODO: if mid-line is annoying
+//					if (targetY == 4) { // avoid the annoying black line in the middle of the arena
+//						ColorPoller.sleep(); // this doesn't work too well
+//					}
 					processNextMove(move); // keeps on moving to the center
 				} else if (navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
 					UltrasonicPoller.resetDetection();
@@ -327,7 +327,7 @@ public class Navigation {
 				} else {
 					Main.sleepFor(70); // let colorPoller take over
 				}
-				ColorPoller.wake(); // wake it just in case it finished sleeping for the middle seam
+//				ColorPoller.wake(); // wake it just in case it finished sleeping for the middle seam TODO: if mid-line is annoying
 			}
 			if (navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
 				// this catches the case where the list of moves is not complete. Path needs
