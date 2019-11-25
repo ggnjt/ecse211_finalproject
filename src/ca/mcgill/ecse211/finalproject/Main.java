@@ -104,17 +104,20 @@ public class Main {
 	}
 	
 	public static void launcherSequenceTest() {
-		int accel = 5000;
-		int speed = 500;
+		int accel = 6000;
+		int speed = 600;
 		
 		Resources.shooterMotor.setAcceleration(accel);
 		Resources.shooterMotor.setSpeed(speed);
 		
 		while (true) {
-			Resources.shooterMotor.rotate(180);
-			Resources.shooterMotor.rotate(-165);
+			Resources.shooterMotor.rotate(260);
+			sleepFor(1000);
+			Resources.shooterMotor.rotate(-120);
+			sleepFor(500);
 			Resources.shooterMotor.flt();
 			Button.waitForAnyPress();
+			sleepFor(2000);
 		}
 	}
 
