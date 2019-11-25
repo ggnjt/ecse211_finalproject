@@ -11,6 +11,7 @@ import ca.mcgill.ecse211.finalproject.Navigation;
 import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
 import ca.mcgill.ecse211.finalproject.Resources;
 import ca.mcgill.ecse211.finalproject.UltrasonicPoller;
+import lejos.hardware.Sound;
 
 /**
  * Class which takes care of color sensor polling, signal filtering as well as
@@ -90,13 +91,14 @@ public class ColorPoller implements Runnable {
 			// sleep
 			if (wait) {
 				try {
-					Thread.sleep(60);
+					Thread.sleep(50);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			} else {
 				long readingStart, readingEnd;
 				readingStart = System.currentTimeMillis();
+				double theta = odometer.getXYT()[2];
 				switch (Navigation.navigationMode) {
 				case TRAVELING:
 					// continuously detect line
@@ -129,7 +131,7 @@ public class ColorPoller implements Runnable {
 					// first fail safe: if both lines present similar reading then they both are on
 					// the line
 					if (leftLineDetected && rightLineDetected
-							|| Math.abs(leftSampler.currentSample - rightSampler.currentSample) < 0.030) {
+							|| Math.abs(leftSampler.currentSample - rightSampler.currentSample) < 0.06) {
 						// tweak the number to get better line detection
 						// Correct
 						correctXYT();
@@ -154,7 +156,7 @@ public class ColorPoller implements Runnable {
 						// second fail safe: if miss line reading move this many cycles
 						// tweak the number if the robot turns too much if it does not detect a black
 						// line or does not correct enough for some reason
-						if (rightCounter > 20) {
+						if (rightCounter > 15) {
 							synchronized (leftMotor) {
 								synchronized (rightMotor) {
 									Navigation.stopTheRobot();
@@ -172,7 +174,7 @@ public class ColorPoller implements Runnable {
 							}
 						}
 						leftCounter++;
-						if (leftCounter > 20) {
+						if (leftCounter > 15) {
 							synchronized (leftMotor) {
 								synchronized (rightMotor) {
 									Navigation.stopTheRobot();
@@ -274,7 +276,7 @@ public class ColorPoller implements Runnable {
 		leftLineDetected = false;
 		rightLineDetected = false;
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(2200);
 		} catch (InterruptedException e) {
 		}
 	}

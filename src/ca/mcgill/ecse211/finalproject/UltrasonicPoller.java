@@ -40,7 +40,7 @@ public class UltrasonicPoller implements Runnable {
 		while (true) {
 			if (wait) {
 				try {
-					Thread.sleep(70);
+					Thread.sleep(50);
 				} catch (Exception e) {
 				} // Poor man's timed sampling
 			} else {

@@ -141,7 +141,7 @@ public class UltrasonicLocalizer implements Runnable {
 	 * turn until it encounters a wall, at which point it slows down
 	 */
 	private static void gazeTheAbyss() {
-		if (reading < TILE_SIZE*0.8) {
+		if (reading < TILE_SIZE * 1.1) {
 			spaceCounter++;
 		} else
 			spaceCounter = 0;
@@ -158,7 +158,7 @@ public class UltrasonicLocalizer implements Runnable {
 	 * we know that the robot is relatively perpendicular to the y-axis wall
 	 */
 	private static void detectYWall() {
-		if (spaceCounter < 10) {
+		if (spaceCounter < 4) {
 			spaceCounter++;
 		} else {
 			Navigation.setSpeed(HIGH_FORWARD_SPEED);

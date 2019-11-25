@@ -55,7 +55,7 @@ public class Main {
 		//--===[PHASE 2: TRAVEL TO A LAUNCH POINT]===--//
 		Thread cT = new Thread(colorPoller);
 		cT.start();
-		// stressShooterTest();
+		//stressShooterTest();
 		// stressTest();
 		// Resources.pathFinder.printMap();
 		moves = PathFinder.findPath();
@@ -70,9 +70,7 @@ public class Main {
 		while (!success) {
 			success = Navigation.run(moves);
 		}
-//		colorPoller.sleep();
-//		navigation.goToLowerLeftCorner();
-//		navigation.turnTo(Resources.targetAngle);
+		
 //		Sound.beep();
 //		Main.sleepFor(500);
 //		Sound.beep();
@@ -132,8 +130,9 @@ public class Main {
 
 	public static void stressShooterTest() {
 		while (true) {
-			Resources.shooterMotor.rotate(165);
+			Resources.shooterMotor.rotate(165,false);
 			Resources.shooterMotor.flt(true);
+			Button.waitForAnyPress();
 			Resources.shooterMotor.rotate(-165);
 			Button.waitForAnyPress();
 		}

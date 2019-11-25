@@ -38,7 +38,7 @@ public class Resources {
 	 * The threshold in intensity delta for determining when a line has been
 	 * detected
 	 */
-	public static final double INTENSITY_THRESHOLD = 0.07f; //this could be tweaked
+	public static final double INTENSITY_THRESHOLD = 0.10f; //this could be tweaked
 
 	/**
 	 * Distance to light sensor from center of rotation in centimeters
@@ -53,7 +53,7 @@ public class Resources {
 	/**
 	 * The robot width in centimeters.
 	 */
-	public static final double TRACK = 12.03; // TODO:OPTIMIZE THIS
+	public static final double TRACK = 12.23; // TODO:OPTIMIZE THIS
 
 	/**
 	 * The lower speed at which the robot moves towards a black line
@@ -88,12 +88,12 @@ public class Resources {
 	/**
 	 * speed for the launcher motor
 	 */
-	public static final int SHOOTER_MOTOR_SPEED = 500;
+	public static final int SHOOTER_MOTOR_SPEED = 99999;
 
 	/**
 	 * obstacle detection threshold
 	 */
-	public static final double ObstacleDetectionThreashold = 15.0;
+	public static final double ObstacleDetectionThreashold = 12.0;
 
 	// ------------------EV3 Components--------------------
 	/**
