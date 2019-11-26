@@ -58,6 +58,7 @@ public class Main {
 		//stressShooterTest();
 		// stressTest();
 		// Resources.pathFinder.printMap();
+		navigationStressTest();
 		moves = PathFinder.findPath();
 		boolean success = Navigation.run(moves);
 		while (!success) {
@@ -90,7 +91,9 @@ public class Main {
 	}
 
 	public static void navigationStressTest() {
-		ArrayList<int[]> moves = new ArrayList<int[]>();
+		ArrayList<int[]> moves;
+		while (true) {
+		moves = new ArrayList<int[]>();
 		moves.add(new int[] { 0, 1 });
 		moves.add(new int[] { 0, 2 });
 		moves.add(new int[] { 0, 3 });
@@ -109,21 +112,11 @@ public class Main {
 		moves.add(new int[] { 2, 0 });
 		moves.add(new int[] { 1, 0 });
 		moves.add(new int[] { 0, 0 });
-
-		while (true) {
-			for (int[] move : moves) {
-				System.out.println(Arrays.toString(move));
-				Navigation.setSpeed(Resources.LOW_FORWARD_SPEED);
-				Navigation.processNextMove(move);
-				while (!Navigation.moveSuccessful || Navigation.interrupted) {
-					if (Navigation.navigationMode == TravelingMode.TRAVELING) {
-						Navigation.processNextMove(move);
-						Main.sleepFor(20);
-					} else {
-						Main.sleepFor(70);
-					}
-				}
-			}
+ 
+		boolean success = Navigation.run(moves);
+		while (!success) {
+			success = Navigation.run(moves);
+		}
 		}
 
 	}
