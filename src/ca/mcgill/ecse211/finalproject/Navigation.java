@@ -11,8 +11,10 @@ import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
 import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
+import lejos.hardware.Sound;
 
 /**
  * Class where all of the navigation of the robot is handled
@@ -69,8 +71,7 @@ public class Navigation {
 	public static boolean interrupted = false;
 
 	/**
-	 * Constructor for the Navigation class.
-	 * sets speed and acceleration of motors
+	 * Constructor for the Navigation class. sets speed and acceleration of motors
 	 */
 	public Navigation() {
 		setSpeed(Resources.LOW_FORWARD_SPEED);
@@ -238,7 +239,7 @@ public class Navigation {
 				navigationMode = TravelingMode.OBSTACLE_ENCOUNTERED;
 			}
 		}
-		//prevet threading issue
+		// prevet threading issue
 		Main.sleepFor(100);
 	}
 
@@ -366,15 +367,129 @@ public class Navigation {
 	public static void launchManeuver() {
 		goToLowerLeftCorner();
 		turnTo(PathFinder.launchAngle + 180);
-		moveByDistance((-PathFinder.launchAdjustment) * Resources.TILE_SIZE - 0.5*Resources.TILE_SIZE);
+		moveByDistance((-PathFinder.launchAdjustment) * Resources.TILE_SIZE - 0.7 * Resources.TILE_SIZE);
+		Sound.beep();
+		Main.sleepFor(100);
+		Sound.beep();
+		Main.sleepFor(100);
+		Sound.beep();
+		Main.sleepFor(100);
 		Resources.shooterMotor.rotate(180);
 		Main.sleepFor(1000);
 		Resources.shooterMotor.flt(true);
 		// Resources.pathFinder.printMap();
 		PathFinder.letsGoHome();
-		moveByDistance((PathFinder.launchAdjustment) * Resources.TILE_SIZE + 0.5*Resources.TILE_SIZE);
+		moveByDistance((PathFinder.launchAdjustment) * Resources.TILE_SIZE + 0.7 * Resources.TILE_SIZE);
 		reCenter();
-		Main.sleepFor(100);
 		Main.moves = PathFinder.findPath();
 	}
+
+//	public static void localizeWithinSquare() {
+//		ColorPoller.sleep();
+//		allignInFront();
+//		setSpeed(180);
+//		synchronized (leftMotor) {
+//			synchronized (rightMotor) {
+//				Resources.leftMotor.rotate(convertDistance(-TILE_SIZE/2d+4.5), true);
+//				Resources.rightMotor.rotate(convertDistance(-TILE_SIZE/2d+4.5), false);
+//			}
+//		}
+//		Main.sleepFor(50);
+//		synchronized (leftMotor) {
+//			synchronized (rightMotor) {
+//				Resources.leftMotor.rotate(convertAngle(90), true);
+//				Resources.rightMotor.rotate(convertAngle(-90), false);
+//			}
+//		}
+//		allignInFront();
+//		synchronized (leftMotor) {
+//			synchronized (rightMotor) {
+//				Resources.leftMotor.rotate(convertDistance(-TILE_SIZE/2d+4.5), true);
+//				Resources.rightMotor.rotate(convertDistance(-TILE_SIZE/2d+4.5), false);
+//			}
+//		}
+//		double currTheta = odometer.getXYT()[2];
+//		if (currTheta >= 45 && currTheta < 135) {
+//			currTheta = 90d; // facing EAST
+//		} else if (currTheta >= 135 && currTheta < 225) {
+//			currTheta = 180d; // facing SOUTH
+//		} else if (currTheta >= 225 && currTheta < 315) {
+//			currTheta = 270d; // facing WEST
+//		} else {
+//			currTheta = 0d; // facing NORTH
+//		}
+//		Resources.odometer.setTheta(currTheta);
+//		ColorPoller.wake();
+//		return;
+//	}
+//	
+//	private static void allignInFront() {
+//		boolean leftLineDetected, rightLineDetected;
+//		int leftCounter = 0, rightCounter = 0;
+//		boolean statechange = false;
+//		setSpeed(80);
+//		synchronized (leftMotor) {
+//			synchronized (rightMotor) {
+//				leftMotor.forward();
+//				rightMotor.forward();
+//			}
+//		}
+//		while (true) {
+//			leftLineDetected = ColorPoller.leftSampler.getBlackLine();
+//			rightLineDetected = ColorPoller.rightSampler.getBlackLine();
+//			if (!statechange) {
+//				if (leftLineDetected || rightLineDetected) {
+//					// line detection during traveling, state change and slow the robot down
+//					Navigation.stopTheRobot();
+//					statechange = true;
+//				} else {
+//					continue;
+//				}
+//			} else {
+//				leftLineDetected = leftLineDetected || ColorPoller.leftSampler.getBlackLine();
+//				rightLineDetected = rightLineDetected || ColorPoller.rightSampler.getBlackLine();
+//				boolean stopped = !leftMotor.isMoving() && !rightMotor.isMoving();
+//				if (leftLineDetected && rightLineDetected || Math
+//						.abs(ColorPoller.leftSampler.currentSample - ColorPoller.rightSampler.currentSample) < 0.06) {
+//					Navigation.stopTheRobot();
+//					break;
+//				} else if (leftLineDetected) {
+//					if (stopped) {
+//						synchronized (rightMotor) {
+//							synchronized (leftMotor) {
+//								rightMotor.forward();
+//							}
+//						}
+//					}
+//					rightCounter++;
+//					if (rightCounter > 15) {
+//						synchronized (leftMotor) {
+//							synchronized (rightMotor) {
+//								Navigation.stopTheRobot();
+//								return;
+//							}
+//						}
+//					}
+//				} else if (rightLineDetected) {
+//					if (stopped) {
+//						synchronized (leftMotor) {
+//							synchronized (rightMotor) {
+//								leftMotor.forward();
+//							}
+//						}
+//					}
+//					leftCounter++;
+//					if (leftCounter > 15) {
+//						synchronized (leftMotor) {
+//							synchronized (rightMotor) {
+//								Navigation.stopTheRobot();
+//								return;
+//							}
+//						}
+//					}
+//				}
+//			}
+//			Main.sleepFor(20);
+//		}
+//	}
 }

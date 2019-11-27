@@ -40,12 +40,12 @@ public class ColorPoller implements Runnable {
 	/**
 	 * left light Sampler
 	 */
-	private static ColorSampler leftSampler;
+	public static ColorSampler leftSampler;
 
 	/**
 	 * right light Sampler
 	 */
-	private static ColorSampler rightSampler;
+	public static ColorSampler rightSampler;
 
 	/**
 	 * leftColorThread
@@ -98,7 +98,6 @@ public class ColorPoller implements Runnable {
 			} else {
 				long readingStart, readingEnd;
 				readingStart = System.currentTimeMillis();
-				double theta = odometer.getXYT()[2];
 				switch (Navigation.navigationMode) {
 				case TRAVELING:
 					// continuously detect line
@@ -131,7 +130,7 @@ public class ColorPoller implements Runnable {
 					// first fail safe: if both lines present similar reading then they both are on
 					// the line
 					if (leftLineDetected && rightLineDetected
-							|| Math.abs(leftSampler.currentSample - rightSampler.currentSample) < 0.06) {
+							|| Math.abs(leftSampler.currentSample - rightSampler.currentSample) < 0.09) {
 						// tweak the number to get better line detection
 						// Correct
 						correctXYT();
@@ -156,7 +155,7 @@ public class ColorPoller implements Runnable {
 						// second fail safe: if miss line reading move this many cycles
 						// tweak the number if the robot turns too much if it does not detect a black
 						// line or does not correct enough for some reason
-						if (rightCounter > 15) {
+						if (rightCounter > 20) {
 							synchronized (leftMotor) {
 								synchronized (rightMotor) {
 									Navigation.stopTheRobot();
@@ -174,7 +173,7 @@ public class ColorPoller implements Runnable {
 							}
 						}
 						leftCounter++;
-						if (leftCounter > 15) {
+						if (leftCounter > 20) {
 							synchronized (leftMotor) {
 								synchronized (rightMotor) {
 									Navigation.stopTheRobot();

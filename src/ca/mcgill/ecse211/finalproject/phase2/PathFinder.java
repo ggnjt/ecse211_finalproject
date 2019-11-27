@@ -81,6 +81,8 @@ public class PathFinder {
 	 * boolean to avoid obstacle avoidance during returning trip
 	 */
 	private static boolean goingHome = false;
+	
+	private static int Corner;
 
 	/**
 	 * Contructor of the FathFinder
@@ -88,7 +90,9 @@ public class PathFinder {
 	 * @param isRedTeam whether your team is the red team
 	 */
 	public PathFinder(boolean isRedTeam) {
+		
 		int corner = isRedTeam ? redCorner : greenCorner;
+		Corner = corner;
 		Region base = isRedTeam ? red : green;
 		Region tn = isRedTeam ? tnr : tng;
 		Point bin = isRedTeam ? redBin : greenBin;
@@ -182,7 +186,7 @@ public class PathFinder {
 		case 3: // face east
 			Navigation.xTile = 0;
 			Navigation.yTile = ARENA_Y - 1;
-			Resources.odometer.setXYT(Resources.TILE_SIZE / 2d, Resources.TILE_SIZE * (ARENA_Y - 1 + 0.5), 180);
+			Resources.odometer.setXYT(Resources.TILE_SIZE / 2d, Resources.TILE_SIZE * (ARENA_Y - 1 + 0.5), 90);
 			break;
 		}
 
@@ -603,5 +607,8 @@ public class PathFinder {
 					|| (map[x - 1][y - 1].status == tileType.OBSTACLE));
 		}
 	}
-
+	
+	public static boolean isTunnel(int x, int y) {
+		return map[x][y].status == tileType.TUNNEL;
+	}
 }

@@ -38,7 +38,7 @@ public class Resources {
 	 * The threshold in intensity delta for determining when a line has been
 	 * detected
 	 */
-	public static final double INTENSITY_THRESHOLD = 0.14f; //this could be tweaked
+	public static final double INTENSITY_THRESHOLD = 0.12d; //this could be tweaked
 
 	/**
 	 * Distance to light sensor from center of rotation in centimeters
@@ -53,7 +53,7 @@ public class Resources {
 	/**
 	 * The robot width in centimeters.
 	 */
-	public static final double TRACK = 12.15; // TODO:OPTIMIZE THIS
+	public static final double TRACK = 12.25; // TODO:OPTIMIZE THIS
 
 	/**
 	 * The lower speed at which the robot moves towards a black line
@@ -88,12 +88,12 @@ public class Resources {
 	/**
 	 * speed for the launcher motor
 	 */
-	public static final int SHOOTER_MOTOR_SPEED = 99999;
+	public static final int SHOOTER_MOTOR_SPEED = 800;
 
 	/**
 	 * obstacle detection threshold
 	 */
-	public static final double ObstacleDetectionThreashold = 12.0;
+	public static final double ObstacleDetectionThreashold = 18.0;
 
 	// ------------------EV3 Components--------------------
 	/**
@@ -190,14 +190,14 @@ public class Resources {
 	/**
 	 * The default server IP used by the profs and TA's.
 	 */
-	public static final String DEFAULT_SERVER_IP = "192.168.2.53";
+	public static final String DEFAULT_SERVER_IP = "192.168.2.3";
 
 	/**
 	 * The IP address of the server that transmits data to the robot. Set this to
 	 * the default for the beta demo and competition.
 	 */
 	//public static final String SERVER_IP = "192.168.2.56";
-	public static final String SERVER_IP = "192.168.2.52";
+	public static final String SERVER_IP = "192.168.2.3";
 
 	/**
 	 * Your team number.
@@ -207,7 +207,7 @@ public class Resources {
 	/**
 	 * Enables printing of debug info from the WiFi class.
 	 */
-	public static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
+	public static final boolean ENABLE_DEBUG_WIFI_PRINT = false;
 
 	/**
 	 * Enable this to attempt to receive Wi-Fi parameters at the start of the

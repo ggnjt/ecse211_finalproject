@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
+import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
 //import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizer;
 import lejos.hardware.Button;
@@ -27,6 +28,7 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		System.out.println("Hello world!");
 		//--===[PHASE 1: LOCALOZATION]===--//
 		Thread USPollerThread = new Thread(Resources.usPoller);
 		Thread USLocalizerThread = new Thread(Resources.usLocalizer);
@@ -38,8 +40,13 @@ public class Main {
 		}
 		
 		//beep after localization
-		Sound.beepSequence();
-
+		Sound.beep();
+		sleepFor(100);
+		Sound.beep();
+		sleepFor(100);
+		Sound.beep();
+		sleepFor(100);
+		
 		try {
 			USLocalizerThread.join(1000);
 		} catch (InterruptedException e) {
@@ -47,6 +54,7 @@ public class Main {
 		}
 		
 		Resources.shooterMotor.setSpeed(Resources.SHOOTER_MOTOR_SPEED);
+		Resources.shooterMotor.setAcceleration(9999);
 		Resources.pathFinder = new PathFinder(redTeam == TEAM_NUMBER);
 		//low error threshold to prevent large thread fuck-ups
 		Resources.leftMotor.setStallThreshold(10, 10);
@@ -70,13 +78,16 @@ public class Main {
 		while (!success) {
 			success = Navigation.run(moves);
 		}
-		
-//		Sound.beep();
-//		Main.sleepFor(500);
-//		Sound.beep();
-//		Main.sleepFor(500);
-//		Sound.beep();
-//		Resources.shooterMotor.rotate(165);
+		Sound.beep();
+		sleepFor(100);
+		Sound.beep();
+		sleepFor(100);
+		Sound.beep();
+		sleepFor(100);
+		Sound.beep();
+		sleepFor(100);
+		Sound.beep();
+		sleepFor(100);
 		Button.waitForAnyPress();
 		System.exit(0);
 	}
