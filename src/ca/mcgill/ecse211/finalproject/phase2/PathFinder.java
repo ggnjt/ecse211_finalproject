@@ -216,34 +216,34 @@ public class PathFinder {
 	 * 
 	 */
 	public static boolean setObstacle() {
-		if (!isFacingAWall()) { //if facing a wall then it would be OOB
+		if (!isFacingAWall()) { //if facing a wall then it would be OOB 
 			double[] currXYT = odometer.getXYT();
 			if (currXYT[2] >= 45 && currXYT[2] < 135) {// facing EAST
 				map[Navigation.xTile + 1][Navigation.yTile].setStatus(tileType.OBSTACLE);
 				//if the obstacle is on launch point, we need to reset it
-				if (!goingHome && map[Navigation.xTile + 1][Navigation.yTile].X == targetX 
-						&& map[Navigation.xTile + 1][Navigation.yTile].Y == targetY) {
+				if ((!goingHome && map[Navigation.xTile + 1][Navigation.yTile].X == targetX 
+						&& map[Navigation.xTile + 1][Navigation.yTile].Y == targetY)|| isAdjacentToObstacle(targetX, targetY)) {
 					resetLaunchPoint(); //this takes care of adjacent tiles
 				}
 				return true;
 			} else if (currXYT[2] >= 135 && currXYT[2] < 225) {// facing SOUTH
 				map[Navigation.xTile][Navigation.yTile - 1].setStatus(tileType.OBSTACLE);
-				if (!goingHome && map[Navigation.xTile][Navigation.yTile - 1].X == targetX
-						&& map[Navigation.xTile][Navigation.yTile - 1].Y == targetY) {
+				if ((!goingHome && map[Navigation.xTile][Navigation.yTile - 1].X == targetX
+						&& map[Navigation.xTile][Navigation.yTile - 1].Y == targetY)|| isAdjacentToObstacle(targetX, targetY)) {
 					resetLaunchPoint();
 				}
 				return true;
 			} else if (currXYT[2] >= 225 && currXYT[2] < 315) {// facing WEST
 				map[Navigation.xTile - 1][Navigation.yTile].setStatus(tileType.OBSTACLE);
 				if (!goingHome && map[Navigation.xTile - 1][Navigation.yTile].X == targetX
-						&& map[Navigation.xTile - 1][Navigation.yTile].Y == targetY) {
+						&& map[Navigation.xTile - 1][Navigation.yTile].Y == targetY || isAdjacentToObstacle(targetX, targetY)) {
 					resetLaunchPoint();
 				}
 				return true;
 			} else {
 				map[Navigation.xTile][Navigation.yTile + 1].setStatus(tileType.OBSTACLE);
 				if (!goingHome && map[Navigation.xTile][Navigation.yTile + 1].X == targetX
-						&& map[Navigation.xTile][Navigation.yTile + 1].Y == targetY) {
+						&& map[Navigation.xTile][Navigation.yTile + 1].Y == targetY || isAdjacentToObstacle(targetX, targetY)) {
 					resetLaunchPoint();
 				}
 				return true;

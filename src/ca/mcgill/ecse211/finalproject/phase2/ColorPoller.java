@@ -276,7 +276,7 @@ public class ColorPoller implements Runnable {
 		leftLineDetected = false;
 		rightLineDetected = false;
 		try {
-			Thread.sleep(2200);
+			Thread.sleep(2400);
 		} catch (InterruptedException e) {
 		}
 	}

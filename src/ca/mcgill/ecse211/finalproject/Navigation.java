@@ -366,12 +366,13 @@ public class Navigation {
 	public static void launchManeuver() {
 		goToLowerLeftCorner();
 		turnTo(PathFinder.launchAngle + 180);
-		moveByDistance((-PathFinder.launchAdjustment) * Resources.TILE_SIZE - Resources.TILE_SIZE);
-		Resources.shooterMotor.rotate(165);
+		moveByDistance((-PathFinder.launchAdjustment) * Resources.TILE_SIZE - 0.5*Resources.TILE_SIZE);
+		Resources.shooterMotor.rotate(180);
+		Main.sleepFor(1000);
 		Resources.shooterMotor.flt(true);
 		// Resources.pathFinder.printMap();
 		PathFinder.letsGoHome();
-		moveByDistance((PathFinder.launchAdjustment) * Resources.TILE_SIZE + Resources.TILE_SIZE);
+		moveByDistance((PathFinder.launchAdjustment) * Resources.TILE_SIZE + 0.5*Resources.TILE_SIZE);
 		reCenter();
 		Main.sleepFor(100);
 		Main.moves = PathFinder.findPath();
