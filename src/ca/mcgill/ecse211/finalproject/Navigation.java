@@ -11,7 +11,6 @@ import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
 import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
 import lejos.hardware.Sound;

@@ -7,9 +7,6 @@ import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizer;
 import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.Odometer;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
-//import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
-//import ca.mcgill.ecse211.finalproject.UltrasonicPoller;
-//import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizerDisplay;
 /** WIFI package stuff */
 import ca.mcgill.ecse211.wificlient.WifiConnection;
 import lejos.hardware.ev3.LocalEV3;

@@ -1,9 +1,6 @@
 package ca.mcgill.ecse211.finalproject;
 
 import static ca.mcgill.ecse211.finalproject.Resources.US_SENSOR;
-import static ca.mcgill.ecse211.finalproject.Resources.navigation;
-import static ca.mcgill.ecse211.finalproject.Resources.odometer;
-
 import java.util.Arrays;
 
 import lejos.robotics.SampleProvider;

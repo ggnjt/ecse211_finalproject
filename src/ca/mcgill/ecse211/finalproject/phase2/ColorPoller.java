@@ -11,7 +11,6 @@ import ca.mcgill.ecse211.finalproject.Navigation;
 import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
 import ca.mcgill.ecse211.finalproject.Resources;
 import ca.mcgill.ecse211.finalproject.UltrasonicPoller;
-import lejos.hardware.Sound;
 
 /**
  * Class which takes care of color sensor polling, signal filtering as well as
