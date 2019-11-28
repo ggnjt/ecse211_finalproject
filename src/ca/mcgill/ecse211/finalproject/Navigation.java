@@ -317,10 +317,7 @@ public class Navigation {
 			processNextMove(move);
 			while (!moveSuccessful || interrupted) { // move was interrupted by a line / obstacle
 				UltrasonicPoller.resetDetection();
-				if (navigationMode == TravelingMode.TRAVELING) { // after the black line TODO: if mid-line is annoying
-//					if (targetY == 4) { // avoid the annoying black line in the middle of the arena
-//						ColorPoller.sleep(); // this doesn't work too well
-//					}
+				if (navigationMode == TravelingMode.TRAVELING) { // after the black line
 					processNextMove(move); // keeps on moving to the center
 				} else if (navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
 					UltrasonicPoller.resetDetection();
@@ -328,7 +325,6 @@ public class Navigation {
 				} else {
 					Main.sleepFor(70); // let colorPoller take over
 				}
-//				ColorPoller.wake(); // wake it just in case it finished sleeping for the middle seam TODO: if mid-line is annoying
 			}
 			if (navigationMode == TravelingMode.OBSTACLE_ENCOUNTERED) {
 				// this catches the case where the list of moves is not complete. Path needs
@@ -383,113 +379,4 @@ public class Navigation {
 		reCenter();
 		Main.moves = PathFinder.findPath();
 	}
-
-//	public static void localizeWithinSquare() {
-//		ColorPoller.sleep();
-//		allignInFront();
-//		setSpeed(180);
-//		synchronized (leftMotor) {
-//			synchronized (rightMotor) {
-//				Resources.leftMotor.rotate(convertDistance(-TILE_SIZE/2d+4.5), true);
-//				Resources.rightMotor.rotate(convertDistance(-TILE_SIZE/2d+4.5), false);
-//			}
-//		}
-//		Main.sleepFor(50);
-//		synchronized (leftMotor) {
-//			synchronized (rightMotor) {
-//				Resources.leftMotor.rotate(convertAngle(90), true);
-//				Resources.rightMotor.rotate(convertAngle(-90), false);
-//			}
-//		}
-//		allignInFront();
-//		synchronized (leftMotor) {
-//			synchronized (rightMotor) {
-//				Resources.leftMotor.rotate(convertDistance(-TILE_SIZE/2d+4.5), true);
-//				Resources.rightMotor.rotate(convertDistance(-TILE_SIZE/2d+4.5), false);
-//			}
-//		}
-//		double currTheta = odometer.getXYT()[2];
-//		if (currTheta >= 45 && currTheta < 135) {
-//			currTheta = 90d; // facing EAST
-//		} else if (currTheta >= 135 && currTheta < 225) {
-//			currTheta = 180d; // facing SOUTH
-//		} else if (currTheta >= 225 && currTheta < 315) {
-//			currTheta = 270d; // facing WEST
-//		} else {
-//			currTheta = 0d; // facing NORTH
-//		}
-//		Resources.odometer.setTheta(currTheta);
-//		ColorPoller.wake();
-//		return;
-//	}
-//	
-//	private static void allignInFront() {
-//		boolean leftLineDetected, rightLineDetected;
-//		int leftCounter = 0, rightCounter = 0;
-//		boolean statechange = false;
-//		setSpeed(80);
-//		synchronized (leftMotor) {
-//			synchronized (rightMotor) {
-//				leftMotor.forward();
-//				rightMotor.forward();
-//			}
-//		}
-//		while (true) {
-//			leftLineDetected = ColorPoller.leftSampler.getBlackLine();
-//			rightLineDetected = ColorPoller.rightSampler.getBlackLine();
-//			if (!statechange) {
-//				if (leftLineDetected || rightLineDetected) {
-//					// line detection during traveling, state change and slow the robot down
-//					Navigation.stopTheRobot();
-//					statechange = true;
-//				} else {
-//					continue;
-//				}
-//			} else {
-//				leftLineDetected = leftLineDetected || ColorPoller.leftSampler.getBlackLine();
-//				rightLineDetected = rightLineDetected || ColorPoller.rightSampler.getBlackLine();
-//				boolean stopped = !leftMotor.isMoving() && !rightMotor.isMoving();
-//				if (leftLineDetected && rightLineDetected || Math
-//						.abs(ColorPoller.leftSampler.currentSample - ColorPoller.rightSampler.currentSample) < 0.06) {
-//					Navigation.stopTheRobot();
-//					break;
-//				} else if (leftLineDetected) {
-//					if (stopped) {
-//						synchronized (rightMotor) {
-//							synchronized (leftMotor) {
-//								rightMotor.forward();
-//							}
-//						}
-//					}
-//					rightCounter++;
-//					if (rightCounter > 15) {
-//						synchronized (leftMotor) {
-//							synchronized (rightMotor) {
-//								Navigation.stopTheRobot();
-//								return;
-//							}
-//						}
-//					}
-//				} else if (rightLineDetected) {
-//					if (stopped) {
-//						synchronized (leftMotor) {
-//							synchronized (rightMotor) {
-//								leftMotor.forward();
-//							}
-//						}
-//					}
-//					leftCounter++;
-//					if (leftCounter > 15) {
-//						synchronized (leftMotor) {
-//							synchronized (rightMotor) {
-//								Navigation.stopTheRobot();
-//								return;
-//							}
-//						}
-//					}
-//				}
-//			}
-//			Main.sleepFor(20);
-//		}
-//	}
 }

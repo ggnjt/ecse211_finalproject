@@ -97,12 +97,6 @@ public class PathFinder {
 		Region tn = isRedTeam ? tnr : tng;
 		Point bin = isRedTeam ? redBin : greenBin;
 
-//		System.out.println("Corner: " + greenCorner);
-//		System.out.println("Base: " + green.toString());
-//		System.out.println("Tn: " + tng.toString());
-//		System.out.println("Island: " + island.toString());
-//		System.out.println("Arena X: " + ARENA_X + " Arena Y: " + ARENA_Y);
-
 		PathFinder.map = new Square[ARENA_X][ARENA_Y];
 		PathFinder.closed = new boolean[ARENA_X][ARENA_Y];
 
@@ -606,9 +600,5 @@ public class PathFinder {
 			return ((map[x - 1][y].status == tileType.OBSTACLE) || (map[x][y - 1].status == tileType.OBSTACLE)
 					|| (map[x - 1][y - 1].status == tileType.OBSTACLE));
 		}
-	}
-	
-	public static boolean isTunnel(int x, int y) {
-		return map[x][y].status == tileType.TUNNEL;
 	}
 }

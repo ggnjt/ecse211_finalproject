@@ -28,7 +28,6 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		System.out.println("Hello world!");
 		//--===[PHASE 1: LOCALOZATION]===--//
 		Thread USPollerThread = new Thread(Resources.usPoller);
 		Thread USLocalizerThread = new Thread(Resources.usLocalizer);
@@ -63,9 +62,6 @@ public class Main {
 		//--===[PHASE 2: TRAVEL TO A LAUNCH POINT]===--//
 		Thread cT = new Thread(colorPoller);
 		cT.start();
-		//stressShooterTest();
-		// stressTest();
-		// Resources.pathFinder.printMap();
 		moves = PathFinder.findPath();
 		boolean success = Navigation.run(moves);
 		while (!success) {

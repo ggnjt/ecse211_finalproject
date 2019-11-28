@@ -35,13 +35,11 @@ public class ColorSampler implements Runnable {
 	 * blackLine
 	 */
 	private boolean blackLine = false;
-	
+
 	/**
 	 * current reading
 	 */
 	public float currentSample = 0.0f;
-	
-	public static boolean wait;
 
 	/**
 	 * Consturctor from a color sensor
@@ -62,38 +60,28 @@ public class ColorSampler implements Runnable {
 		long readingStart, readingEnd;
 
 		while (true) {
-			if (wait) {
+			readingStart = System.currentTimeMillis();
+			sampleProvider.fetchSample(sample, 0);
+			currentSample = sample[0];
+			der = currentSample - prev;
+			blackLine = (der < 0 && Math.abs(der) > Resources.INTENSITY_THRESHOLD);
+			readingEnd = System.currentTimeMillis();
+			prev = currentSample;
+
+			readingEnd = System.currentTimeMillis();
+			if (readingEnd - readingStart < 70) {
 				try {
-					Thread.sleep(60);
+					Thread.sleep(70 - (readingEnd - readingStart));
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			} else {
-				readingStart = System.currentTimeMillis();
-				sampleProvider.fetchSample(sample, 0);
-				currentSample = sample[0];
-				der = currentSample - prev;
-				blackLine = (der < 0 && Math.abs(der) > Resources.INTENSITY_THRESHOLD);
-				readingEnd = System.currentTimeMillis();
-				prev = currentSample;
-
-				readingEnd = System.currentTimeMillis();
-				if (readingEnd - readingStart < 70) {
-					try {
-						Thread.sleep(70 - (readingEnd - readingStart));
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				} else {
-					try {
-						Thread.sleep(20);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
-			
 		}
 	}
 
@@ -104,15 +92,13 @@ public class ColorSampler implements Runnable {
 		return der;
 	}
 
+	/**
+	 * get the line detections status
+	 * 
+	 * @return true if a black line has been detected
+	 */
 	public boolean getBlackLine() {
 		return blackLine;
 	}
-	
-	public static void sleep() {
-		wait = true;
-	}
-	
-	public static void wake () {
-		wait = false;
-	}
+
 }
