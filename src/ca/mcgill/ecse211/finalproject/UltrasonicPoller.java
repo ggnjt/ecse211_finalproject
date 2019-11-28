@@ -17,13 +17,15 @@ public class UltrasonicPoller implements Runnable {
 	private float[] usData;
 	private static final short BUFFER_SIZE = 11;
 	private int[] filterBuffer = new int[BUFFER_SIZE];
-	public static boolean kill = false;
+	private static boolean wait = false;
 	private SampleProvider sampleProvider;
 
 	public UltrasonicPoller() {
 		usData = new float[US_SENSOR.sampleSize()];
 		sampleProvider = US_SENSOR.getDistanceMode();
 	}
+
+	private static boolean obstacleDetected = false;
 
 	/**
 	 * run method for the US sensor
@@ -33,26 +35,51 @@ public class UltrasonicPoller implements Runnable {
 		int count = 0;
 
 		while (true) {
-			if (kill)
-				break;
-			sampleProvider.fetchSample(usData, 0); // acquire distance data in meters
-			reading = (int) (usData[0] * 100.0); // extract from buffer, convert to cm, cast to int
-			// filling up the median filter and returning -1 as reading
-			if (count < BUFFER_SIZE) {
-				filterBuffer[count] = reading;
-				distance = -1;
-				count++;
-			} else { // median filter
-				shiftArray(filterBuffer, reading);
-				int[] sample = filterBuffer.clone();
-				Arrays.sort(sample); // cloning and sorting to preseve the buffer array
-				distance = sample[BUFFER_SIZE / 2]; // reading median value
+			if (wait) {
+				try {
+					Thread.sleep(50);
+				} catch (Exception e) {
+				} // Poor man's timed sampling
+			} else {
+				long readingStart, readingEnd;
+				readingStart = System.currentTimeMillis();
+				sampleProvider.fetchSample(usData, 0); // acquire distance data in meters
+				reading = (int) (usData[0] * 100.0); // extract from buffer, convert to cm, cast to int
+				// filling up the median filter and returning -1 as reading
+
+				if (!Main.localizationFinished) {
+					if (count < BUFFER_SIZE) {
+						filterBuffer[count] = reading;
+						distance = -1;
+						count++;
+					} else { // median filter
+						shiftArray(filterBuffer, reading);
+						int[] sample = filterBuffer.clone();
+						Arrays.sort(sample); // cloning and sorting to preseve the buffer array
+						distance = sample[BUFFER_SIZE / 2]; // reading median value
+					}
+				} else {
+					distance = reading;
+					obstacleDetected = (obstacleDetected
+							|| (distance < Resources.ObstacleDetectionThreashold && distance > 0));
+				}
+				readingEnd = System.currentTimeMillis();
+				if (readingEnd - readingStart < 70) {
+					try {
+						Thread.sleep(70 - (readingEnd - readingStart));
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				} else {
+					try {
+						Thread.sleep(20);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
 			}
-			try {
-				Thread.sleep(50);
-			} catch (Exception e) {
-			} // Poor man's timed sampling
 		}
+		// Poor man's timed sampling
 	}
 
 	/**
@@ -79,4 +106,19 @@ public class UltrasonicPoller implements Runnable {
 		return this.distance;
 	}
 
+	public static void sleep() {
+		wait = true;
+	}
+
+	public static void wake() {
+		wait = false;
+	}
+
+	public static void resetDetection() {
+		obstacleDetected = false;
+	}
+
+	public static boolean hasDetected() {
+		return obstacleDetected;
+	}
 }

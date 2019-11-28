@@ -137,6 +137,11 @@ public class Odometer extends Thread {
 				} catch (InterruptedException e) {
 					// there is nothing to be done
 				}
+			} else {
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException e) {
+				}
 			}
 		}
 	}

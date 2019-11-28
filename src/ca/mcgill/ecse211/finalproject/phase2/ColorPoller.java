@@ -3,19 +3,21 @@ package ca.mcgill.ecse211.finalproject.phase2;
 import static ca.mcgill.ecse211.finalproject.Resources.TILE_SIZE;
 import static ca.mcgill.ecse211.finalproject.Resources.leftColorSensor;
 import static ca.mcgill.ecse211.finalproject.Resources.leftMotor;
-import static ca.mcgill.ecse211.finalproject.Resources.navigation;
 import static ca.mcgill.ecse211.finalproject.Resources.odometer;
 import static ca.mcgill.ecse211.finalproject.Resources.rightColorSensor;
 import static ca.mcgill.ecse211.finalproject.Resources.rightMotor;
+import ca.mcgill.ecse211.finalproject.Main;
 import ca.mcgill.ecse211.finalproject.Navigation;
 import ca.mcgill.ecse211.finalproject.Navigation.TravelingMode;
 import ca.mcgill.ecse211.finalproject.Resources;
+import ca.mcgill.ecse211.finalproject.UltrasonicPoller;
 
 /**
  * Class which takes care of color sensor polling, signal filtering as well as
  * odometry correction using the color sensors
  * 
  * @author yp
+ * @author holmsi
  *
  */
 public class ColorPoller implements Runnable {
@@ -23,49 +25,49 @@ public class ColorPoller implements Runnable {
 	/**
 	 * whether or not the left sensor is currently detecting a black line
 	 */
-	private boolean leftLineDetected = false;
+	private static boolean leftLineDetected = false;
 	/**
 	 * whether or not the right sensor is currently detecting a black line
 	 */
-	private boolean rightLineDetected = false;
+	private static boolean rightLineDetected = false;
 
 	/**
 	 * boolean to make the thread wait while turning
 	 */
-	public static boolean wait = false;
+	private static boolean wait = false;
 
 	/**
 	 * left light Sampler
 	 */
-	ColorSampler leftSampler;
+	public static ColorSampler leftSampler;
 
 	/**
 	 * right light Sampler
 	 */
-	ColorSampler rightSampler;
+	public static ColorSampler rightSampler;
 
 	/**
 	 * leftColorThread
 	 */
-	Thread leftColorThread;
+	private static Thread leftColorThread;
 
 	/**
 	 * RightColorThread
 	 */
-	Thread rightColorThread;
+	private static Thread rightColorThread;
 
 	/**
 	 * safety net counter for no line detection on the right
 	 */
-	private int rightCounter = 0;
+	private static int rightCounter = 0;
 
 	/**
 	 * safety net counter for no line detection on the left
 	 */
-	private int leftCounter = 0;
+	private static int leftCounter = 0;
 
 	/**
-	 * constructor
+	 * constructor, starts both left and right threads
 	 */
 	public ColorPoller() {
 		super();
@@ -85,66 +87,97 @@ public class ColorPoller implements Runnable {
 	@Override
 	public void run() {
 		while (true) {
+			// sleep
 			if (wait) {
 				try {
-					Thread.sleep(30);
+					Thread.sleep(50);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			} else {
 				long readingStart, readingEnd;
 				readingStart = System.currentTimeMillis();
-				switch (navigation.navigationMode) {
+				switch (Navigation.navigationMode) {
 				case TRAVELING:
+					// continuously detect line
 					leftLineDetected = leftSampler.getBlackLine();
 					rightLineDetected = rightSampler.getBlackLine();
 					if (leftLineDetected || rightLineDetected) {
-						navigation.stopTheRobot();
-						navigation.navigationMode = TravelingMode.CORRECTING;
-						navigation.setSpeed(Resources.CORRECTION_SPPED);
-						synchronized(navigation) {
-							navigation.moveSuccessful = false;
-							Navigation.interrupted = true;
-						}
+						// line detection during traveling, state change and slow the robot down
+						Navigation.stopTheRobot();
+						Main.sleepFor(50);
+						Navigation.navigationMode = TravelingMode.CORRECTING;
+						Navigation.setSpeed(Resources.CORRECTION_SPPED);
+						Navigation.moveSuccessful = false;
+						Navigation.interrupted = true;
 					} else {
 						rightCounter = 0;
 						leftCounter = 0;
 					}
 					break;
 				case OBSTACLE_ENCOUNTERED:
+					// not sure if anything should be done when encountered an obstacle, but either
+					// way it should not detect anything since the detection only happens within
+					// the middle of the square
 					break;
 				case CORRECTING:
+					// probe for the other line detection
 					leftLineDetected = leftLineDetected || leftSampler.getBlackLine();
 					rightLineDetected = rightLineDetected || rightSampler.getBlackLine();
 					boolean stopped = !leftMotor.isMoving() && !rightMotor.isMoving();
+
+					// first fail safe: if both lines present similar reading then they both are on
+					// the line
 					if (leftLineDetected && rightLineDetected
-							|| Math.abs(leftSampler.currentSample - rightSampler.currentSample) < 0.030) { //tweak moi plz
+							|| Math.abs(leftSampler.currentSample - rightSampler.currentSample) < 0.09) {
+						// tweak the number to get better line detection
 						// Correct
 						correctXYT();
-						// clear the line
-						leftMotor.rotate(40, true); //how far you clear the black line
-						rightMotor.rotate(40, false);
-						navigation.stopTheRobot();
-						navigation.setSpeed(Resources.HIGH_FORWARD_SPEED);
-						navigation.navigationMode = TravelingMode.TRAVELING;
+						synchronized (Resources.leftMotor) {
+							synchronized (Resources.rightMotor) {
+								Navigation.stopTheRobot();
+								Navigation.setSpeed(Resources.HIGH_FORWARD_SPEED);
+								Navigation.navigationMode = TravelingMode.TRAVELING;
+								UltrasonicPoller.resetDetection();
+							}
+						}
 						resetLineDetection();
 					} else if (leftLineDetected) {
 						if (stopped) {
-							rightMotor.forward();
+							synchronized (rightMotor) {
+								synchronized (leftMotor) {
+									rightMotor.forward();
+								}
+							}
 						}
 						rightCounter++;
-						if (rightCounter > 25) { // fail safe //if miss line reading move this many cycles
-							navigation.stopTheRobot();
+						// second fail safe: if miss line reading move this many cycles
+						// tweak the number if the robot turns too much if it does not detect a black
+						// line or does not correct enough for some reason
+						if (rightCounter > 20) {
+							synchronized (leftMotor) {
+								synchronized (rightMotor) {
+									Navigation.stopTheRobot();
+								}
+							}
 							rightLineDetected = true;
 							rightCounter = 0;
 						}
 					} else if (rightLineDetected) {
 						if (stopped) {
-							leftMotor.forward();
+							synchronized (leftMotor) {
+								synchronized (rightMotor) {
+									leftMotor.forward();
+								}
+							}
 						}
 						leftCounter++;
-						if (leftCounter > 25) {
-							navigation.stopTheRobot();
+						if (leftCounter > 20) {
+							synchronized (leftMotor) {
+								synchronized (rightMotor) {
+									Navigation.stopTheRobot();
+								}
+							}
 							leftLineDetected = true;
 							leftCounter = 0;
 						}
@@ -153,9 +186,16 @@ public class ColorPoller implements Runnable {
 				}
 
 				readingEnd = System.currentTimeMillis();
-				if (readingEnd - readingStart < 60) {
+				if (readingEnd - readingStart < 70) {
 					try {
-						Thread.sleep(60 - (readingEnd - readingStart));
+						Thread.sleep(70 - (readingEnd - readingStart));
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				} else {
+					// always sleep because sleep deprivation make threads unhappy
+					try {
+						Thread.sleep(20);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -230,12 +270,11 @@ public class ColorPoller implements Runnable {
 	/**
 	 * reset the line detect booleans to false
 	 */
-	public void resetLineDetection() {
+	public static void resetLineDetection() {
 		leftLineDetected = false;
 		rightLineDetected = false;
-
 		try {
-			Thread.sleep(1500);
+			Thread.sleep(2400);
 		} catch (InterruptedException e) {
 		}
 	}
@@ -243,14 +282,20 @@ public class ColorPoller implements Runnable {
 	/**
 	 * makes the color poller thread sleep while turning
 	 */
-	public void sleep() {
+	public static void sleep() {
 		wait = true;
 	}
 
 	/**
 	 * wake the thread up after sleeping
 	 */
-	public void wake() {
+	public static void wake() {
+		try {
+			Thread.sleep(50);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		wait = false;
 	}
 }

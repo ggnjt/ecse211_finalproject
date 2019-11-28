@@ -7,9 +7,6 @@ import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizer;
 import ca.mcgill.ecse211.finalproject.phase2.ColorPoller;
 import ca.mcgill.ecse211.finalproject.phase2.Odometer;
 import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
-//import ca.mcgill.ecse211.finalproject.phase2.PathFinder;
-//import ca.mcgill.ecse211.finalproject.UltrasonicPoller;
-//import ca.mcgill.ecse211.finalproject.phase1.UltrasonicLocalizerDisplay;
 /** WIFI package stuff */
 import ca.mcgill.ecse211.wificlient.WifiConnection;
 import lejos.hardware.ev3.LocalEV3;
@@ -31,14 +28,14 @@ public class Resources {
 	/**
 	 * The dimensions sizes in squares
 	 */
-	public static final int ARENA_X = 8;
-	public static final int ARENA_Y = 8;
+	public static final int ARENA_X = 15;  //14 or 15???
+	public static final int ARENA_Y = 9;
 
 	/**
 	 * The threshold in intensity delta for determining when a line has been
 	 * detected
 	 */
-	public static final double INTENSITY_THRESHOLD = 0.07f;
+	public static final double INTENSITY_THRESHOLD = 0.12d; //this could be tweaked
 
 	/**
 	 * Distance to light sensor from center of rotation in centimeters
@@ -53,32 +50,32 @@ public class Resources {
 	/**
 	 * The robot width in centimeters.
 	 */
-	public static final double TRACK = 11.90; // plis dont touch
+	public static final double TRACK = 12.25; // TODO:OPTIMIZE THIS
 
 	/**
 	 * The lower speed at which the robot moves towards a black line
 	 */
-	public static final int LOW_FORWARD_SPEED = 100; // TODO: optimize this
+	public static final int LOW_FORWARD_SPEED = 100; 
 	
 	/**
 	 * the higher speed at which the robot moves away from a black line
 	 */
-	public static final int HIGH_FORWARD_SPEED = 240;
+	public static final int HIGH_FORWARD_SPEED = 300;
 
 	/**
 	 * The speed at which the robot rotates in degrees per second.
 	 */
-	public static final int ROTATE_SPEED = 140;
+	public static final int ROTATE_SPEED = 180;
 
 	/**
-	 * Low speed used for more accurate sensor radians
+	 * Low speed used for more accurate sensor readings
 	 */
 	public static final int CORRECTION_SPPED = 45;
 
 	/**
 	 * The motor acceleration in degrees per second squared.
 	 */
-	public static final int ACCELERATION = 1000;
+	public static final int ACCELERATION = 1500;
 
 	/**
 	 * The tile size in centimeters.
@@ -88,12 +85,12 @@ public class Resources {
 	/**
 	 * speed for the launcher motor
 	 */
-	public static final int SHOOTER_MOTOR_SPEED = 300;
+	public static final int SHOOTER_MOTOR_SPEED = 800;
 
 	/**
 	 * obstacle detection threshold
 	 */
-	public static final double ObstacleDetectionThreashold = 12.0;
+	public static final double ObstacleDetectionThreashold = 18.0;
 
 	// ------------------EV3 Components--------------------
 	/**
@@ -165,6 +162,11 @@ public class Resources {
 	public static final Navigation navigation = new Navigation();
 
 	/**
+	 * Path finder
+	 */
+	public static PathFinder pathFinder;
+
+	/**
 	 * The odometer.
 	 */
 	public static Odometer odometer = Odometer.getOdometer();
@@ -185,13 +187,14 @@ public class Resources {
 	/**
 	 * The default server IP used by the profs and TA's.
 	 */
-	public static final String DEFAULT_SERVER_IP = "192.168.2.53";
+	public static final String DEFAULT_SERVER_IP = "192.168.2.3";
 
 	/**
 	 * The IP address of the server that transmits data to the robot. Set this to
 	 * the default for the beta demo and competition.
 	 */
-	public static final String SERVER_IP = "192.168.2.56";
+	//public static final String SERVER_IP = "192.168.2.56";
+	public static final String SERVER_IP = "192.168.2.3";
 
 	/**
 	 * Your team number.
@@ -201,7 +204,7 @@ public class Resources {
 	/**
 	 * Enables printing of debug info from the WiFi class.
 	 */
-	public static final boolean ENABLE_DEBUG_WIFI_PRINT = true;
+	public static final boolean ENABLE_DEBUG_WIFI_PRINT = false;
 
 	/**
 	 * Enable this to attempt to receive Wi-Fi parameters at the start of the
@@ -262,9 +265,7 @@ public class Resources {
 	/**
 	 * The red tunnel footprint.
 	 */
-	// public static Region tnr = new Region("TNR_LL_x", "TNR_LL_y", "TNR_UR_x",
-	// "TNR_UR_y");
-	public static double targetAngle = Math.max(get("TNR_LL_x"), get("TNR_UR_x"));
+	public static Region tnr = new Region("TNR_LL_x", "TNR_LL_y", "TNR_UR_x", "TNR_UR_y");
 
 	/**
 	 * The green tunnel footprint.
@@ -272,9 +273,14 @@ public class Resources {
 	public static Region tng = new Region("TNG_LL_x", "TNG_LL_y", "TNG_UR_x", "TNG_UR_y");
 
 	/**
-	 * The location of the target bin.
+	 * The location of the red team's target bin.
 	 */
-	public static Point bin = new Point(get("BIN_x"), get("BIN_y"));
+	public static Point redBin = new Point(get("Red_BIN_x"), get("Red_BIN_y"));
+	
+	/**
+	 * The location of the green team's target bin.
+	 */
+	public static Point greenBin = new Point(get("Green_BIN_x"), get("Green_BIN_y"));
 
 	/**
 	 * Receives Wi-Fi parameters from the server program.
@@ -306,12 +312,6 @@ public class Resources {
 			System.err.println("Error: " + e.getMessage());
 		}
 	}
-
-	/**
-	 * Test path finder TODO: the way the path finder is initialized is subject to
-	 * change
-	 */
-	public static PathFinder pathFinder; //YP: not final because I want to construct this after localization
 
 	/**
 	 * Returns the Wi-Fi parameter int value associated with the given key.

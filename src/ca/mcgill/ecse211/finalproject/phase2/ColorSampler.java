@@ -35,7 +35,10 @@ public class ColorSampler implements Runnable {
 	 * blackLine
 	 */
 	private boolean blackLine = false;
-	
+
+	/**
+	 * current reading
+	 */
 	public float currentSample = 0.0f;
 
 	/**
@@ -66,9 +69,15 @@ public class ColorSampler implements Runnable {
 			prev = currentSample;
 
 			readingEnd = System.currentTimeMillis();
-			if (readingEnd - readingStart < 60) {
+			if (readingEnd - readingStart < 70) {
 				try {
-					Thread.sleep(60 - (readingEnd - readingStart));
+					Thread.sleep(70 - (readingEnd - readingStart));
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			} else {
+				try {
+					Thread.sleep(20);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -83,7 +92,13 @@ public class ColorSampler implements Runnable {
 		return der;
 	}
 
+	/**
+	 * get the line detections status
+	 * 
+	 * @return true if a black line has been detected
+	 */
 	public boolean getBlackLine() {
 		return blackLine;
 	}
+
 }
